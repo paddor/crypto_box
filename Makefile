@@ -1,6 +1,6 @@
 CC=llvm-gcc
 INCLUDES=
-CFLAGS=-Wall -std=c11 $(shell pkg-config --cflags libsodium) -g
+CFLAGS=-Wall -std=c11 $(shell pkg-config --cflags libsodium)
 LDFLAGS=$(shell pkg-config --libs libsodium)
 
 default: crypto_box crypto_open
