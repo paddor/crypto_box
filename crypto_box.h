@@ -92,7 +92,6 @@ void grow_ct(size_t nbytes_coming) {
     // grow if needed
     while (ct.used + nbytes_coming > ct.size) {
       ct.size *= 2;
-      fprintf(stderr, "growing ct.data to %zu bytes\n", ct.size);
       ct.data = realloc(ct.data, ct.size * sizeof *ct.data);
       if (ct.data == NULL) {
         fprintf(stderr, "failed to grow ciphertext capacity to %zu bytes\n",

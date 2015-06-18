@@ -54,11 +54,9 @@ void parse_options(int argc, const char *argv[]) {
   while ((opt = getopt(argc, (char * const *)argv, "aH")) != -1) {
       switch (opt) {
       case 'a':
-        fprintf(stderr, "option -a recognized\n");
         key_source = ASK;
         break;
       case 'H':
-        fprintf(stderr, "option -H recognized\n");
         ciphertext = HEX;
         break;
       default:
@@ -67,30 +65,28 @@ void parse_options(int argc, const char *argv[]) {
       }
   }
   if (optind >= argc) {
-    fprintf(stderr, "no key on command line given\n");
-    exit(EXIT_FAILURE);
+    // no key on command line given
+    exit(EXIT_FAILURE); // TODO: remove when asking is implemented
   } else {
-    fprintf(stderr, "key on command line given\n");
     key_source = CMD;
   }
 }
 
 void get_key(const char * argv[]) {
+  size_t bin_len, bytes_read;
   switch (key_source) {
     case RANDOM:
       // should never be random
       exit(EXIT_FAILURE);
       break;
     case CMD:
-      fprintf(stderr, "using key from command line\n");
-      size_t bin_len;
       if (-1 == sodium_hex2bin(key, sizeof key, argv[optind],
             strlen(argv[optind]), ": ", &bin_len, NULL)) {
         fprintf(stderr, "Given key is too long, only %lu bytes are useable!\n",
             sizeof key);
         exit(EXIT_FAILURE);
       }
-      size_t bytes_read = bin_len;
+      bytes_read = bin_len;
       while (bytes_read < sizeof key) {
         sodium_hex2bin(&key[bytes_read], sizeof key - bytes_read,
           argv[optind], strlen(argv[optind]), ": ", &bin_len, NULL);
