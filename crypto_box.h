@@ -1,0 +1,99 @@
+#ifndef CRYPTO_BOX_H
+#define CRYPTO_BOX_H
+
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <assert.h>
+#include <sodium.h>
+
+void hexDump (const char *desc, const void *addr, size_t len) {
+    size_t i;
+    uint8_t buff[17];
+    uint8_t *pc = (uint8_t*)addr;
+
+    // Output description if given.
+    if (desc != NULL)
+        fprintf (stderr, "%s:\n", desc);
+
+    // Process every byte in the data.
+    for (i = 0; i < len; i++) {
+        // Multiple of 16 means new line (with line offset).
+
+        if ((i % 16) == 0) {
+            // Just don't print ASCII for the zeroth line.
+            if (i != 0)
+                fprintf (stderr, "  %s\n", buff);
+
+            // Output the offset.
+            fprintf (stderr, "  %04zx ", i);
+        }
+
+        // Now the hex code for the specific character.
+        fprintf (stderr, " %02x", pc[i]);
+
+        // And store a printable ASCII character for later.
+        if ((pc[i] < 0x20) || (pc[i] > 0x7e))
+            buff[i % 16] = '.';
+        else
+            buff[i % 16] = pc[i];
+        buff[(i % 16) + 1] = '\0';
+    }
+
+    // Pad out last line if not exactly 16 characters.
+    while ((i % 16) != 0) {
+        fprintf (stderr, "   ");
+        i++;
+    }
+
+    // And print the final ASCII bit.
+    fprintf (stderr, "  %s\n", buff);
+}
+
+
+#define INITIAL_CT_SIZE 512
+#define CT_AFTER_MAC(x) (x+crypto_secretbox_MACBYTES)
+#define MAC_BYTES crypto_secretbox_MACBYTES
+
+typedef struct {
+  uint8_t *data;
+  size_t used;
+  size_t size;
+} ct_t;
+
+static uint8_t key[crypto_secretbox_KEYBYTES];
+static uint8_t nonce[crypto_secretbox_NONCEBYTES];
+static ct_t ct;
+
+void init_ct(ct_t *ct) {
+  ct->data = malloc(INITIAL_CT_SIZE * sizeof *ct->data);
+  if (ct->data == NULL) {
+    fprintf(stderr, "ciphertext data couldn't be allocated\n");
+    exit(EXIT_FAILURE);
+  }
+  ct->used = crypto_secretbox_MACBYTES;
+  ct->size = INITIAL_CT_SIZE;
+}
+
+void grow_ct(size_t nbytes_coming) {
+    // grow if needed
+    while (ct.used + nbytes_coming > ct.size) {
+      ct.size *= 2;
+      fprintf(stderr, "growing ct.data to %zu bytes\n", ct.size);
+      ct.data = realloc(ct.data, ct.size * sizeof *ct.data);
+      if (ct.data == NULL) {
+        fprintf(stderr, "failed to grow ciphertext capacity to %zu bytes\n",
+            ct.size);
+        exit(EXIT_FAILURE);
+      }
+    }
+}
+
+void free_ct(ct_t *ct) {
+  free(ct->data);
+  ct->data = NULL;
+  ct->used = ct->size = 0;
+}
+
+#endif
+// vim: et:ts=2:sw=2
