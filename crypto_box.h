@@ -54,10 +54,11 @@ void hexDump (const char *desc, const void *addr, size_t len) {
 
 
 #define INITIAL_CT_SIZE 512
-#define CT_AFTER_MAC(x) (x+crypto_secretbox_MACBYTES)
 #define KEY_BYTES crypto_secretbox_KEYBYTES
 #define MAC_BYTES crypto_secretbox_MACBYTES
 #define NONCE_BYTES crypto_secretbox_NONCEBYTES
+#define CT_AFTER_MAC(x) (x+MAC_BYTES)
+#define PT_LEN(x) (x-MAC_BYTES)
 #define READ_BYTES 128
 
 typedef struct {
@@ -78,7 +79,7 @@ void init_ct(ct_t *ct) {
     fprintf(stderr, "ciphertext data couldn't be allocated\n");
     exit(EXIT_FAILURE);
   }
-  ct->used = MAC_BYTES;
+  ct->used = 0;
   ct->size = INITIAL_CT_SIZE;
 }
 

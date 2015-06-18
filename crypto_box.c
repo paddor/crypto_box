@@ -16,18 +16,19 @@ void read_plaintext(void) {
       exit(EXIT_FAILURE);
     }
   }
-  hexDump("plain text", CT_AFTER_MAC(ct.data), ct.used - MAC_BYTES);
+  hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used));
 }
 
 // in-place encryption + MAC
 void encrypt_then_mac(void) {
-  crypto_secretbox_easy(ct.data, CT_AFTER_MAC(ct.data), ct.used, nonce, key);
+  crypto_secretbox_easy(ct.data, CT_AFTER_MAC(ct.data), PT_LEN(ct.used), nonce, key);
   hexDump("MAC", ct.data, MAC_BYTES);
-  hexDump("cipher text", CT_AFTER_MAC(ct.data), ct.used - MAC_BYTES);
+  hexDump("cipher text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used));
 }
 
 void write_ciphertext() {
-  fwrite(ct.data, sizeof *ct.data, ct.used, stdout);
+  fwrite(nonce, sizeof nonce, 1, stdout); // write nonce first
+  fwrite(ct.data, sizeof *ct.data, ct.used, stdout); // then MAC and CT
   if (ferror(stdout)) {
     perror("Couldn't write cipher text: ");
     exit(EXIT_FAILURE);
@@ -120,6 +121,7 @@ int main(int argc, const char *argv[]) {
   get_nonce();
 
   init_ct(&ct);
+  ct.used = MAC_BYTES; // reserve room for MAC
 
   read_plaintext();
   encrypt_then_mac();
