@@ -74,7 +74,7 @@ $ ./open_box c4eb8509d97e2d955339bfe4eb91078605099818d1334a09602fae22d76cbd88 < 
 Ciphertext couldn't be verified. It has been tampered with or you're using the wrong key.
 ```
 
-Use the option `-a` to make it ask for the key is also supported.
+Using the option `-a` to make it ask for the key is also supported.
 
 # Cryptographic Primitives
 XSalsa20 and Poly1305 are used.
