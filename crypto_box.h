@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
+#include <unistd.h>
+#include <string.h>
 #include <sodium.h>
 
 void hexDump (const char *desc, const void *addr, size_t len) {
@@ -53,7 +55,9 @@ void hexDump (const char *desc, const void *addr, size_t len) {
 
 #define INITIAL_CT_SIZE 512
 #define CT_AFTER_MAC(x) (x+crypto_secretbox_MACBYTES)
+#define KEY_BYTES crypto_secretbox_KEYBYTES
 #define MAC_BYTES crypto_secretbox_MACBYTES
+#define NONCE_BYTES crypto_secretbox_NONCEBYTES
 
 typedef struct {
   uint8_t *data;
@@ -61,9 +65,11 @@ typedef struct {
   size_t size;
 } ct_t;
 
-static uint8_t key[crypto_secretbox_KEYBYTES];
-static uint8_t nonce[crypto_secretbox_NONCEBYTES];
+static uint8_t key[KEY_BYTES];
+static uint8_t nonce[NONCE_BYTES];
 static ct_t ct;
+static enum { BIN, HEX } ciphertext = BIN;
+static enum { RANDOM, CMD, ASK } key_source = RANDOM;
 
 void init_ct(ct_t *ct) {
   ct->data = malloc(INITIAL_CT_SIZE * sizeof *ct->data);
@@ -71,7 +77,7 @@ void init_ct(ct_t *ct) {
     fprintf(stderr, "ciphertext data couldn't be allocated\n");
     exit(EXIT_FAILURE);
   }
-  ct->used = crypto_secretbox_MACBYTES;
+  ct->used = MAC_BYTES;
   ct->size = INITIAL_CT_SIZE;
 }
 
