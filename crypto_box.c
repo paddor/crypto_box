@@ -16,14 +16,14 @@ void read_plaintext(void) {
       exit(EXIT_FAILURE);
     }
   }
-//  hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used));
+  DEBUG_ONLY(hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
 }
 
 // in-place encryption + MAC
 void encrypt_then_mac(void) {
   crypto_secretbox_easy(ct.data, CT_AFTER_MAC(ct.data), PT_LEN(ct.used), nonce, key);
-//  hexDump("MAC", ct.data, MAC_BYTES);
-//  hexDump("cipher text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used));
+  DEBUG_ONLY(hexDump("MAC", ct.data, MAC_BYTES));
+  DEBUG_ONLY(hexDump("cipher text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
 }
 
 void write_ciphertext() {
@@ -98,12 +98,12 @@ void get_key(const char * argv[]) {
       // TODO: ask for key
       exit(EXIT_FAILURE);
   }
-//  hexDump("not so secret key", key, sizeof key);
+  DEBUG_ONLY(hexDump("not so secret key", key, sizeof key));
 }
 
 void get_nonce(void) {
   randombytes_buf(nonce, sizeof nonce);
-//  hexDump("nonce", nonce, sizeof nonce);
+  DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 }
 
 int main(int argc, const char *argv[]) {

@@ -6,6 +6,7 @@ void read_ciphertext(void) {
   // read nonce
   while(!fread(&nonce, sizeof nonce, 1, stdin));
 //  hexDump("nonce", nonce, sizeof nonce);
+  DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 
   while(1) {
 
@@ -21,7 +22,7 @@ void read_ciphertext(void) {
       exit(EXIT_FAILURE);
     }
   }
-//  hexDump("cipher text", ct.data, ct.used);
+  DEBUG_ONLY(hexDump("cipher text", ct.data, ct.used));
 }
 
 // verify MAC and in-place decryption
@@ -31,7 +32,7 @@ void verify_then_decrypt(void) {
       "tampered with or you're using the wrong key.\n");
     exit(EXIT_FAILURE);
   }
-//  hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used));
+  DEBUG_ONLY(hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
 }
 
 void write_plaintext() {
@@ -101,7 +102,7 @@ void get_key(const char * argv[]) {
       // TODO: ask for key
       exit(EXIT_FAILURE);
   }
-//  hexDump("not so secret key", key, sizeof key);
+  DEBUG_ONLY(hexDump("not so secret key", key, sizeof key));
 }
 
 int main(int argc, const char *argv[]) {

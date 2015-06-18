@@ -8,6 +8,12 @@
 #include <string.h>
 #include <sodium.h>
 
+#ifdef DEBUG
+  #define DEBUG_ONLY(x) (x)
+#else
+  #define DEBUG_ONLY(x)
+#endif
+
 void hexDump (const char *desc, const void *addr, size_t len) {
     size_t i;
     uint8_t buff[17];
