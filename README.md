@@ -13,7 +13,7 @@ $ ls -l sealed.box
 $ 
 ```
 
-The output file in this case is 7+16+24=47 bytes long, for input, MAC and nonce, respectively.
+The output file in this case is 7+16+24=47 bytes long, for ciphertext, MAC and nonce, respectively.
 
 You can specify a key on the command line, in hex. Make sure your command won't get logged!
 Colons (`:`) and whitespace characters (` `) in the key are ignored. So the
@@ -33,7 +33,7 @@ $ ls -l sealed.box
 $ 
 ```
 
-A key shorter than 32 byte (which would be at least 64 ASCI hex characters)
+A key shorter than 32 byte (which would be at least 64 ASCII hex characters)
 will be repeated to make up a complete 32 byte key. This is not recommended.
 
 ```
