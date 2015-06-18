@@ -65,8 +65,8 @@ $ ls -l sealed.box
 -rw-r--r--+ 1 user  staff  47 Jun 18 12:22 sealed.box
 ```
 
-Colons (`:`) and whitespace characters (` `) in the key are ignored. So the
-following example is equivalent to the one above:
+Colons (`:`) in the key are ignored. So the following example is equivalent to
+the one above:
 
 ```
 $  echo foobar | seal_box ab:ba:0f:f8:87:ca:60:64:62:2b:30:a4:7a:2a:a9:98:0f:aa:1f:54:4b:24:a9:99:1b:14:e9:48:d7:33:17:28 > sealed.box

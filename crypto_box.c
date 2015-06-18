@@ -74,7 +74,7 @@ void get_key(const char * argv[]) {
     case CMD:
       // TODO: warn about invalid characters
       if (-1 == sodium_hex2bin(key, sizeof key, argv[optind],
-            strlen(argv[optind]), ": ", &bin_len, NULL)) {
+            strlen(argv[optind]), ":", &bin_len, NULL)) {
         fprintf(stderr, "Given key is too long, only %lu bytes are useable!\n",
             sizeof key);
         exit(EXIT_FAILURE);
