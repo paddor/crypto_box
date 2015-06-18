@@ -1,7 +1,5 @@
 #include "crypto_box.h"
 
-#define READ_BYTES 128
-
 void read_plaintext(void) {
   size_t nread;
 

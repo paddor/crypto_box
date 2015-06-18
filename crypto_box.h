@@ -58,6 +58,7 @@ void hexDump (const char *desc, const void *addr, size_t len) {
 #define KEY_BYTES crypto_secretbox_KEYBYTES
 #define MAC_BYTES crypto_secretbox_MACBYTES
 #define NONCE_BYTES crypto_secretbox_NONCEBYTES
+#define READ_BYTES 128
 
 typedef struct {
   uint8_t *data;
