@@ -6,6 +6,8 @@ LDFLAGS=$(shell pkg-config --libs libsodium)
 DEBUG ?= 1
 ifeq ($(DEBUG), 1)
 	CFLAGS+= -DDEBUG -g
+else
+	CFLAGS+= -O2
 endif
 
 default: all
