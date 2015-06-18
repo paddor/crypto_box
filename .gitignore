@@ -27,8 +27,8 @@
 *.i*86
 *.x86_64
 *.hex
-crypto_box
-crypto_open
+seal_box
+open_box
 
 # Debug files
 *.dSYM/
