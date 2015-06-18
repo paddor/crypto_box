@@ -48,6 +48,7 @@ void cleanup(void) {
 }
 
 void parse_options(int argc, const char *argv[]) {
+  // TODO: -f key_file
   int opt;
   while ((opt = getopt(argc, (char * const *)argv, "aH")) != -1) {
       switch (opt) {
