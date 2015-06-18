@@ -75,6 +75,10 @@ void parse_options(int argc, const char *argv[]) {
 
 void get_key(const char * argv[]) {
   switch (key_source) {
+    case RANDOM:
+      // should never be random
+      exit(EXIT_FAILURE);
+      break;
     case CMD:
       fprintf(stderr, "using key from command line\n");
       size_t bin_len;
