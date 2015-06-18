@@ -1,16 +1,23 @@
 CC=llvm-gcc
 INCLUDES=
-CFLAGS=-Wall -std=c11 $(shell pkg-config --cflags libsodium)
+CFLAGS=$(shell pkg-config --cflags libsodium) -Wall -std=c11
 LDFLAGS=$(shell pkg-config --libs libsodium)
 
-default: crypto_box crypto_open
+DEBUG ?= 1
+ifeq ($(DEBUG), 1)
+	CFLAGS+= -DDEBUG -g
+endif
 
-crypto_box: crypto_box.h crypto_box.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crypto_box.c
+default: all
+all:	seal_box open_box
 
-crypto_open: crypto_box.h crypto_open.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crypto_open.c
+seal_box: crypto_box.c crypto_box.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+
+open_box: crypto_open.c crypto_box.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
 
 .PHONY: clean
 clean:
-	rm -f crypto_box crypto_open
+	rm -f seal_box open_box
+	rm -rf *.dSYM
