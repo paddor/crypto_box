@@ -4,8 +4,8 @@ void read_ciphertext(void) {
   size_t nread;
 
   // read nonce
-  while(!fread(&nonce, sizeof nonce, 1, stdin));
-//  hexDump("nonce", nonce, sizeof nonce);
+  while(!fread(&nonce, sizeof nonce, 1, stdin))
+    ;
   DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 
   while(1) {
