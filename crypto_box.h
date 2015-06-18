@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <assert.h>
 #include <unistd.h>
 #include <string.h>
 #include <sodium.h>
