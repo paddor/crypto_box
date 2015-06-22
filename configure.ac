@@ -2,8 +2,9 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([crypto_box], [0.1], [paddor@gmail.com])
-AC_CONFIG_SRCDIR([include/crypto_box.h])
+AC_INIT([crypto_box], [0.0.1], [paddor@gmail.com])
+AM_INIT_AUTOMAKE([-Wall -Werror foreign])
+AC_CONFIG_SRCDIR([src/crypto_box.c])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.

@@ -32,3 +32,21 @@ open_box
 
 # Debug files
 *.dSYM/
+
+# autotools
+Makefile
+Makefile.in
+aclocal.m4
+autom4te.cache/
+autoscan.log
+compile
+config.h
+config.h.in
+config.h.in~
+config.log
+config.status
+configure
+depcomp
+install-sh
+missing
+stamp-h1
