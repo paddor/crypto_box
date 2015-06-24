@@ -7,6 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <sodium.h>
+#include <argp.h>
 
 #ifdef DEBUG
   #define DEBUG_ONLY(x) (x)
