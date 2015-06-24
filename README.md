@@ -22,12 +22,12 @@ The output file in this case is 7+16+24=47 bytes long, for ciphertext, MAC and
 nonce, respectively.
 
 The long hex string is the randomly generated key. Store it somewhere safe and
-*keep it secret*.
+**keep it secret**.
 
 ### Key file (WIP)
 
-Use the option `-k` to specify a key file.  If the key file doesn't exist yet,
-a randomly generated key will be used and stored into that file.
+Use the option `-k` to specify a key file. **Note**: If the key file doesn't
+exist yet, a randomly generated key will be used and stored into that file.
 
 ```
 $ ls -l secret.key
@@ -39,8 +39,8 @@ $ ls -l sealed.box secret.key
 ```
 
 If the key file already exists, its first 32 bytes are used as the key. Note
-that a key file that is readable by anyone else but the owner will *not be
-used*.
+that a key file that is readable by anyone else but the owner will **not be
+used**.
 
 ```
 $ ls -l *secret.key
@@ -55,7 +55,7 @@ Hell, anybody is still able to read your key file if your system sucks
 
 ### Key as command line argument
 You can specify a key on the command line, using hex ASCII characters (`0-9a-f`).
-If you do this, *make sure your command won't get logged*! Enable the option
+If you do this, **make sure your command won't get logged**! Enable the option
 `hist_ignore_space` in Zsh or `ignore_space` in Bash.
 
 ```
@@ -74,7 +74,8 @@ $ ls -l sealed.box
 -rw-r--r--+ 1 user  staff  47 Jun 18 12:22 sealed.box
 ```
 A key shorter than 32 byte (which would be at least 64 ASCII hex characters)
-will be repeated to make up a complete 32 byte key. This is *not recommended*.
+will be repeated to make up a complete 32 byte key. This is **not
+recommended**.
 
 ```
 $  echo foobar | seal_box 6ea390f04553 > insecurely_sealed.box
