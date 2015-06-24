@@ -69,7 +69,7 @@ void get_key(const char * argv[]) {
       randombytes_buf(key, sizeof key);
       char hex[sizeof key * 2 + 1];
       sodium_bin2hex(hex, sizeof key * 2 + 1, key, sizeof key);
-      fprintf(stderr, "Your key: %s\n", hex);
+      fprintf(stderr, "%s\n", hex);
       break;
     case CMD:
       // TODO: warn about invalid characters
