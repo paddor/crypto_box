@@ -28,18 +28,17 @@ typedef struct {
   size_t size;
 } ct_t;
 
-static uint8_t key[KEY_BYTES];
-static uint8_t nonce[NONCE_BYTES];
-static ct_t ct;
-static enum { BIN, HEX } ciphertext = BIN;
-static enum { RANDOM, CMD, ASK } key_source = RANDOM;
+typedef enum { BIN, HEX } ct_format_t;
+typedef enum { RANDOM, CMD, ASK } key_source_t;
 
-void init_ct(ct_t *ct);
-void grow_ct(size_t nbytes_coming);
-void free_ct(ct_t *ct);
-void cleanup(void);
-void get_key(const char * argv[]);
-void parse_options(int argc, const char *argv[]);
-void hexDump (const char *desc, const void *addr, size_t len);
+extern void init_ct(ct_t *ct);
+extern void grow_ct(ct_t *ct, size_t nbytes_coming);
+extern void free_ct(ct_t *ct);
+extern void get_key(const key_source_t key_source,
+    uint8_t key[KEY_BYTES], const char * argv[]);
+extern void get_key_from_args(uint8_t *key, const char * argv[]);
+extern void parse_options(key_source_t *key_source,
+    ct_format_t *ct_format, int argc, const char *argv[]);
+extern void hexDump (const char *desc, const void *addr, size_t len);
 // vim: et:ts=2:sw=2
 #endif
