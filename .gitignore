@@ -51,3 +51,6 @@ install-sh
 missing
 stamp-h1
 .deps/
+
+# releases
+crypto_box-*.tar.gz
