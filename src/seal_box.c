@@ -1,4 +1,5 @@
 #include "crypto_box.h"
+#include "crypto_box.c"
 
 void read_plaintext(void) {
   size_t nread;
@@ -33,68 +34,6 @@ void write_ciphertext() {
     perror("Couldn't write cipher text: ");
     exit(EXIT_FAILURE);
   }
-}
-
-void cleanup(void) {
-  free_ct(&ct);
-  sodium_munlock(key, sizeof key);
-}
-
-void parse_options(int argc, const char *argv[]) {
-  int opt;
-  while ((opt = getopt(argc, (char * const *)argv, "aH")) != -1) {
-      switch (opt) {
-      case 'a':
-        key_source = ASK;
-        break;
-      case 'H':
-        ciphertext = HEX;
-        break;
-      default:
-          fprintf(stderr, "Usage: %s [-aH] [hex-key]\n", argv[0]);
-          exit(EXIT_FAILURE);
-      }
-  }
-  if (optind >= argc) {
-    // no key on command line given
-  } else {
-    key_source = CMD;
-  }
-}
-
-void get_key(const char * argv[]) {
-  size_t bin_len, bytes_read;
-  switch (key_source) {
-    case RANDOM:
-      randombytes_buf(key, sizeof key);
-      char hex[sizeof key * 2 + 1];
-      sodium_bin2hex(hex, sizeof key * 2 + 1, key, sizeof key);
-      fprintf(stderr, "%s\n", hex);
-      break;
-    case CMD:
-      // TODO: warn about invalid characters
-      if (-1 == sodium_hex2bin(key, sizeof key, argv[optind],
-            strlen(argv[optind]), ":", &bin_len, NULL)) {
-        fprintf(stderr, "Given key is too long, only %lu bytes are useable!\n",
-            sizeof key);
-        exit(EXIT_FAILURE);
-      }
-      if (bin_len < sizeof key)
-        fprintf(stderr, "WARNING: reuising key material to make up a key "
-            "of sufficient length\n");
-        bytes_read = bin_len;
-        while (bytes_read < sizeof key) {
-          sodium_hex2bin(&key[bytes_read], sizeof key - bytes_read,
-            argv[optind], strlen(argv[optind]), ": ", &bin_len, NULL);
-          bytes_read += bin_len;
-        }
-      break;
-    case ASK:
-      fprintf(stderr, "asking for key\n");
-      // TODO: ask for key
-      exit(EXIT_FAILURE);
-  }
-  DEBUG_ONLY(hexDump("not so secret key", key, sizeof key));
 }
 
 void get_nonce(void) {
