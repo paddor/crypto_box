@@ -29,32 +29,38 @@ void free_ct(ct_t *ct) {
   ct->used = ct->size = 0;
 }
 
-void parse_options(key_source_t *key_source,
-		ct_format_t *ct_format, int argc, const char *argv[]) {
-  // TODO: -f key_file
-  int opt;
-  while ((opt = getopt(argc, (char * const *)argv, "aH")) != -1) {
-      switch (opt) {
-      case 'a':
-        *key_source = ASK; break;
-      case 'H':
-        *ct_format = HEX; break;
-      default:
-          fprintf(stderr, "Usage: %s [-aH] [hex-key]\n", argv[0]);
-          exit(EXIT_FAILURE);
-      }
+
+const char *argp_program_version = PACKAGE_STRING;
+const char *argp_program_bug_address = PACKAGE_BUGREPORT;
+static char doc[] = "Easy to use, strong symmetric encryption on the command line.";
+static char args_doc[] = "[KEY]";
+static struct argp_option options[] = {
+    // TODO: -f key_file
+    { "ask", 'a', 0, 0, "Ask for the key"},
+    { "hex", 'H', 0, 0, "read/write ciphertext as ASCII hex characters"},
+    { 0 }
+};
+
+error_t parse_options(int key, char *arg, struct argp_state *state) {
+  struct arguments *arguments = state->input;
+  switch (key) {
+  case 'a':
+    arguments->key_source = ASK; break;
+  case 'H':
+    arguments->ct_format = HEX; break;
+  case ARGP_KEY_ARG: // key on command line
+    arguments->key_source = CMD;
+    arguments->key = arg;
+    break;
+  default: return ARGP_ERR_UNKNOWN;
   }
-  if (optind >= argc) {
-    // no key on command line given
-  } else {
-    *key_source = CMD;
-  }
+  return 0;
 }
 
-void get_key(const key_source_t key_source, uint8_t key[KEY_BYTES],
-		const char * argv[]) {
+struct argp argp = { options, parse_options, args_doc, doc, 0, 0, 0 };
 
-  switch (key_source) {
+void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
+  switch (arguments->key_source) {
     case RANDOM:
       randombytes_buf(key, KEY_BYTES);
       char hex[KEY_BYTES * 2 + 1];
@@ -62,7 +68,7 @@ void get_key(const key_source_t key_source, uint8_t key[KEY_BYTES],
       fprintf(stderr, "%s\n", hex);
       break;
     case CMD:
-      get_key_from_args(key, argv);
+      get_key_from_args(arguments->key, key);
       break;
     case ASK:
       fprintf(stderr, "asking for key\n");
@@ -72,11 +78,11 @@ void get_key(const key_source_t key_source, uint8_t key[KEY_BYTES],
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
-void get_key_from_args(uint8_t key[KEY_BYTES], const char * argv[]) {
+void get_key_from_args(const char *arg, uint8_t *key) {
   size_t bin_len, bytes_read;
   // TODO: warn about invalid characters
-  if (-1 == sodium_hex2bin(key, KEY_BYTES, argv[optind],
-        strlen(argv[optind]), ":", &bin_len, NULL)) {
+  if (-1 == sodium_hex2bin(key, KEY_BYTES, arg,
+        strlen(arg), ":", &bin_len, NULL)) {
     fprintf(stderr, "Given key is too long, only %u bytes are useable!\n",
         KEY_BYTES);
     exit(EXIT_FAILURE);
@@ -87,7 +93,7 @@ void get_key_from_args(uint8_t key[KEY_BYTES], const char * argv[]) {
     bytes_read = bin_len;
     while (bytes_read < KEY_BYTES) {
       sodium_hex2bin(&key[bytes_read], KEY_BYTES - bytes_read,
-        argv[optind], strlen(argv[optind]), ": ", &bin_len, NULL);
+        arg, strlen(arg), ": ", &bin_len, NULL);
       bytes_read += bin_len;
     }
 }

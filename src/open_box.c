@@ -2,8 +2,6 @@
 
 static uint8_t key[KEY_BYTES];
 static uint8_t nonce[NONCE_BYTES];
-static ct_format_t ct_format = BIN;
-static key_source_t key_source = CMD;
 static ct_t ct;
 
 void read_ciphertext(FILE *input) {
@@ -49,9 +47,12 @@ void write_plaintext(FILE *output) {
   }
 }
 
-int main(int argc, const char *argv[]) {
-  parse_options(&key_source, &ct_format, argc, argv);
-  if (key_source == RANDOM) {
+int main(int argc, char *argv[]) {
+  struct arguments arguments;
+  arguments.ct_format = BIN;
+  arguments.key_source = CMD;
+  argp_parse(&argp, argc, argv, 0, 0, &arguments);
+  if (arguments.key_source == RANDOM) {
     fprintf(stderr, "Key can't be random while opening a box");
     exit(EXIT_FAILURE);
   }
@@ -62,7 +63,7 @@ int main(int argc, const char *argv[]) {
   }
 
   sodium_mlock(key, sizeof key);
-  get_key(key_source, key, argv);
+  get_key(&arguments, key);
 
   init_ct(&ct);
 

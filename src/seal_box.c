@@ -2,8 +2,6 @@
 
 static uint8_t key[KEY_BYTES];
 static uint8_t nonce[NONCE_BYTES];
-static ct_format_t ct_format = BIN;
-static key_source_t key_source = RANDOM;
 static ct_t ct;
 
 void read_plaintext(FILE *input) {
@@ -46,8 +44,11 @@ void get_nonce(void) {
   DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 }
 
-int main(int argc, const char *argv[]) {
-  parse_options(&key_source, &ct_format, argc, argv);
+int main(int argc, char *argv[]) {
+  struct arguments arguments;
+  arguments.ct_format = BIN;
+  arguments.key_source = RANDOM;
+  argp_parse(&argp, argc, argv, 0, 0, &arguments);
 
   if (sodium_init() == -1) {
     fprintf(stderr, "unable to initialize libsodium\n");
@@ -55,7 +56,7 @@ int main(int argc, const char *argv[]) {
   }
 
   sodium_mlock(key, sizeof key);
-  get_key(key_source, key, argv);
+  get_key(&arguments, key);
   get_nonce();
 
   init_ct(&ct);

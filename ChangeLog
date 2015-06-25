@@ -1,3 +1,12 @@
+Wed Jun 25 2015  Patrik Wenger  <paddor@gmail.com>
+
+	* crypto_box.h: Include "config.h" and <argp.h>.
+	Also 
+
+	* crypto_box.h crypto_box.c seal_box.c open_box.c: Switch to ARGP for
+	command line arguments processing. Now we have long options and stuff
+	like --help and --version for free!
+
 Wed Jun 24 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.c crypto_box.h: Refactor.

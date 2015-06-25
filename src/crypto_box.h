@@ -1,6 +1,7 @@
 #ifndef CRYPTO_BOX_H
 #define CRYPTO_BOX_H
 
+#include "config.h"
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -29,17 +30,19 @@ typedef struct {
   size_t size;
 } ct_t;
 
-typedef enum { BIN, HEX } ct_format_t;
-typedef enum { RANDOM, CMD, ASK } key_source_t;
+struct arguments {
+  enum { BIN, HEX } ct_format;
+  enum { RANDOM, CMD, ASK } key_source;
+  char *key;
+};
 
+extern struct argp argp;
+extern error_t parse_options(int key, char *arg, struct argp_state *state);
 extern void init_ct(ct_t *ct);
 extern void grow_ct(ct_t *ct, size_t nbytes_coming);
 extern void free_ct(ct_t *ct);
-extern void get_key(const key_source_t key_source,
-    uint8_t key[KEY_BYTES], const char * argv[]);
-extern void get_key_from_args(uint8_t *key, const char * argv[]);
-extern void parse_options(key_source_t *key_source,
-    ct_format_t *ct_format, int argc, const char *argv[]);
+extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
+extern void get_key_from_args(const char *arg, uint8_t *key);
 extern void hexDump (const char *desc, const void *addr, size_t len);
 // vim: et:ts=2:sw=2
 #endif
