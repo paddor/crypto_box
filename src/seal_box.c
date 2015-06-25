@@ -1,37 +1,42 @@
 #include "crypto_box.h"
-#include "crypto_box.c"
 
-void read_plaintext(void) {
+static uint8_t key[KEY_BYTES];
+static uint8_t nonce[NONCE_BYTES];
+static ct_format_t ct_format = BIN;
+static key_source_t key_source = RANDOM;
+static ct_t ct;
+
+void read_plaintext(FILE *input) {
   size_t nread;
 
   while(1) {
-    grow_ct(READ_BYTES);
+    grow_ct(&ct, READ_BYTES);
 
-    nread = fread(&ct.data[ct.used], sizeof *ct.data, READ_BYTES, stdin);
+    nread = fread(&ct.data[ct.used], sizeof *ct.data, READ_BYTES, input);
     ct.used += nread;
 
     if (READ_BYTES == nread) continue;
-    if (feof(stdin)) break;
-    if (ferror(stdin)) {
-      fprintf(stderr, "unable to read from STDIN:");
+    if (feof(input)) break;
+    if (ferror(input)) {
+      perror("Couldn't read plaintext");
       exit(EXIT_FAILURE);
     }
   }
-  DEBUG_ONLY(hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
+  DEBUG_ONLY(hexDump("plaintext", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
 }
 
 // in-place encryption + MAC
 void encrypt_then_mac(void) {
   crypto_secretbox_easy(ct.data, CT_AFTER_MAC(ct.data), PT_LEN(ct.used), nonce, key);
   DEBUG_ONLY(hexDump("MAC", ct.data, MAC_BYTES));
-  DEBUG_ONLY(hexDump("cipher text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
+  DEBUG_ONLY(hexDump("ciphertext", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
 }
 
-void write_ciphertext() {
-  fwrite(nonce, sizeof nonce, 1, stdout); // write nonce first
-  fwrite(ct.data, sizeof *ct.data, ct.used, stdout); // then MAC and CT
-  if (ferror(stdout)) {
-    perror("Couldn't write cipher text: ");
+void write_ciphertext(FILE *output) {
+  fwrite(nonce, sizeof nonce, 1, output); // write nonce first
+  fwrite(ct.data, sizeof *ct.data, ct.used, output); // then MAC and CT
+  if (ferror(output)) {
+    perror("Couldn't write ciphertext");
     exit(EXIT_FAILURE);
   }
 }
@@ -42,25 +47,24 @@ void get_nonce(void) {
 }
 
 int main(int argc, const char *argv[]) {
-  parse_options(argc, argv);
+  parse_options(&key_source, &ct_format, argc, argv);
 
   if (sodium_init() == -1) {
     fprintf(stderr, "unable to initialize libsodium\n");
-    return 1;
+    exit(EXIT_FAILURE);
   }
 
   sodium_mlock(key, sizeof key);
-  atexit(cleanup);
-
-  get_key(argv);
+  get_key(key_source, key, argv);
   get_nonce();
 
   init_ct(&ct);
   ct.used = MAC_BYTES; // reserve room for MAC
 
-  read_plaintext();
+  read_plaintext(stdin);
   encrypt_then_mac();
-  write_ciphertext();
+  write_ciphertext(stdout);
+  free_ct(&ct);
 
   return EXIT_SUCCESS;
 }
