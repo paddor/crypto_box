@@ -37,6 +37,9 @@ struct arguments {
 };
 
 extern struct argp argp;
+uint8_t key[KEY_BYTES];
+uint8_t nonce[NONCE_BYTES];
+ct_t ct;
 extern error_t parse_options(int key, char *arg, struct argp_state *state);
 extern void init_ct(ct_t *ct);
 extern void grow_ct(ct_t *ct, size_t nbytes_coming);

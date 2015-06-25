@@ -1,9 +1,5 @@
 #include "crypto_box.h"
 
-static uint8_t key[KEY_BYTES];
-static uint8_t nonce[NONCE_BYTES];
-static ct_t ct;
-
 void read_ciphertext(FILE *input) {
   size_t nread;
 
