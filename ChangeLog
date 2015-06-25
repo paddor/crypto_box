@@ -1,0 +1,6 @@
+Wed Jun 24 2015  Patrik Wenger  <paddor@gmail.com>
+
+	* crypto_box.c crypto_box.h: Refactor.
+
+	* seal_box.c open_box.c: New file names (were: crypto_box.c,
+	crypto_open.c).
