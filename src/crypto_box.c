@@ -140,3 +140,4 @@ void hexDump (const char *desc, const void *addr, size_t len) {
     // And print the final ASCII bit.
     fprintf (stderr, "  %s\n", buff);
 }
+// vim: et:ts=2:sw=2
