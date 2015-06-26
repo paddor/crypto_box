@@ -1,13 +1,16 @@
 Fri Jun 26 2015  Patrik Wenger  <paddor@gmail.com>
 
-	* crypto_box.h crypto_box.c: Learn option -k (--key-file).
-	* NEWS: Symlink to NEWS.md.
-	* NEWS.md: First entry about new option -k.
+	* crypto_box.h (struct arguments) <key_source>: KEY_FILE added.
+	* crypto_box.h (struct arguments) <key_file>: Added.
+	* crypto_box.h (get_key_from_file): Declared.
+	* crypto_box.c (options[]): Option -k/--key-file added.
+	* crypto_box.c (parse_options) <case 'k'>: Added.
+	* crypto_box.c (get_key) <case KEY_FILE>: Added.
+	* crypto_box.c (get_key_from_file): Defined.
 
 Wed Jun 25 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h: Include "config.h" and <argp.h>.
-
 	* crypto_box.h crypto_box.c seal_box.c open_box.c: Switch to ARGP for
 	command line arguments processing. Now we have long options and stuff
 	like --help and --version for free!
@@ -15,6 +18,5 @@ Wed Jun 25 2015  Patrik Wenger  <paddor@gmail.com>
 Wed Jun 24 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.c crypto_box.h: Refactor.
-
 	* seal_box.c open_box.c: New file names (were: crypto_box.c,
 	crypto_open.c).
