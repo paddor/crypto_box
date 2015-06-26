@@ -35,7 +35,7 @@ const char *argp_program_bug_address = PACKAGE_BUGREPORT;
 static char doc[] = "Easy to use, strong symmetric encryption on the command line.";
 static char args_doc[] = "[KEY]";
 static struct argp_option options[] = {
-    // TODO: -f key_file
+    { "key-file", 'k', "FILE", 0, "get key from file"},
     { "ask", 'a', 0, 0, "Ask for the key"},
     { "hex", 'H', 0, 0, "read/write ciphertext as ASCII hex characters"},
     { 0 }
@@ -44,6 +44,10 @@ static struct argp_option options[] = {
 error_t parse_options(int key, char *arg, struct argp_state *state) {
   struct arguments *arguments = state->input;
   switch (key) {
+  case 'k':
+    arguments->key_source = KEY_FILE;
+    arguments->key_file = arg;
+    break;
   case 'a':
     arguments->key_source = ASK; break;
   case 'H':
@@ -67,6 +71,9 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
       sodium_bin2hex(hex, KEY_BYTES * 2 + 1, key, KEY_BYTES);
       fprintf(stderr, "%s\n", hex);
       break;
+    case KEY_FILE:
+      get_key_from_file(arguments->key_file, key);
+      break;
     case CMD:
       get_key_from_args(arguments->key, key);
       break;
@@ -76,6 +83,58 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
       exit(EXIT_FAILURE);
   }
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
+}
+
+void get_key_from_file(const char *key_file, uint8_t *key) {
+  FILE *f = fopen(key_file, "r");
+  if(f == NULL && errno != ENOENT) {
+    perror("Couldn't open key file");
+    exit(EXIT_FAILURE);
+  }
+  if (f == NULL && errno == ENOENT) { // we'll create the file
+    int fd = open(key_file, O_WRONLY | O_CREAT | O_EXCL, 0400);
+    if (fd == -1) {
+      perror("Couldn't create key file");
+      exit(EXIT_FAILURE);
+    }
+    f = fdopen(fd, "w");
+    if (f == NULL) {
+      perror("Couldn't associate stream with file descriptor");
+      exit(EXIT_FAILURE);
+    }
+    randombytes_buf(key, KEY_BYTES); // generate random key
+    if (fwrite(key, KEY_BYTES, 1, f) == 0) { // write to file
+      perror("Couldn't write key file");
+      exit(EXIT_FAILURE);
+    }
+  } else {
+    struct stat s;
+    if (fstat(fileno(f), &s) != 0) {
+      perror("Couldn't stat key file");
+      exit(EXIT_FAILURE);
+    }
+
+    // check file permissions
+    if ((s.st_mode & 077) > 0) {
+      fprintf(stderr, "Key file is readable by other users! Please specify "
+          "a secret key file instead.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    // check size
+    if (s.st_size < KEY_BYTES) {
+      fprintf(stderr, "Key file is too small. It must contain at "
+          "least %d bytes.\n", KEY_BYTES);
+      exit(EXIT_FAILURE);
+    }
+
+    // read key
+    if (fread(key, KEY_BYTES, 1, f) == 0) {
+      perror("Couldn't read key file");
+      exit(EXIT_FAILURE);
+    }
+  }
+  fclose(f);
 }
 
 void get_key_from_args(const char *arg, uint8_t *key) {

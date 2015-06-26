@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h> // for open()
+#include <sys/stat.h>
 #include <sodium.h>
 #include <argp.h>
 
@@ -32,8 +34,9 @@ typedef struct {
 
 struct arguments {
   enum { BIN, HEX } ct_format;
-  enum { RANDOM, CMD, ASK } key_source;
+  enum { RANDOM, KEY_FILE, CMD, ASK } key_source;
   char *key;
+  char *key_file;
 };
 
 extern struct argp argp;
@@ -45,6 +48,7 @@ extern void init_ct(ct_t *ct);
 extern void grow_ct(ct_t *ct, size_t nbytes_coming);
 extern void free_ct(ct_t *ct);
 extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
+extern void get_key_from_file(const char *key_file, uint8_t *key);
 extern void get_key_from_args(const char *arg, uint8_t *key);
 extern void hexDump (const char *desc, const void *addr, size_t len);
 // vim: et:ts=2:sw=2

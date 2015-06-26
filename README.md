@@ -24,7 +24,7 @@ nonce, respectively.
 The long hex string is the randomly generated key. Store it somewhere safe and
 **keep it secret**.
 
-### Key file (WIP)
+### Key file
 
 Use the option `-k` to specify a key file. **Note**: If the key file doesn't
 exist yet, a randomly generated key will be used and stored into that file.

@@ -1,3 +1,9 @@
+Fri Jun 26 2015  Patrik Wenger  <paddor@gmail.com>
+
+	* crypto_box.h crypto_box.c: Learn option -k (--key-file).
+	* NEWS: Symlink to NEWS.md.
+	* NEWS.md: First entry about new option -k.
+
 Wed Jun 25 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h: Include "config.h" and <argp.h>.
