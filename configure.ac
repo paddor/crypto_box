@@ -4,7 +4,7 @@
 AC_PREREQ([2.69])
 AC_INIT([crypto_box], m4_esyscmd_s([cat VERSION]), [paddor@gmail.com])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
-AC_CONFIG_SRCDIR([src/crypto_box.h])
+AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
