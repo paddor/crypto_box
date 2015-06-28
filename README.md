@@ -3,17 +3,19 @@ Simple secret-key encryption without the PGP/GPG/OpenSSL/OMG jungle. Secure by
 default by leveraging [libsodium](https://github.com/jedisct1/libsodium)'s
 power.
 
+## Usage
+
 This gives you two (filter) utilities: `seal_box` and `open_box`. These have
 been developed with the Unix philosophy _Do one thing and do it well_ in mind.
 They are very simple to use, but that doesn't mean you can't do anything
 wrong. As always, it's your responsibility to keep a secret key secret.
 
-## Encryption: `seal_box`
+### Encryption: `seal_box`
 
 Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to
 STDOUT. Below are the different ways of specifying a key.
 
-### Random key (no key file)
+#### Random key (no key file)
 
 If no options are given, a random key is generated and printed on STDERR. It
 will not be automatically stored anywhere. This is only safe to use locally or
@@ -34,7 +36,7 @@ The long hex string is the randomly generated key. Store it somewhere safe and
 To decrypt a box later, specify the key directly on the command line (see
 below).
 
-### Key file
+#### Key file
 
 Use the option `-k` to specify a key file. **Note**: If the key file doesn't
 exist yet, a randomly generated key will be used and stored into that file.
@@ -65,7 +67,7 @@ read your key file.  Hell, anybody is still able to read your key file if your
 system sucks (security vulnerabilities, physical access but no disk
 encryption, ...).
 
-### Key as command line argument
+#### Key as command line argument
 
 You can specify a key on the command line, using hex ASCII characters (`0-9a-f`).
 This can be useful if you let `seal_box` generate a random key earlier without
@@ -102,7 +104,7 @@ $ ls -l sealed.box
 -rw-r--r--+ 1 user  staff  47 Jun 18 12:24 insecurely_sealed.box
 ```
 
-### Prompting for the key (WIP)
+#### Prompting for the key (WIP)
 
 Use option `-a` to be asked for a key.
 
@@ -111,7 +113,7 @@ $ echo foobar | seal_box -a > sealed.box
 Please enter key: 
 ```
 
-## Decryption: `open_box`
+### Decryption: `open_box`
 
 Reads ciphertext (including MAC and nonce) from STDIN. Writes plaintext to STDOUT. The
 key can be given in the same ways as for `seal_box`. For example from a key file:
