@@ -47,6 +47,7 @@ extern void init_ct(ct_t *ct);
 extern void grow_ct(ct_t *ct, size_t nbytes_coming);
 extern void free_ct(ct_t *ct);
 extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
+extern void key_mlock(void);
 extern void hexDump (const char *desc, const void *addr, size_t len);
 // vim: et:ts=2:sw=2
 #endif

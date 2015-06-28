@@ -5,6 +5,10 @@ Sun Jun 28 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.c (get_key_from_args) [invalid]: Warn and abort.
 
+	* crypto_box.h (key_mlock): Declared.
+	* crypto_box.c (key_mlock, key_munlock): Defined.
+	* seal_box.c open_box.c (main): Call key_mlock().
+
 Fri Jun 26 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (struct arguments) <key_source>: KEY_FILE added.

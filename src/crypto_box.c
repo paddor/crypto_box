@@ -168,6 +168,23 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
+void key_munlock(void) {
+  fprintf(stderr, "Unlocking key memory...\n");
+  sodium_munlock(key, sizeof key);
+}
+
+void key_mlock(void) {
+  if (sodium_mlock(key, sizeof key) == -1) {
+    fprintf(stderr, "Unable to lock memory for key.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* register unlocking before exit
+   * NOTE: This is important because the unlocking also zeroes the memory out
+   * before actually unlocking it. */
+  atexit(key_munlock);
+}
+
 void hexDump (const char *desc, const void *addr, size_t len) {
     size_t i;
     uint8_t buff[17];

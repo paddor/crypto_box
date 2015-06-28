@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  sodium_mlock(key, sizeof key);
+  key_mlock();
   get_key(&arguments, key);
 
   init_ct(&ct);
