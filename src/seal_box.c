@@ -27,6 +27,10 @@ void encrypt_then_mac(void) {
 }
 
 void write_ciphertext(FILE *output) {
+  if (isatty(fileno(output))) {
+    fprintf(stderr, "WARNING: Writing ciphertext to terminal.\n");
+  }
+
   fwrite(nonce, sizeof nonce, 1, output); // write nonce first
   fwrite(ct.data, sizeof *ct.data, ct.used, output); // then MAC and CT
   if (ferror(output)) {
