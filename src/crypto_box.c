@@ -169,7 +169,6 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
 }
 
 void key_munlock(void) {
-  fprintf(stderr, "Unlocking key memory...\n");
   sodium_munlock(key, sizeof key);
 }
 
