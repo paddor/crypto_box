@@ -43,13 +43,10 @@ extern struct argp argp;
 uint8_t key[KEY_BYTES];
 uint8_t nonce[NONCE_BYTES];
 ct_t ct;
-extern error_t parse_options(int key, char *arg, struct argp_state *state);
 extern void init_ct(ct_t *ct);
 extern void grow_ct(ct_t *ct, size_t nbytes_coming);
 extern void free_ct(ct_t *ct);
 extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
-extern void get_key_from_file(const char *key_file, uint8_t *key);
-extern void get_key_from_args(const char *arg, uint8_t *key);
 extern void hexDump (const char *desc, const void *addr, size_t len);
 // vim: et:ts=2:sw=2
 #endif

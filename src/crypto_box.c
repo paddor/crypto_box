@@ -63,28 +63,6 @@ error_t parse_options(int key, char *arg, struct argp_state *state) {
 
 struct argp argp = { options, parse_options, args_doc, doc, 0, 0, 0 };
 
-void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
-  switch (arguments->key_source) {
-    case RANDOM:
-      randombytes_buf(key, KEY_BYTES);
-      char hex[KEY_BYTES * 2 + 1];
-      sodium_bin2hex(hex, KEY_BYTES * 2 + 1, key, KEY_BYTES);
-      fprintf(stderr, "%s\n", hex);
-      break;
-    case KEY_FILE:
-      get_key_from_file(arguments->key_file, key);
-      break;
-    case CMD:
-      get_key_from_args(arguments->key, key);
-      break;
-    case ASK:
-      fprintf(stderr, "asking for key\n");
-      // TODO: ask for key
-      exit(EXIT_FAILURE);
-  }
-  DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
-}
-
 void get_key_from_file(const char *key_file, uint8_t *key) {
   FILE *f = fopen(key_file, "r");
   if(f == NULL && errno != ENOENT) {
@@ -155,6 +133,28 @@ void get_key_from_args(const char *arg, uint8_t *key) {
         arg, strlen(arg), ": ", &bin_len, NULL);
       bytes_read += bin_len;
     }
+}
+
+void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
+  switch (arguments->key_source) {
+    case RANDOM:
+      randombytes_buf(key, KEY_BYTES);
+      char hex[KEY_BYTES * 2 + 1];
+      sodium_bin2hex(hex, KEY_BYTES * 2 + 1, key, KEY_BYTES);
+      fprintf(stderr, "%s\n", hex);
+      break;
+    case KEY_FILE:
+      get_key_from_file(arguments->key_file, key);
+      break;
+    case CMD:
+      get_key_from_args(arguments->key, key);
+      break;
+    case ASK:
+      fprintf(stderr, "asking for key\n");
+      // TODO: ask for key
+      exit(EXIT_FAILURE);
+  }
+  DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
 void hexDump (const char *desc, const void *addr, size_t len) {
