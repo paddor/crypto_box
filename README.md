@@ -3,14 +3,20 @@ Simple secret-key encryption without the PGP/GPG/OpenSSL/OMG jungle. Secure by
 default by leveraging [libsodium](https://github.com/jedisct1/libsodium)'s
 power.
 
-This gives you two utilities: `seal_box` and `open_box`. These have been
-developed with the Unix philosophy _Do one thing and do it well_ in mind.
+This gives you two (filter) utilities: `seal_box` and `open_box`. These have
+been developed with the Unix philosophy _Do one thing and do it well_ in mind.
+They are very simple to use, but that doesn't mean you can't do anything
+wrong. As always, it's your responsibility to keep a secret key secret.
 
 ## `seal_box`
+
 Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to STDOUT.
 
 ### Random key
-By default, it uses a randomly generated key and prints the key on STDERR.
+
+If no options are given, a random key is generated and printed on STDERR. This
+is only safe to use locally or over secure connections like SSH (and nobody
+looking over your shoulders).
 
 ```
 $ echo foobar | seal_box > sealed.box
@@ -24,10 +30,14 @@ nonce, respectively.
 The long hex string is the randomly generated key. Store it somewhere safe and
 **keep it secret**.
 
+To decrypt a box later, specify the key directly on the command line (see
+below).
+
 ### Key file
 
 Use the option `-k` to specify a key file. **Note**: If the key file doesn't
 exist yet, a randomly generated key will be used and stored into that file.
+Only use this if your key file will be located on an encrypted disk.
 
 ```
 $ ls -l secret.key
@@ -49,12 +59,18 @@ $ echo foobar | seal_box -k not_so_secret.key > sealed.box
 Key file is readable by other users! Please specify a secret key file instead.
 ```
 
-Keep in mind that the administrator (`root`) can still read your key file.
-Hell, anybody is still able to read your key file if your system sucks
-(security vulnerabilities, physical access but no disk encryption, ...).
+Keep in mind that, on a shared system, the administrator (`root`) can still
+read your key file.  Hell, anybody is still able to read your key file if your
+system sucks (security vulnerabilities, physical access but no disk
+encryption, ...).
 
 ### Key as command line argument
+
 You can specify a key on the command line, using hex ASCII characters (`0-9a-f`).
+This can be useful if you let `seal_box` generate a random key earlier without
+storing it to a key file or you've kept it as a piece of information outside
+your computer.
+
 If you do this, **make sure your command won't get logged**! Enable the option
 `hist_ignore_space` in Zsh or `ignore_space` in Bash.
 
@@ -75,7 +91,8 @@ $ ls -l sealed.box
 ```
 A key shorter than 32 byte (which would be at least 64 ASCII hex characters)
 will be repeated to make up a complete 32 byte key. This is **not
-recommended**.
+recommended**, as it greatly decreases the information content of the key,
+which makes it easier to guess.
 
 ```
 $  echo foobar | seal_box 6ea390f04553 > insecurely_sealed.box
@@ -85,6 +102,7 @@ $ ls -l sealed.box
 ```
 
 ### Prompting for the key (WIP)
+
 Use option `-a` to be asked for a key.
 
 ```
@@ -93,6 +111,7 @@ Please enter key:
 ```
 
 ## `open_box`
+
 Reads ciphertext (including MAC and nonce) from STDIN. Writes plaintext to STDOUT. The
 key can be given in the same ways as for `seal_box`. For example directly on the command line:
 
@@ -117,9 +136,10 @@ Ciphertext couldn't be verified. It has been tampered with or you're using the w
 ```
 
 ## Internals
-The current implementation never creates any (temporary) files, no matter how big the input is.
 
-The cryptographic primitives used are XSalsa20 and Poly1305.
+As mentioned above, libsodium is used to do
+encryption/decryption/authentication. The cryptographic primitives used are
+XSalsa20 and Poly1305.
 
 XSalsa20 (with its 24 byte nonces) is a good choice because it allows one to
 safely use randomly generated nonces. Of course, the full 20-rounds version of
@@ -128,3 +148,11 @@ XSalsa20 is used.
 Poly1305 will ensure the integrity of your data. Never use encryption without
 authentication to verify the integrity of the encrypted data. If you don't care
 if someone tampers with your data, you might as well just send plaintext.
+
+The memory used for the secret key is locked before the key is stored in it
+and zeroed out and unlocked before the programs exit.
+
+The current implementation never creates any (temporary) files, no matter how
+big the input is. (This might change in the future, but only encrypted data
+would ever be stored on the disk by the programs themselves.)
+
