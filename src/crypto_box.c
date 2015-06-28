@@ -117,13 +117,24 @@ void get_key_from_file(const char *key_file, uint8_t *key) {
 
 void get_key_from_args(const char *arg, uint8_t *key) {
   size_t bin_len, bytes_read;
-  // TODO: warn about invalid characters
+  const char * hex_end; // pointer to last parsed hex character
+
   if (-1 == sodium_hex2bin(key, KEY_BYTES, arg,
-        strlen(arg), ":", &bin_len, NULL)) {
+        strlen(arg), ":", &bin_len, &hex_end)) {
     fprintf(stderr, "Given key is too long, only %u bytes are useable!\n",
         KEY_BYTES);
     exit(EXIT_FAILURE);
   }
+
+  /* check if invalid characters (like "abfg") or invalid format given (like
+   * "abc", which has an uneven number of 4-bit nibbles)
+   */
+  if ((hex_end - arg) < strlen(arg)) {
+    fprintf(stderr, "Please check your key for typos.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* warn about short keys */
   if (bin_len < KEY_BYTES)
     fprintf(stderr, "WARNING: reuising key material to make up a key "
         "of sufficient length\n");

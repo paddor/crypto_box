@@ -3,6 +3,8 @@ Sun Jun 28 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (parse_options, get_key_from_file)
 	    (get_key_from_args): Declarations removed.
 
+	* crypto_box.c (get_key_from_args) [invalid]: Warn and abort.
+
 Fri Jun 26 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (struct arguments) <key_source>: KEY_FILE added.

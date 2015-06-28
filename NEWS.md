@@ -1,3 +1,9 @@
+News for next version
+=====================
+* Now the programs warn and abort if a key given on the command line contains
+  invalid characters (like "abcx") or has an incorrect format (like "abc").
+
+
 News for crypto_box 0.2.0
 ==========================
 * Added option -k (--key-file) to support getting the key from the first 32
