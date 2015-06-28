@@ -8,7 +8,7 @@ been developed with the Unix philosophy _Do one thing and do it well_ in mind.
 They are very simple to use, but that doesn't mean you can't do anything
 wrong. As always, it's your responsibility to keep a secret key secret.
 
-## `seal_box`
+## Encryption: `seal_box`
 
 Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to
 STDOUT. Below are the different ways of specifying a key.
@@ -111,7 +111,7 @@ $ echo foobar | seal_box -a > sealed.box
 Please enter key: 
 ```
 
-## `open_box`
+## Decryption: `open_box`
 
 Reads ciphertext (including MAC and nonce) from STDIN. Writes plaintext to STDOUT. The
 key can be given in the same ways as for `seal_box`. For example from a key file:
