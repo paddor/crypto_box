@@ -10,13 +10,14 @@ wrong. As always, it's your responsibility to keep a secret key secret.
 
 ## `seal_box`
 
-Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to STDOUT.
+Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to
+STDOUT. Below are the different ways of specifying a key.
 
-### Random key
+### Random key (no key file)
 
-If no options are given, a random key is generated and printed on STDERR. This
-is only safe to use locally or over secure connections like SSH (and nobody
-looking over your shoulders).
+If no options are given, a random key is generated and printed on STDERR. It
+will not be automatically stored anywhere. This is only safe to use locally or
+over secure connections like SSH (and nobody looking over your shoulders).
 
 ```
 $ echo foobar | seal_box > sealed.box
@@ -113,7 +114,7 @@ Please enter key:
 ## `open_box`
 
 Reads ciphertext (including MAC and nonce) from STDIN. Writes plaintext to STDOUT. The
-key can be given in the same ways as for `seal_box`. For example directly on the command line:
+key can be given in the same ways as for `seal_box`. For example from a key file:
 
 ```
 $ open_box -k secret.key < sealed.box
