@@ -1,3 +1,9 @@
+Sun Jun 29 2015  Patrik Wenger  <paddor@gmail.com>
+
+	* crypto_box.h (ct_t): Remove typedef. Now it's struct ciphertext. *_t
+	types are reserved for C standards. Declarations and definitions
+	adapted.
+
 Sun Jun 28 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (parse_options, get_key_from_file)

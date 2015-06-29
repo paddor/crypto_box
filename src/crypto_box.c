@@ -1,6 +1,6 @@
 #include "crypto_box.h"
 
-void init_ct(ct_t *ct) {
+void init_ct(struct ciphertext *ct) {
   ct->data = malloc(INITIAL_CT_SIZE * sizeof *ct->data);
   if (ct->data == NULL) {
     fprintf(stderr, "ciphertext data couldn't be allocated\n");
@@ -10,7 +10,7 @@ void init_ct(ct_t *ct) {
   ct->size = INITIAL_CT_SIZE;
 }
 
-void grow_ct(ct_t *ct, size_t nbytes_coming) {
+void grow_ct(struct ciphertext *ct, size_t nbytes_coming) {
     // grow if needed
     while (ct->used + nbytes_coming > ct->size) {
       ct->size *= 2;
@@ -23,7 +23,7 @@ void grow_ct(ct_t *ct, size_t nbytes_coming) {
     }
 }
 
-void free_ct(ct_t *ct) {
+void free_ct(struct ciphertext *ct) {
   free(ct->data);
   ct->data = NULL;
   ct->used = ct->size = 0;
