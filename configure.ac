@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([crypto_box], m4_esyscmd_s([cat VERSION]), [paddor@gmail.com])
+AC_INIT([Crypto Box], m4_esyscmd_s([cat VERSION]), [paddor@gmail.com], [crypto_box], [https://github.com/paddor/crypto_box])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
