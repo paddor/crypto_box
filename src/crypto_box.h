@@ -45,6 +45,7 @@ extern struct argp argp_parser;
 uint8_t key[KEY_BYTES];
 uint8_t nonce[NONCE_BYTES];
 struct ciphertext ct;
+struct arguments arguments;
 extern void init_ct(struct ciphertext *ct);
 extern void grow_ct(struct ciphertext *ct, size_t nbytes_coming);
 extern void free_ct(struct ciphertext *ct);

@@ -44,9 +44,6 @@ void write_plaintext(FILE *output) {
 }
 
 int main(int argc, char *argv[]) {
-  struct arguments arguments;
-  arguments.input_source = STDIN;
-  arguments.ct_format = BIN;
   arguments.key_source = CMD;
   argp_parse(&argp_parser, argc, argv, 0, 0, &arguments);
   if (arguments.key_source == RANDOM) {

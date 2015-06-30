@@ -42,6 +42,9 @@ static struct argp_option options[] = {
     { 0 }
 };
 
+/* initialize with default values */
+struct arguments arguments = { .input_source = STDIN, .ct_format = BIN };
+
 error_t parse_options(int key, char *arg, struct argp_state *state) {
   struct arguments *arguments = state->input;
   switch (key) {
@@ -65,6 +68,11 @@ error_t parse_options(int key, char *arg, struct argp_state *state) {
     /* sanity check */
     if (arguments->key_source == ASK && arguments->input_source == STDIN) {
       fprintf(stderr, "Can't use -a without -f.\n");
+      exit(EXIT_FAILURE);
+    }
+
+    if (arguments->key_source == CMD && arguments->key == NULL) {
+      fprintf(stderr, "Please specify a key.\n");
       exit(EXIT_FAILURE);
     }
   default: return ARGP_ERR_UNKNOWN;

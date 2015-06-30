@@ -18,6 +18,15 @@ Sun Jun 30 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (extern struct argp argp): Rename to argp_parser.
 	Initialization and callers adapted.
 
+	* crypto_box.h (struct arguments arguments): Declared.
+	* crypto_box.c (struct arguments arguments): Initialized with default
+	values.
+	* lock_box.c open_box.c (main) <struct arguments arguments>: Removed
+	local declaration.
+	* crypto_box.c (parse_options) <case ARGP_KEY_SUCCESS>
+	[key_source==CMD && key==NULL]: Inform about missing key argument and
+	exit.
+
 Sun Jun 29 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (ct_t): Remove typedef. Now it's struct ciphertext. *_t
