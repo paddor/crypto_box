@@ -168,9 +168,11 @@ if someone tampers with your data, you might as well just send plaintext.
 The memory used for the secret key is locked before the key is stored in it
 and zeroed out and unlocked before the programs exit.
 
-The current implementation never creates any (temporary) files, no matter how
-big the input is. (This might change in the future, but only encrypted data
-would ever be stored on the disk by the programs themselves.)
+The current implementation reads all input at once and never creates any
+(temporary) files, no matter how big the input is. This means it could
+potentially use a lot of memory, depending on the input size. I'm thinking
+about changing the internals to work in chunks, to improve usage in a pipeline.
+(see TODO section)
 
 
 ## TODO
