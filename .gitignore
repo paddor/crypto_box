@@ -53,4 +53,5 @@ stamp-h1
 .deps/
 
 # releases
+build/
 crypto_box-*.tar.gz
