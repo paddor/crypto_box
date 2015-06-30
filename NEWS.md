@@ -5,6 +5,7 @@ News for crypto_box 0.3.0
   added, because `-a`/`--ask` doesn't make sense otherwise.
 * Now the programs warn and abort if a key given on the command line contains
   invalid characters (like "abcx") or has an incorrect format (like "abc").
+* A warning is issued before writing ciphertext to terminal.
 
 
 News for crypto_box 0.2.0
