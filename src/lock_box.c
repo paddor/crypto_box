@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
   arguments.input_source = STDIN;
   arguments.ct_format = BIN;
   arguments.key_source = RANDOM;
-  argp_parse(&argp, argc, argv, 0, 0, &arguments);
+  argp_parse(&argp_parser, argc, argv, 0, 0, &arguments);
 
   if (sodium_init() == -1) {
     fprintf(stderr, "unable to initialize libsodium\n");

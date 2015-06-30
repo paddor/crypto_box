@@ -72,7 +72,7 @@ error_t parse_options(int key, char *arg, struct argp_state *state) {
   return 0;
 }
 
-struct argp argp = { options, parse_options, args_doc, doc, 0, 0, 0 };
+struct argp argp_parser = { options, parse_options, args_doc, doc, 0, 0, 0 };
 
 void get_key_from_file(const char *key_file, uint8_t *key) {
   FILE *f = fopen(key_file, "r");

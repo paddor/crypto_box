@@ -41,7 +41,7 @@ struct arguments {
   char *input_file;
 };
 
-extern struct argp argp;
+extern struct argp argp_parser;
 uint8_t key[KEY_BYTES];
 uint8_t nonce[NONCE_BYTES];
 struct ciphertext ct;
