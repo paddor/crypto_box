@@ -198,6 +198,7 @@ about changing the internals to work in chunks, to improve usage in a pipeline.
     - final ct_mac should be the same as computed MAC over each chunk_mac
 length, nonce, and MAC
   - also MAC the whole plaintext and add final MAC
+* test suite
 * switch to CMake
 * K&R style function definitions
 * explicit creation of key file to avoid an attacker to create a key file
