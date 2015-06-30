@@ -172,6 +172,23 @@ The current implementation never creates any (temporary) files, no matter how
 big the input is. (This might change in the future, but only encrypted data
 would ever be stored on the disk by the programs themselves.)
 
+
+## TODO
+
+* streaming
+  - authenticated header frame containing the whole plaintext length
+  - encrypt and mac in chunks of 4KB/32KB/1MB
+* switch to CMake
+* K&R style function definitions
+* better names: "seal" might be misleading. There's no asymmetric encryption involved.
+  - lockbox unlockbox
+  - lock_box unlock_box <= my favorite
+  - close_box open_box
+  - lockf unlockf
+* explicit creation of key file to avoid an attacker to create a key file
+  - -K/--new-key-file
+* hex ciphertext (-H)
+
 ## License
 
 ISC. See LICENSE file.
