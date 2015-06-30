@@ -33,10 +33,12 @@ struct ciphertext {
 };
 
 struct arguments {
+  enum { STDIN, INPUT_FILE } input_source;
   enum { BIN, HEX } ct_format;
   enum { RANDOM, KEY_FILE, CMD, ASK } key_source;
   char *key;
   char *key_file;
+  char *input_file;
 };
 
 extern struct argp argp;
@@ -48,6 +50,8 @@ extern void grow_ct(struct ciphertext *ct, size_t nbytes_coming);
 extern void free_ct(struct ciphertext *ct);
 extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
 extern void key_mlock(void);
+extern FILE* open_input(struct arguments *arguments);
+extern void close_input(FILE *input);
 extern void hexDump (const char *desc, const void *addr, size_t len);
 // vim: et:ts=2:sw=2
 #endif

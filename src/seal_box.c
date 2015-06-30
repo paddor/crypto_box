@@ -46,6 +46,7 @@ void get_nonce(void) {
 
 int main(int argc, char *argv[]) {
   struct arguments arguments;
+  arguments.input_source = STDIN;
   arguments.ct_format = BIN;
   arguments.key_source = RANDOM;
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
@@ -62,7 +63,9 @@ int main(int argc, char *argv[]) {
   init_ct(&ct);
   ct.used = MAC_BYTES; // reserve room for MAC
 
-  read_plaintext(stdin);
+  FILE *input = open_input(&arguments);
+  read_plaintext(input);
+  close_input(input);
   encrypt_then_mac();
   write_ciphertext(stdout);
   free_ct(&ct);

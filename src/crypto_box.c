@@ -36,7 +36,8 @@ static char doc[] = "Easy to use, strong symmetric encryption on the command lin
 static char args_doc[] = "[KEY]";
 static struct argp_option options[] = {
     { "key-file", 'k', "FILE", 0, "get key from file"},
-    { "ask", 'a', 0, 0, "Ask for the key"},
+    { "ask", 'a', 0, 0, "Ask for the key (requires -f)"},
+    { "file", 'f', "FILE", 0, "get data from file instead of STDIN"},
     { "hex", 'H', 0, 0, "read/write ciphertext as ASCII hex characters"},
     { 0 }
 };
@@ -50,12 +51,22 @@ error_t parse_options(int key, char *arg, struct argp_state *state) {
     break;
   case 'a':
     arguments->key_source = ASK; break;
+  case 'f':
+    arguments->input_source = INPUT_FILE;
+    arguments->input_file = arg;
+    break;
   case 'H':
     arguments->ct_format = HEX; break;
   case ARGP_KEY_ARG: // key on command line
     arguments->key_source = CMD;
     arguments->key = arg;
     break;
+  case ARGP_KEY_SUCCESS: // finished parsing of args
+    /* sanity check */
+    if (arguments->key_source == ASK && arguments->input_source == STDIN) {
+      fprintf(stderr, "Can't use -a without -f.\n");
+      exit(EXIT_FAILURE);
+    }
   default: return ARGP_ERR_UNKNOWN;
   }
   return 0;
@@ -115,12 +126,12 @@ void get_key_from_file(const char *key_file, uint8_t *key) {
   fclose(f);
 }
 
-void get_key_from_args(const char *arg, uint8_t *key) {
+void get_key_from_str(const char *str, uint8_t *key) {
   size_t bin_len, bytes_read;
   const char * hex_end; // pointer to last parsed hex character
 
-  if (-1 == sodium_hex2bin(key, KEY_BYTES, arg,
-        strlen(arg), ":", &bin_len, &hex_end)) {
+  if (-1 == sodium_hex2bin(key, KEY_BYTES, str,
+        strlen(str), ":", &bin_len, &hex_end)) {
     fprintf(stderr, "Given key is too long, only %u bytes are useable!\n",
         KEY_BYTES);
     exit(EXIT_FAILURE);
@@ -129,7 +140,7 @@ void get_key_from_args(const char *arg, uint8_t *key) {
   /* check if invalid characters (like "abfg") or invalid format given (like
    * "abc", which has an uneven number of 4-bit nibbles)
    */
-  if ((hex_end - arg) < strlen(arg)) {
+  if ((hex_end - str) < strlen(str)) {
     fprintf(stderr, "Please check your key for typos.\n");
     exit(EXIT_FAILURE);
   }
@@ -141,11 +152,49 @@ void get_key_from_args(const char *arg, uint8_t *key) {
     bytes_read = bin_len;
     while (bytes_read < KEY_BYTES) {
       sodium_hex2bin(&key[bytes_read], KEY_BYTES - bytes_read,
-        arg, strlen(arg), ": ", &bin_len, NULL);
+        str, strlen(str), ": ", &bin_len, NULL);
       bytes_read += bin_len;
     }
 }
 
+char *read_line(char *buf, size_t len)
+  /* Read at most len characters from stdin and writes them to buf.  If the
+   * input line contains more characters, discard the rest.
+   *
+   * Returns a null pointer on error.
+   *
+   * Taken from http://home.datacomm.ch/t_wolf/tw/c/getting_input.html
+   */
+{
+  char *p;
+
+  if ((p = fgets(buf, len, stdin)) != NULL) {
+    size_t last = strlen (buf) - 1;
+
+    if (buf[last] == '\n') {
+      /**** Discard the trailing newline */
+      buf[last] = '\0';
+    } else {
+      /**** There's no newline in the buffer, therefore there must be
+            more characters on that line: discard them!
+       */
+      fscanf (stdin, "%*[^\n]");
+      /**** And also discard the newline... */
+      (void) fgetc (stdin);
+    } /* end if */
+  } else {
+    /* p == NULL, which means 0 bytes read before EOF or read error */
+  }
+  return p;
+}
+
+/* must be at least 2*32+31+1=96 (2*32 hex + upto 31 ':' + '\n') but longer is
+ * better so get_key_from_str() can nicely inform about a too long key.
+ *
+ * Using 97 would work in most cases, but there might be sequences like ":::"
+ * in the key, which don't add any more bytes to the binary key.
+ */
+#define HEX_KEY_MAXLEN (128)
 void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
   switch (arguments->key_source) {
     case RANDOM:
@@ -158,12 +207,24 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
       get_key_from_file(arguments->key_file, key);
       break;
     case CMD:
-      get_key_from_args(arguments->key, key);
+      get_key_from_str(arguments->key, key);
       break;
     case ASK:
-      fprintf(stderr, "asking for key\n");
-      // TODO: ask for key
-      exit(EXIT_FAILURE);
+      fprintf (stderr, "Enter key: ");
+      fflush (stderr);
+      char *hex_key = sodium_malloc(HEX_KEY_MAXLEN);
+      if (hex_key == NULL) {
+        fprintf(stderr, "Memory for prompted key couldn't be allocated.\n");
+        exit(EXIT_FAILURE);
+      }
+      if (read_line(hex_key, HEX_KEY_MAXLEN) == NULL) {
+        sodium_free(hex_key);
+        fprintf(stderr, "Error while reading key from stdin.\n");
+        exit(EXIT_FAILURE);
+      }
+      get_key_from_str(hex_key, key);
+      sodium_free(hex_key);
+      break;
   }
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
@@ -182,6 +243,24 @@ void key_mlock(void) {
    * NOTE: This is important because the unlocking also zeroes the memory out
    * before actually unlocking it. */
   atexit(key_munlock);
+}
+
+FILE* open_input(struct arguments *arguments) {
+  if (arguments->input_source == INPUT_FILE) {
+    FILE *input = fopen(arguments->input_file, "r");
+    if (input == NULL) {
+      perror("Couldn't open input file");
+      exit(EXIT_FAILURE);
+    }
+    return input;
+  } else {
+    return stdin;
+  }
+}
+
+void close_input(FILE *input) {
+  if (input == stdin) return;
+  fclose(input);
 }
 
 void hexDump (const char *desc, const void *addr, size_t len) {

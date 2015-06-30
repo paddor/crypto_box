@@ -45,6 +45,7 @@ void write_plaintext(FILE *output) {
 
 int main(int argc, char *argv[]) {
   struct arguments arguments;
+  arguments.input_source = STDIN;
   arguments.ct_format = BIN;
   arguments.key_source = CMD;
   argp_parse(&argp, argc, argv, 0, 0, &arguments);
@@ -63,7 +64,9 @@ int main(int argc, char *argv[]) {
 
   init_ct(&ct);
 
-  read_ciphertext(stdin);
+  FILE *input = open_input(&arguments);
+  read_ciphertext(input);
+  close_input(input);
   verify_then_decrypt();
   write_plaintext(stdout);
   free_ct(&ct);

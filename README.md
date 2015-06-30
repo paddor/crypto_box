@@ -104,13 +104,25 @@ $ ls -l sealed.box
 -rw-r--r--+ 1 user  staff  47 Jun 18 12:24 insecurely_sealed.box
 ```
 
-#### Prompting for the key (WIP)
+#### Prompting for the key
 
-Use option `-a` to be asked for a key.
+Use option `-a`/`--ask` to be prompted for a key. In this case, you have to
+specify the input file with `-f`/`--file`, as STDIN is already used to get the
+key.  This can be useful if you're worried about your command being logged in
+your shell's history.
 
 ```
-$ echo foobar | seal_box -a > sealed.box
-Please enter key: 
+$ echo foobar > secret.txt
+$ seal_box --ask --file secret.txt > secret.box
+Enter key: 
+```
+
+Don't forget to delete your plaintext file after encrypting it! ;-) Or avoid
+creating a file altogether with some shell magic:
+
+```
+$ seal_box -af <(echo foobar) > secret.box
+Enter key: 
 ```
 
 ### Decryption: `open_box`

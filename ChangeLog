@@ -1,3 +1,18 @@
+Sun Jun 30 2015  Patrik Wenger  <paddor@gmail.com>
+
+	* crypto_box.h (struct arguments) <input_source, input_file>: Added.
+	* crypto_box.c (options[]): Option -f/--file added.
+	* crypto_box.c (parse_options) <case 'f', ARGP_KEY_SUCCESS>: Added.
+	* crypto_box.c (get_key_from_args): Renamed to get_key_from_str().
+	Parameter arg renamed to str.
+	* crypto_box.c (read_line): Defined.
+	* crypto_box.c (HEX_KEY_MAXLEN): Macro defined.
+	* crypto_box.h (open_input, close_input): Declared.
+	* crypto_box.c (open_input, close_input): Defined.
+	* seal_box.c open_box.c (main):
+	  - Initialize arguments.input_source.
+	  - Use open_input() and close_input().
+
 Sun Jun 29 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (ct_t): Remove typedef. Now it's struct ciphertext. *_t
