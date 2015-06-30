@@ -178,8 +178,26 @@ about changing the internals to work in chunks, to improve usage in a pipeline.
 ## TODO
 
 * streaming
-  - authenticated header frame containing the whole plaintext length
-  - encrypt and mac in chunks of 4KB/32KB/1MB
+  * encryption:
+    - initialize MAC state for whole ciphertext ("ct_mac")
+    - process plaintext in fixed size chunks of 4KB/32KB/1MB
+      - new nonce for each chunk
+      - encrypt plaintext => chunk_mac, ciphertext
+      - output nonce, chunk_mac, ciphertext
+      - update ct_mac with chunk_mac
+    - final output is ct_mac
+  * decryption:
+    - initialize MAC state for whole ciphertext ("ct_mac")
+    - process ciphertext in chunks of same size
+      - getchar()+ungetc() to ensure we're not right before EOF
+      - if right before EOF, or chunk is smaller than usual size, take last 16 bytes as ct_mac
+      - read prepended nonce
+      - decrypt (implicit MAC verification for chunk)
+      - output plaintext
+      - update ct_mac with chunk_mac
+    - final ct_mac should be the same as computed MAC over each chunk_mac
+length, nonce, and MAC
+  - also MAC the whole plaintext and add final MAC
 * switch to CMake
 * K&R style function definitions
 * better names: "seal" might be misleading. There's no asymmetric encryption involved.
