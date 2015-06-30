@@ -38,9 +38,10 @@ below).
 
 #### Key file
 
-Use the option `-k` to specify a key file. **Note**: If the key file doesn't
-exist yet, a randomly generated key will be used and stored into that file.
-Only use this if your key file will be located on an encrypted disk.
+Use the option `-k`/`--key-file` to specify a key file. **Note**: If the key
+file doesn't exist yet, a randomly generated key will be used and stored into
+that file.  Only use this if your key file will be located on an encrypted
+disk.
 
 ```
 $ ls -l secret.key
