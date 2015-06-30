@@ -5,12 +5,12 @@ power.
 
 ## Usage
 
-This gives you two (filter) utilities: `seal_box` and `open_box`. These have
+This gives you two (filter) utilities: `lock_box` and `open_box`. These have
 been developed with the Unix philosophy _Do one thing and do it well_ in mind.
-They are very simple to use, but that doesn't mean you can't do anything
-wrong. As always, it's your responsibility to keep a secret key secret.
+They are very simple to use, but that doesn't mean you can't do anything wrong.
+As always, it's your responsibility to keep a secret key secret.
 
-### Encryption: `seal_box`
+### Encryption: `lock_box`
 
 Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to
 STDOUT. Below are the different ways of specifying a key.
@@ -22,10 +22,10 @@ will not be automatically stored anywhere. This is only safe to use locally or
 over secure connections like SSH (and nobody looking over your shoulders).
 
 ```
-$ echo foobar | seal_box > sealed.box
+$ echo foobar | lock_box > locked.box
 4a5c4119c24b0db47bb4b4d8383c716ea390f04553f8877d0c94099e1ac12eb6
-$ ls -l sealed.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:20 sealed.box
+$ ls -l locked.box
+-rw-r--r--+ 1 user  staff  47 Jun 18 12:20 locked.box
 ```
 The output file in this case is 7+16+24=47 bytes long, for ciphertext, MAC and
 nonce, respectively.
@@ -46,9 +46,9 @@ disk.
 ```
 $ ls -l secret.key
 ls: secret.key: No such file or directory
-$ echo foobar | seal_box -k secret.key > sealed.box
-$ ls -l sealed.box secret.key
--rw-r--r--+ 1 user  staff  47 Jun 18 19:31 sealed.box
+$ echo foobar | lock_box -k secret.key > locked.box
+$ ls -l locked.box secret.key
+-rw-r--r--+ 1 user  staff  47 Jun 18 19:31 locked.box
 -r--------+ 1 user  staff  47 Jun 18 19:31 secret.key
 ```
 
@@ -59,7 +59,7 @@ used**.
 ```
 $ ls -l *secret.key
 -rw-r--r--+ 1 user  staff  47 Jun 18 19:29 not_so_secret.key
-$ echo foobar | seal_box -k not_so_secret.key > sealed.box
+$ echo foobar | lock_box -k not_so_secret.key > locked.box
 Key file is readable by other users! Please specify a secret key file instead.
 ```
 
@@ -71,7 +71,7 @@ encryption, ...).
 #### Key as command line argument
 
 You can specify a key on the command line, using hex ASCII characters (`0-9a-f`).
-This can be useful if you let `seal_box` generate a random key earlier without
+This can be useful if you let `lock_box` generate a random key earlier without
 storing it to a key file or you've kept it as a piece of information outside
 your computer.
 
@@ -80,18 +80,18 @@ If you do this, **make sure your command won't get logged**! Enable the option
 
 ```
 # notice the additional space before the whole command, so it won't get logged
-$  echo foobar | seal_box abba0ff887ca6064622b30a47a2aa9980faa1f544b24a9991b14e948d7331728 > sealed.box
-$ ls -l sealed.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:22 sealed.box
+$  echo foobar | lock_box abba0ff887ca6064622b30a47a2aa9980faa1f544b24a9991b14e948d7331728 > locked.box
+$ ls -l locked.box
+-rw-r--r--+ 1 user  staff  47 Jun 18 12:22 locked.box
 ```
 
 Colons (`:`) in the key are ignored. So the following example is equivalent to
 the one above:
 
 ```
-$  echo foobar | seal_box ab:ba:0f:f8:87:ca:60:64:62:2b:30:a4:7a:2a:a9:98:0f:aa:1f:54:4b:24:a9:99:1b:14:e9:48:d7:33:17:28 > sealed.box
-$ ls -l sealed.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:22 sealed.box
+$  echo foobar | lock_box ab:ba:0f:f8:87:ca:60:64:62:2b:30:a4:7a:2a:a9:98:0f:aa:1f:54:4b:24:a9:99:1b:14:e9:48:d7:33:17:28 > locked.box
+$ ls -l locked.box
+-rw-r--r--+ 1 user  staff  47 Jun 18 12:22 locked.box
 ```
 A key shorter than 32 byte (which would be at least 64 ASCII hex characters)
 will be repeated to make up a complete 32 byte key. This is **not
@@ -99,10 +99,10 @@ recommended**, as it greatly decreases the information content of the key,
 which makes it easier to guess.
 
 ```
-$  echo foobar | seal_box 6ea390f04553 > insecurely_sealed.box
+$  echo foobar | lock_box 6ea390f04553 > insecurely_locked.box
 WARNING: reuising key material to make up a key of sufficient length
-$ ls -l sealed.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:24 insecurely_sealed.box
+$ ls -l locked.box
+-rw-r--r--+ 1 user  staff  47 Jun 18 12:24 insecurely_locked.box
 ```
 
 #### Prompting for the key
@@ -114,7 +114,7 @@ your shell's history.
 
 ```
 $ echo foobar > secret.txt
-$ seal_box --ask --file secret.txt > secret.box
+$ lock_box --ask --file secret.txt > secret.box
 Enter key: 
 ```
 
@@ -122,17 +122,17 @@ Don't forget to delete your plaintext file after encrypting it! ;-) Or avoid
 creating a file altogether with some shell magic:
 
 ```
-$ seal_box -af <(echo foobar) > secret.box
+$ lock_box -af <(echo foobar) > secret.box
 Enter key: 
 ```
 
 ### Decryption: `open_box`
 
 Reads ciphertext (including MAC and nonce) from STDIN. Writes plaintext to STDOUT. The
-key can be given in the same ways as for `seal_box`. For example from a key file:
+key can be given in the same ways as for `lock_box`. For example from a key file:
 
 ```
-$ open_box -k secret.key < sealed.box
+$ open_box -k secret.key < locked.box
 foobar
 ```
 
@@ -140,14 +140,14 @@ In case the box has been tampered with, verification of the MAC will and the
 program will exit with a message on STDERR. Example:
 
 ```
-$ echo foobar | seal_box -k secret.key > sealed.box
-$ ls -l sealed.box secret.key
--rw-r--r--+ 1 user  staff  47 Jun 18 12:27 sealed.box
+$ echo foobar | lock_box -k secret.key > locked.box
+$ ls -l locked.box secret.key
+-rw-r--r--+ 1 user  staff  47 Jun 18 12:27 locked.box
 -r--------+ 1 user  staff  47 Jun 18 12:27 secret.key
-$ echo "baz" >> sealed.box
-$ ls -l sealed.box
--rw-r--r--+ 1 user  staff  51 Jun 18 12:27 sealed.box
-$ open_box -k secret.key < sealed.box
+$ echo "baz" >> locked.box
+$ ls -l locked.box
+-rw-r--r--+ 1 user  staff  51 Jun 18 12:27 locked.box
+$ open_box -k secret.key < locked.box
 Ciphertext couldn't be verified. It has been tampered with or you're using the wrong key.
 ```
 
@@ -200,11 +200,6 @@ length, nonce, and MAC
   - also MAC the whole plaintext and add final MAC
 * switch to CMake
 * K&R style function definitions
-* better names: "seal" might be misleading. There's no asymmetric encryption involved.
-  - lockbox unlockbox
-  - lock_box unlock_box <= my favorite
-  - close_box open_box
-  - lockf unlockf
 * explicit creation of key file to avoid an attacker to create a key file
   - -K/--new-key-file
 * hex ciphertext (-H)
