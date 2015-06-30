@@ -172,3 +172,6 @@ The current implementation never creates any (temporary) files, no matter how
 big the input is. (This might change in the future, but only encrypted data
 would ever be stored on the disk by the programs themselves.)
 
+## License
+
+ISC. See LICENSE file.
