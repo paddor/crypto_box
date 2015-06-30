@@ -1,5 +1,7 @@
 News for next version
 =====================
+* The option -a/--ask is now implemented. Option -f/--file has been added,
+  because -a/--ask doesn't make sense otherwise.
 * Now the programs warn and abort if a key given on the command line contains
   invalid characters (like "abcx") or has an incorrect format (like "abc").
 
