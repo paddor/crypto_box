@@ -2,12 +2,30 @@
 
 void lock_box(FILE *input, FILE *output) {
   size_t nread;
+  unsigned char *subkey;
   unsigned char mac_mac[crypto_onetimeauth_BYTES];
   crypto_onetimeauth_state mac_mac_state;
-  crypto_onetimeauth_init(&mac_mac_state, key);
+
+  /* initialize state for MAC of MACs */
+  subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
+  if (subkey == NULL) {
+    fprintf(stderr, "Memory for authentication subkey couldn't be "
+        "allocated.\n");
+    exit(EXIT_FAILURE);
+  }
+  randombytes_buf(nonce, sizeof nonce);
+  crypto_stream(subkey, sizeof subkey, nonce, key);
+  crypto_onetimeauth_init(&mac_mac_state, subkey);
 
   if (isatty(fileno(output)))
     fprintf(stderr, "WARNING: Writing ciphertext to terminal.\n");
+
+  /* print nonce for subkey */
+  if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
+
+    perror("Couldn't write ciphertext");
+    exit(EXIT_FAILURE);
+  }
 
   init_ct(&ct);
   while(!feof(input)) {

@@ -174,12 +174,34 @@ Encryption and decryption are done in chunks. This means that only a small
 amount of memory is used, no matter how big the input is. Each chunk is
 encrypted using a new nonce and authenticated with a MAC. That means that,
 during encryption, 16+24=40 additional bytes will be added for each chunk
-(instead of once for the whole file like in versions before 0.4.0). To avoid
-whole missing chunks going undetected, an additional, trailing MAC is appended,
-which authenticates all previous MACs.  The chunk size is 64KB (or less for the
-last chunk, depending on input size). According to benchmarks on a
-significantly large file and comparing the size of the result file, this seems
-like a reasonable chunk size.
+(instead of once for the whole file like in versions before 0.4.0).
+
+The chunk size is 64KB (or less for the last chunk, depending on input size).
+According to benchmarks using a file of ~155MB, this chunk size is big enough
+to make both speed and size overheads negligible.
+
+To avoid missing/reordered/replayed chunks going undetected, an additional,
+trailing MAC is appended, which authenticates all previous MACs. The nonce to
+derive the subkey for the MAC of MACs, an additional nonce of 24 bytes is
+prepended at the very beginning of the ciphertext, so `open_box` can start
+calculating the MAC of MACs right away during decryption.
+
+All in all, this is how the output of `lock_box` including all MACs and nonces
+will look like:
+
+```
++----------------------+---------------------------------+----------------+
+|   nonce (24 bytes)   |    variable number of chunks    | MAC (16 bytes) |
++----------------------+---------------------------------+----------------+
+```
+
+Whereas each chunk looks like this:
+
+```
++----------------------+----------------+-------------------------------+
+|   nonce (24 bytes)   | MAC (16 bytes) |    ciphertext (up to 64KB)    |
++----------------------+----------------+-------------------------------+
+```
 
 
 ## TODO

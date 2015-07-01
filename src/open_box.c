@@ -2,10 +2,27 @@
 
 void open_box(FILE *input, FILE *output) {
   size_t nread;
+  unsigned char *subkey;
   unsigned char mac_mac[crypto_onetimeauth_BYTES];
   unsigned char *input_mac_mac;
   crypto_onetimeauth_state mac_mac_state;
   crypto_onetimeauth_init(&mac_mac_state, key);
+
+  /* read nonce for authentication subkey */
+  if (fread(&nonce, sizeof nonce, 1, input) < 1) {
+    fprintf(stderr, "Couldn't read ciphertext.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  /* initialize state for MAC of MACs */
+  subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
+  if (subkey == NULL) {
+    fprintf(stderr, "Memory for authentication subkey couldn't be "
+        "allocated.\n");
+    exit(EXIT_FAILURE);
+  }
+  crypto_stream(subkey, sizeof subkey, nonce, key);
+  crypto_onetimeauth_init(&mac_mac_state, subkey);
 
   init_ct(&ct);
   while(!feof(input)) {
