@@ -113,8 +113,7 @@ void get_key_from_file(const char *key_file, uint8_t *key) {
 
     // check file permissions
     if ((s.st_mode & 077) > 0) {
-      fprintf(stderr, "Key file is readable by other users! Please specify "
-          "a secret key file instead.\n");
+      fprintf(stderr, "Please specify a *secret* key file.\n");
       exit(EXIT_FAILURE);
     }
 

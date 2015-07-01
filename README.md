@@ -5,10 +5,10 @@ power.
 
 ## Usage
 
-This gives you two (filter) utilities: `lock_box` and `open_box`. These have
-been developed with the Unix philosophy _Do one thing and do it well_ in mind.
-They are very simple to use, but that doesn't mean you can't do anything wrong.
-As always, it's your responsibility to keep a secret key secret.
+Crypto Box gives you two (filter) utilities: `lock_box` and `open_box`. These
+have been developed with the Unix philosophy _Do one thing and do it well_ in
+mind.  They are very simple to use, but that doesn't mean you can't do anything
+wrong.  As always, it's your responsibility to keep a secret key secret.
 
 ### Encryption: `lock_box`
 
@@ -54,15 +54,15 @@ $ ls -l locked.box secret.key
 -r--------+ 1 user  staff  47 Jun 18 19:31 secret.key
 ```
 
-If the key file already exists, its first 32 bytes are used as the key. Note
-that a key file that is readable by anyone else but the owner will **not be
-used**.
+If the key file already exists, its first 32 bytes are used as the key.
+**Note**: Crypto Box will refuse to use a key file that permits access to
+anyone else but the owner.
 
 ```
 $ ls -l *secret.key
 -rw-r--r--+ 1 user  staff  47 Jun 18 19:29 not_so_secret.key
 $ echo foobar | lock_box -k not_so_secret.key > locked.box
-Key file is readable by other users! Please specify a secret key file instead.
+Please specify a *secret* key file.
 ```
 
 Keep in mind that, on a shared system, the administrator (`root`) can still
