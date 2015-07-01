@@ -35,8 +35,8 @@ ciphertext, trailing MAC, respectively.
 The long hex string is the randomly generated key. Store it somewhere safe and
 **keep it secret**.
 
-To decrypt a box later, specify the key directly on the command line (see
-below).
+To decrypt a box later, specify the key directly on the command line or use
+`-a`/`--ask` (see below).
 
 #### Key file
 
@@ -87,14 +87,8 @@ $ ls -l locked.box
 -rw-r--r--+ 1 user  staff  47 Jun 18 12:22 locked.box
 ```
 
-Colons (`:`) in the key are ignored. So the following example is equivalent to
-the one above:
+Colons (`:`) in the key are ignored, so you can also specify the key like this: `ab:ba:0f:f8:87:ca:60:64:62:2b:30:a4:7a:2a:a9:98:0f:aa:1f:54:4b:24:a9:99:1b:14:e9:48:d7:33:17:28`.
 
-```
-$  echo foobar | lock_box ab:ba:0f:f8:87:ca:60:64:62:2b:30:a4:7a:2a:a9:98:0f:aa:1f:54:4b:24:a9:99:1b:14:e9:48:d7:33:17:28 > locked.box
-$ ls -l locked.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:22 locked.box
-```
 A key shorter than 32 byte (which would be at least 64 ASCII hex characters)
 will be repeated to make up a complete 32 byte key. This is **not
 recommended**, as it greatly decreases the information content of the key,
@@ -109,7 +103,7 @@ $ ls -l locked.box
 
 #### Prompting for the key
 
-Use option `-a`/`--ask` to be prompted for a key. In this case, you have to
+Use the option `-a`/`--ask` to be prompted for a key. In this case, you have to
 specify the input file with `-f`/`--file`, as STDIN is already used to get the
 key.  This can be useful if you're worried about your command being logged in
 your shell's history.
@@ -156,6 +150,7 @@ Ciphertext couldn't be verified. It has been tampered with or you're using the w
 
 ## Internals
 
+### Primitives
 As mentioned above, libsodium is used to do
 encryption/decryption/authentication. The cryptographic primitives used are
 XSalsa20 and Poly1305.
@@ -168,8 +163,11 @@ Poly1305 will ensure the integrity of your data. Never use encryption without
 authentication to verify the integrity of the encrypted data. If you don't care
 if someone tampers with your data, you might as well just send plaintext.
 
-The memory used for the secret key is locked before the key is stored in it
-and zeroed out and unlocked before the programs exit.
+### Memory locking
+The memory used for the secret key is locked before the key is stored in it and
+zeroed out and unlocked before the programs exit. This applies to the randomly
+generated key and the one given on STDIN (with `-a`/`--ask`). It doesn't apply
+to the one given on the command line (see TODO).
 
 ### Chunking
 Encryption and decryption are done in chunks. This means that only a small
@@ -186,6 +184,12 @@ like a reasonable chunk size.
 
 ## TODO
 
+* lock and zero out key in arguments (possible?)
+* open_box: change default to stay silent until the everything has been authenticated
+  - advantage: if file has been tampered with, no unauthenticated data will be
+    output (and potentially processed by the next filter in the pipeline) at
+    all
+  - add --streaming to disable this behavior
 * test suite
 * switch to CMake
 * K&R style function definitions
