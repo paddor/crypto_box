@@ -130,15 +130,16 @@ Enter key:
 
 ### Decryption: `open_box`
 
-Reads ciphertext (including MAC and nonce) from STDIN. Writes plaintext to STDOUT. The
-key can be given in the same ways as for `lock_box`. For example from a key file:
+Reads ciphertext from STDIN and writes plaintext to STDOUT. The
+key can be given in the same ways as for `lock_box`. Here's an example using a
+key file:
 
 ```
 $ open_box -k secret.key < locked.box
 foobar
 ```
 
-In case the box has been tampered with, verification of the MAC will and the
+In case the box has been tampered with, MAC verification will fail and the
 program will exit with a message on STDERR. Example:
 
 ```
