@@ -206,12 +206,12 @@ Whereas each chunk looks like this:
 
 ## TODO
 
+* fail early if ciphertext has been tampered with
+  - MAC authenticates previous MAC
+  - first and last chunks are marked as such
+  - this also gets rid of the additional nonce and MAC pair around the whole
+    ciphertext
 * lock and zero out key in arguments (possible?)
-* open_box: change default to stay silent until the everything has been authenticated
-  - advantage: if file has been tampered with, no unauthenticated data will be
-    output (and potentially processed by the next filter in the pipeline) at
-    all
-  - add --streaming to disable this behavior
 * test suite
 * switch to CMake
 * K&R style function definitions
