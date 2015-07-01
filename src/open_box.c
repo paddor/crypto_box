@@ -1,44 +1,90 @@
 #include "crypto_box.h"
 
-void read_ciphertext(FILE *input) {
+void open_box(FILE *input, FILE *output) {
   size_t nread;
+  unsigned char mac_mac[crypto_onetimeauth_BYTES];
+  unsigned char *input_mac_mac;
+  crypto_onetimeauth_state mac_mac_state;
+  crypto_onetimeauth_init(&mac_mac_state, key);
 
-  // read nonce
-  while(!fread(&nonce, sizeof nonce, 1, input))
-    ;
-  DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
+  init_ct(&ct);
+  while(!feof(input)) {
+    /* recycle ct */
+    ct.used = 0;
 
-  while(1) {
+    /* read nonce */
+    if (fread(&nonce, sizeof nonce, 1, input) < 1) {
+      fprintf(stderr, "Couldn't read ciphertext.\n");
+      exit(EXIT_FAILURE);
+    }
 
-    grow_ct(&ct, READ_BYTES);
-
-    nread = fread(&ct.data[ct.used], sizeof *ct.data, READ_BYTES, input);
+    /* read complete chunk, if possible */
+    grow_ct(&ct, MAC_BYTES+CHUNK_BYTES);
+    nread = fread(&ct.data[ct.used], sizeof *ct.data, MAC_BYTES+CHUNK_BYTES, input);
     ct.used += nread;
+    DEBUG_ONLY(hexDump("read ciphertext chunk", ct.data, ct.used));
 
-    if (READ_BYTES == nread) continue;
-    if (feof(input)) break;
-    if (ferror(input)) {
-      perror("Couldn't read ciphertext");
+    if (nread < (MAC_BYTES+CHUNK_BYTES)) {
+      if (ferror(input)) {
+        fprintf(stderr, "Couldn't read ciphertext.\n");
+        exit(EXIT_FAILURE);
+      }
+
+      /* This is the very last chunk. The last bytes are MAC of MACs.
+       */
+      ct.used -= MAC_BYTES;
+      input_mac_mac = &ct.data[ct.used];
+    } else {
+      /* Looks like a complete chunk, but we might be right before EOF, so
+       * check for that */
+      int c;
+      if ((c = getc(input)) == EOF) {
+        if (feof(input)) {
+          /* We're right before EOF, how unfortunate!
+           * What looked like a complete chunk is actually the last (short)
+           * chunk with the MAC of MACs appended.
+           */
+          ct.used -= MAC_BYTES;
+          input_mac_mac = &ct.data[ct.used];
+        }
+      } else {
+        /* So this actually is a complete chunk. No trailing MAC. Let's put the
+         * character back. */
+        if (ungetc(c, input) == EOF) {
+          fprintf(stderr, "Couldn't put character back to ciphertext.\n");
+          exit(EXIT_FAILURE);
+        }
+      }
+    }
+
+    /* update mac_mac_state */
+    crypto_onetimeauth_update(&mac_mac_state, ct.data,
+        crypto_onetimeauth_BYTES);
+
+    /* decrypt */
+    if(-1 == crypto_secretbox_open_easy(CT_AFTER_MAC(ct.data), ct.data,
+          ct.used, nonce, key)) {
+      fprintf(stderr, "Ciphertext couldn't be verified. It has been "
+        "tampered with or you're using the wrong key.\n");
+      exit(EXIT_FAILURE);
+    }
+    DEBUG_ONLY(hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
+
+    /* print plaintext */
+    if (fwrite(CT_AFTER_MAC(ct.data), PT_LEN(ct.used), 1, output) < 1) {
+      perror("Couldn't write plaintext");
       exit(EXIT_FAILURE);
     }
   }
-  DEBUG_ONLY(hexDump("ciphertext", ct.data, ct.used));
-}
+  free_ct(&ct);
 
-// verify MAC and in-place decryption
-void verify_then_decrypt(void) {
-  if(-1 == crypto_secretbox_open_easy(CT_AFTER_MAC(ct.data), ct.data, ct.used, nonce, key)) {
-    fprintf(stderr, "Ciphertext couldn't be verified. It has been "
-      "tampered with or you're using the wrong key.\n");
-    exit(EXIT_FAILURE);
-  }
-  DEBUG_ONLY(hexDump("plain text", CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
-}
-
-void write_plaintext(FILE *output) {
-  fwrite(CT_AFTER_MAC(ct.data), sizeof *ct.data, PT_LEN(ct.used), output);
-  if (ferror(output)) {
-    perror("Couldn't write plaintext");
+  /* verify mac_mac */
+  crypto_onetimeauth_final(&mac_mac_state, mac_mac);
+  DEBUG_ONLY(hexDump("calculated MAC of MACs", mac_mac,
+        crypto_onetimeauth_BYTES));
+  if (sodium_memcmp(mac_mac, input_mac_mac, crypto_onetimeauth_BYTES) != 0) {
+    fprintf(stderr, "Previous MACs couldn't be verified. Your locked box has "
+        "been tampered with!\n");
     exit(EXIT_FAILURE);
   }
 }
@@ -59,14 +105,9 @@ int main(int argc, char *argv[]) {
   key_mlock();
   get_key(&arguments, key);
 
-  init_ct(&ct);
-
   FILE *input = open_input(&arguments);
-  read_ciphertext(input);
+  open_box(input, stdout);
   close_input(input);
-  verify_then_decrypt();
-  write_plaintext(stdout);
-  free_ct(&ct);
 
   return EXIT_SUCCESS;
 }

@@ -12,8 +12,10 @@ As always, it's your responsibility to keep a secret key secret.
 
 ### Encryption: `lock_box`
 
-Reads plaintext from STDIN and writes ciphertext (including MAC and nonce) to
-STDOUT. Below are the different ways of specifying a key.
+Reads plaintext from STDIN and writes ciphertext to STDOUT. Below are the
+different ways of specifying a key. The ciphertext will be sightly larger than
+the plaintext since it'll contain a nonce (24 bytes) and MAC (16 bytes) for
+each chunk and one more trailing MAC (16 bytes). See Internals.
 
 #### Random key (no key file)
 
@@ -27,8 +29,8 @@ $ echo foobar | lock_box > locked.box
 $ ls -l locked.box
 -rw-r--r--+ 1 user  staff  47 Jun 18 12:20 locked.box
 ```
-The output file in this case is 7+16+24=47 bytes long, for ciphertext, MAC and
-nonce, respectively.
+The output file in this case is 24+16+7+16=63 bytes long, for nonce, chunk MAC,
+ciphertext, trailing MAC, respectively.
 
 The long hex string is the randomly generated key. Store it somewhere safe and
 **keep it secret**.
@@ -168,36 +170,21 @@ if someone tampers with your data, you might as well just send plaintext.
 The memory used for the secret key is locked before the key is stored in it
 and zeroed out and unlocked before the programs exit.
 
-The current implementation reads all input at once and never creates any
-(temporary) files, no matter how big the input is. This means it could
-potentially use a lot of memory, depending on the input size. I'm thinking
-about changing the internals to work in chunks, to improve usage in a pipeline.
-(see TODO section)
+### Chunking
+Encryption and decryption are done in chunks. This means that only a small
+amount of memory is used, no matter how big the input is. Each chunk is
+encrypted using a new nonce and authenticated with a MAC. That means that,
+during encryption, 16+24=40 additional bytes will be added for each chunk
+(instead of once for the whole file like in versions before 0.4.0). To avoid
+whole missing chunks going undetected, an additional, trailing MAC is appended,
+which authenticates all previous MACs.  The chunk size is 64KB (or less for the
+last chunk, depending on input size). According to benchmarks on a
+significantly large file and comparing the size of the result file, this seems
+like a reasonable chunk size.
 
 
 ## TODO
 
-* streaming
-  * encryption:
-    - initialize MAC state for whole ciphertext ("ct_mac")
-    - process plaintext in fixed size chunks of 4KB/32KB/1MB
-      - new nonce for each chunk
-      - encrypt plaintext => chunk_mac, ciphertext
-      - output nonce, chunk_mac, ciphertext
-      - update ct_mac with chunk_mac
-    - final output is ct_mac
-  * decryption:
-    - initialize MAC state for whole ciphertext ("ct_mac")
-    - process ciphertext in chunks of same size
-      - getchar()+ungetc() to ensure we're not right before EOF
-      - if right before EOF, or chunk is smaller than usual size, take last 16 bytes as ct_mac
-      - read prepended nonce
-      - decrypt (implicit MAC verification for chunk)
-      - output plaintext
-      - update ct_mac with chunk_mac
-    - final ct_mac should be the same as computed MAC over each chunk_mac
-length, nonce, and MAC
-  - also MAC the whole plaintext and add final MAC
 * test suite
 * switch to CMake
 * K&R style function definitions

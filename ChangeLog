@@ -27,6 +27,16 @@ Sun Jun 30 2015  Patrik Wenger  <paddor@gmail.com>
 	[key_source==CMD && key==NULL]: Inform about missing key argument and
 	exit.
 
+	* crypto_box.h (READ_BYTES): Macro removed.
+	* crypto_box.h (CHUNK_BYTES): Macro defined.
+	* lock_box.c (read_plaintext, encrypt_then_mac, write_ciphertext)
+	(get_nonce): Removed.
+	* open_box.c (read_ciphertext, verify_then_decrypt, write_plaintext):
+	Removed.
+	* lock_box.c (lock_box): Defined.
+	* open_box.c (open_box): Defined.
+	* lock_box.c open_box.c (main): Changed.
+
 Sun Jun 29 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (ct_t): Remove typedef. Now it's struct ciphertext. *_t

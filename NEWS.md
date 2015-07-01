@@ -1,3 +1,8 @@
+News for crypto_box 0.4.0
+=========================
+* Now the programs encrypt and decrypt in chunks. Encrypting a 100GB file is
+  now possible with just a few KB of RAM! See README for details.
+
 News for crypto_box 0.3.0
 =========================
 * Fixed segfault when open_box is used without specifying a key.

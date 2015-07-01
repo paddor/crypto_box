@@ -18,13 +18,13 @@
   #define DEBUG_ONLY(x)
 #endif
 
-#define INITIAL_CT_SIZE 512
 #define KEY_BYTES crypto_secretbox_KEYBYTES
 #define MAC_BYTES crypto_secretbox_MACBYTES
 #define NONCE_BYTES crypto_secretbox_NONCEBYTES
+#define INITIAL_CT_SIZE (512 + MAC_BYTES)
 #define CT_AFTER_MAC(x) (x+MAC_BYTES)
 #define PT_LEN(x) (x-MAC_BYTES)
-#define READ_BYTES 128
+#define CHUNK_BYTES 65536
 
 struct ciphertext {
   uint8_t *data;
