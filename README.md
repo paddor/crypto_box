@@ -192,7 +192,7 @@ The chunk size is 256 KiB (or less for the last chunk, depending on input
 size).  This makes the speed and size overheads negligible and still allows a
 tiny memory foot print.
 
-Schematically, the `lock_box`' output will look like this:
+Schematically, output from `lock_box` will look like this:
 ```
 +-----------------------+----------------------------------------------------+
 |    nonce (24 bytes)   |                  one or more chunks                |
