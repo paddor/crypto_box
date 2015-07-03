@@ -13,6 +13,7 @@ AC_PROG_CC
 # Checks for libraries.
 AC_CHECK_LIB([argp], [argp_parse])
 AC_CHECK_LIB([sodium], [sodium_init])
+PKG_CHECK_MODULES([CHECK], [check])
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h stdint.h stdlib.h string.h unistd.h])
@@ -28,5 +29,6 @@ AC_FUNC_REALLOC
 AC_CHECK_FUNCS([atexit])
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile])
+                 src/Makefile
+		 test/Makefile])
 AC_OUTPUT
