@@ -5,4 +5,6 @@ add_executable(open_box src/open_box.c src/crypto_box.c)
 target_link_libraries(lock_box PRIVATE sodium argp)
 target_link_libraries(open_box PRIVATE sodium argp)
 add_library(check SHARED IMPORTED)
+
+file(STRINGS VERSION package_version)
 configure_file(config.h.in config.h)
