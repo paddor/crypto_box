@@ -1,9 +1,12 @@
 language: c
 before_install:
+  - pwd
+  - scripts/install-libsodium.sh
   - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ trusty main universe"
   - sudo apt-get update -qq
-  - sudo apt-get install cmake libsodium-dev check
+  - sudo apt-get install cmake check
+before_script:
   - mkdir -p build/test && cd build/test
   - cmake ../..
-  - make all
-  - make test
+install: make all
+script: make test
