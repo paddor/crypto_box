@@ -1,32 +1,23 @@
 #include "crypto_box.h"
 
-void init_ct(struct ciphertext *ct) {
-  ct->data = malloc(INITIAL_CT_SIZE * sizeof *ct->data);
-  if (ct->data == NULL) {
-    fprintf(stderr, "ciphertext data couldn't be allocated\n");
+void init_chunk(struct chunk *chunk) {
+  /* we allocate CHUNK_CT_BYTES, which is the maximum of data needed, and
+   * slightly bigger than CHUNK_PT_BYTES
+   */
+  chunk->data = malloc(CHUNK_CT_BYTES * sizeof *chunk->data);
+  if (chunk->data == NULL) {
+    fprintf(stderr, "chunk data couldn't be allocated\n");
     exit(EXIT_FAILURE);
   }
-  ct->used = 0;
-  ct->size = INITIAL_CT_SIZE;
+  chunk->used = 0;
+  chunk->size = CHUNK_CT_BYTES;
 }
 
-void grow_ct(struct ciphertext *ct, size_t nbytes_coming) {
-    // grow if needed
-    while (ct->used + nbytes_coming > ct->size) {
-      ct->size *= 2;
-      ct->data = realloc(ct->data, ct->size * sizeof *ct->data);
-      if (ct->data == NULL) {
-        fprintf(stderr, "failed to grow ciphertext capacity to %zu bytes\n",
-            ct->size);
-        exit(EXIT_FAILURE);
-      }
-    }
-}
-
-void free_ct(struct ciphertext *ct) {
-  free(ct->data);
-  ct->data = NULL;
-  ct->used = ct->size = 0;
+void free_chunk(struct chunk *chunk) {
+  free(chunk->data);
+  chunk->data = NULL;
+  chunk->used = 0;
+  chunk->size = 0;
 }
 
 
@@ -312,4 +303,19 @@ void hexDump (const char *desc, const void *addr, size_t len) {
     // And print the final ASCII bit.
     fprintf (stderr, "  %s\n", buff);
 }
+
+/* TODO: Remove when libsodium 1.0.4 is out */
+void
+sodium_increment(unsigned char *n, const size_t nlen)
+{
+    size_t       i;
+    unsigned int c = 1U << 8;
+
+    for (i = (size_t) 0U; i < nlen; i++) {
+        c >>= 8;
+        c += n[i];
+        n[i] = (unsigned char) c;
+    }
+}
+
 // vim: et:ts=2:sw=2

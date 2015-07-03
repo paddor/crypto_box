@@ -172,45 +172,86 @@ to the one given on the command line (see TODO).
 ### Chunking
 Encryption and decryption are done in chunks. This means that only a small
 amount of memory is used, no matter how big the input is. Each chunk is
-encrypted using a new nonce and authenticated with a MAC. That means that,
-during encryption, 16+24=40 additional bytes will be added for each chunk
-(instead of once for the whole file like in versions before 0.4.0).
+encrypted using a new nonce and authenticated with a MAC. However, only the
+first nonce will be output. All further nonces can be calculated from the first
+(simply increments).
 
-The chunk size is 64KB (or less for the last chunk, depending on input size).
-According to benchmarks using a file of ~155MB, this chunk size is big enough
-to make both speed and size overheads negligible.
+Also, each chunk MAC will not only be computed over its ciphertext, but also
+over the previous chunk's MAC to avoid missing/reordered/replayed chunks going
+undetected. To know which chunks are the first and the last (to avoid
+truncation going undetected), each chunk gets an additional byte to identify
+its type. If there's only one chunk, it's marked as the last (so tail
+truncation of all but the fist chunks can be detected).
 
-To avoid missing/reordered/replayed chunks going undetected, an additional,
-trailing MAC is appended, which authenticates all previous MACs. The nonce to
-derive the subkey for the MAC of MACs, an additional nonce of 24 bytes is
-prepended at the very beginning of the ciphertext, so `open_box` can start
-calculating the MAC of MACs right away during decryption.
+That means that `lock_box` will output 24 additional bytes for the nonce plus
+16+1=17 additional bytes for each chunk. Versions before 0.4.0 would output a
+fixed number of 24+16=40 additional bytes for the whole input. According to
+libsodium's documentation, one single MAC isn't suited for huge files.
 
-All in all, this is how the output of `lock_box` including all MACs and nonces
-will look like:
+The chunk size is 256 KiB (or less for the last chunk, depending on input
+size).  This makes the speed and size overheads negligible and still allows a
+tiny memory foot print.
 
+Schematically, the `lock_box`' output will look like this:
 ```
-+----------------------+---------------------------------+----------------+
-|   nonce (24 bytes)   |    variable number of chunks    | MAC (16 bytes) |
-+----------------------+---------------------------------+----------------+
-```
-
-Whereas each chunk looks like this:
-
-```
-+----------------------+----------------+-------------------------------+
-|   nonce (24 bytes)   | MAC (16 bytes) |    ciphertext (up to 64KB)    |
-+----------------------+----------------+-------------------------------+
++-----------------------+----------------------------------------------------+
+|    nonce (24 bytes)   |                  one or more chunks                |
++-----------------------+----------------------------------------------------+
 ```
 
+Whereas each chunk will look like this:
+```
++-------------------+------------+-------------------------------------------+
+|  MAC (16 bytes)   | type (1 B) |     ciphertext (up to 256 KiB - 17 B)     |
++-------------------+------------+-------------------------------------------+
+```
+
+## Caveats
+
+### Truncated ciphertext input produces incomplete plaintext output
+Due to the lack of a real header which specifies the length of the whole
+ciphertext, it's possible that `open_box` will output data, even if it
+eventually finds out that the ciphertext has been truncated. However, it will
+**never ever** output any unauthenticated data. And, of course, when it
+eventually finds out the ciphertext has been truncated, it exits immediately
+with an error code.
+
+In other words: Don't use Crypto Box if you're redirecting the plaintext to
+another command which must never ever read a single byte of truncated truncated
+(even before it will be terminated right after `open_box` exits with an error
+code).
+
+In a pipeline, you cannot know how long the data from STDIN is, unless you want
+to read everything into memory (or a temporary file) before starting to write
+to STDOUT. After 0.3.0, I wanted this Crypto Box to have a small memory
+footprint, no matter how large the input. That's why it works like this.
+
+### No padding
+There's no padding involved, even when the plaintext input's length is 0. The
+plaintext's length can be calculated from the ciphertext's length.
+
+## Limitations
+No real limitations. Just don't encrypt more than
+1393796574908163946345982392040522594123776 YiB at once with one key.
+
+Explanation: We have a 24 byte nonce. That nonce is used to encrypt one
+chunk of 256KiB. After that, the nonce is incremented for the next chunk. 24
+bytes are 192 bit, so we have 2^192 different nonces for one key. Each nonce
+can be used to encrypt up to 256KiB. So:
+
+```
+2^192 * 256 KiB = 1.606938044E60 KiB
+                = 1.569275434E57 MiB
+                = 1.532495541E54 GiB
+                = 1.496577677E51 TiB
+                = 1.461501637E48 PiB
+                = 1.427247693E45 EiB
+                = 1.393796575E42 ZiB
+                = 1.361129468E39 YiB
+```
 
 ## TODO
 
-* fail early if ciphertext has been tampered with
-  - MAC authenticates previous MAC
-  - first and last chunks are marked as such
-  - this also gets rid of the additional nonce and MAC pair around the whole
-    ciphertext
 * lock and zero out key in arguments (possible?)
 * test suite
 * switch to CMake

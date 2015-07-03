@@ -2,6 +2,7 @@
 #define CRYPTO_BOX_H
 
 #include "config.h"
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -18,16 +19,26 @@
   #define DEBUG_ONLY(x)
 #endif
 
-#define KEY_BYTES crypto_secretbox_KEYBYTES
-#define MAC_BYTES crypto_secretbox_MACBYTES
-#define NONCE_BYTES crypto_secretbox_NONCEBYTES
-#define INITIAL_CT_SIZE (512 + MAC_BYTES)
-#define CT_AFTER_MAC(x) (x+MAC_BYTES)
-#define PT_LEN(x) (x-MAC_BYTES)
-#define CHUNK_BYTES 65536
+#define KEY_BYTES crypto_stream_xsalsa20_KEYBYTES
+#define NONCE_BYTES crypto_stream_xsalsa20_NONCEBYTES
+#define MAC_BYTES crypto_onetimeauth_BYTES
 
-struct ciphertext {
-  uint8_t *data;
+/* +- 1 because of the chunk_type */
+#define CHUNK_MAC(x) (x)
+#define CHUNK_PT(x) (x + MAC_BYTES + 1)
+#define CHUNK_PT_LEN(x) (x - MAC_BYTES - 1)
+#define CHUNK_CT(x) (x + MAC_BYTES)
+#define CHUNK_CT_LEN(x) (x - MAC_BYTES)
+#define CHUNK_TYPE_INDEX MAC_BYTES
+#define CHUNK_CT_BYTES 262144 /* 256 KiB */
+#define CHUNK_PT_BYTES (CHUNK_CT_BYTES - MAC_BYTES - 1) /* 256 KiB - 17 */
+/* 0b1000_0000 = 128 */
+#define FIRST_CHUNK 0x80U
+/* 0b0100_0000 =  64 */
+#define LAST_CHUNK  0x40U
+
+struct chunk {
+  uint8_t *data; /* MAC + chunk_type + {PT,CT} */
   size_t used;
   size_t size;
 };
@@ -44,15 +55,17 @@ struct arguments {
 extern struct argp argp_parser;
 uint8_t key[KEY_BYTES];
 uint8_t nonce[NONCE_BYTES];
-struct ciphertext ct;
+struct chunk chunk;
 struct arguments arguments;
-extern void init_ct(struct ciphertext *ct);
-extern void grow_ct(struct ciphertext *ct, size_t nbytes_coming);
-extern void free_ct(struct ciphertext *ct);
+extern void init_chunk(struct chunk *chunk);
+extern void free_chunk(struct chunk *chunk);
 extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
 extern void key_mlock(void);
 extern FILE* open_input(struct arguments *arguments);
 extern void close_input(FILE *input);
 extern void hexDump (const char *desc, const void *addr, size_t len);
+
+/* TODO: Remove when libsodium 1.0.4 is out */
+extern void sodium_increment(unsigned char *n, const size_t nlen);
 // vim: et:ts=2:sw=2
 #endif

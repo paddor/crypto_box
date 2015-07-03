@@ -1,3 +1,25 @@
+Thu Jul 2 2015  Patrik Wenger  <paddor@gmail.com>
+	* crypto_box.h (#include <stdbool.h>): Added.
+	* crypto_box.h (struct ciphertext): Renamed to struct chunk.
+	* crypto_box.h (FIRST_CHUNK, LAST_CHUNK): Macros defined.
+	* crypto_box.h (INITIAL_CT_SIZE): Macros removed.
+	* crypto_box.h (CT_AFTER_MAC): Macro renamed to CHUNK_CT.
+	* crypto_box.h (other macros): Adapted/renamed to CHUNK_*.
+	* crypto_box.h (init_ct): Renamed to init_chunk() along with
+	definition. Callers changed.
+	* crypto_box.h (grow_ct): Removed along with definition.
+	* crypto_box.h (free_ct): Renamed to free_chunk() along with
+	definiton. Callers changed.
+	* crypto_box.h (sodium_increment): Declared.
+	* crypto_box.c (init_ct): Renamed to init_chunk(). It malloc()s a
+	fixed amount of memory now (CHUNK_CT_BYTES, 256 KiB).
+	* crypto_box.c (grow_ct): Removed.
+	* crypto_box.c (sodium_increment): Defined.
+	* lock_box.c (lock_box): Changed to new chunking design (without MAC
+	of MACs).
+	* open_box.c (open_box): Changed to new chunking design (without MAC
+	of MACs).
+
 Sun Jun 30 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (struct arguments) <input_source, input_file>: Added.

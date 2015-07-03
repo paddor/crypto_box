@@ -2,80 +2,123 @@
 
 void lock_box(FILE *input, FILE *output) {
   size_t nread;
+  uint8_t chunk_type; /* first, last or in between */
+  int c;
+  _Bool is_first_chunk = true;
   unsigned char *subkey;
-  unsigned char mac_mac[crypto_onetimeauth_BYTES];
-  crypto_onetimeauth_state mac_mac_state;
+  unsigned char previous_mac[MAC_BYTES];
+  crypto_onetimeauth_state auth_state;
 
-  /* initialize state for MAC of MACs */
+  /* allocate memory for authentication subkey */
   subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
   if (subkey == NULL) {
     fprintf(stderr, "Memory for authentication subkey couldn't be "
         "allocated.\n");
-    exit(EXIT_FAILURE);
+    goto abort;
   }
-  randombytes_buf(nonce, sizeof nonce);
-  crypto_stream(subkey, sizeof subkey, nonce, key);
-  crypto_onetimeauth_init(&mac_mac_state, subkey);
 
   if (isatty(fileno(output)))
     fprintf(stderr, "WARNING: Writing ciphertext to terminal.\n");
 
-  /* print nonce for subkey */
-  if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
+  /* new nonce */
+  randombytes_buf(nonce, sizeof nonce);
+  DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 
+  /* print nonce */
+  if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
     perror("Couldn't write ciphertext");
-    exit(EXIT_FAILURE);
+    goto abort;
   }
 
-  init_ct(&ct);
+  init_chunk(&chunk);
   while(!feof(input)) {
-    /* recycle ct */
-    ct.used = MAC_BYTES; /* reserve room for MAC */
+    /* recycle chunk */
+    chunk.used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
 
     /* read complete chunk, if possible */
-    grow_ct(&ct, CHUNK_BYTES);
-    nread = fread(&ct.data[ct.used], sizeof *ct.data, CHUNK_BYTES, input);
-    ct.used += nread;
-    DEBUG_ONLY(hexDump("read plaintext chunk",
-          CT_AFTER_MAC(ct.data), PT_LEN(ct.used)));
-
-    if (nread < CHUNK_BYTES && ferror(input)) {
+    nread = fread(&chunk.data[chunk.used], sizeof *chunk.data, CHUNK_PT_BYTES,
+        input);
+    chunk.used += nread;
+    if (nread < CHUNK_PT_BYTES && ferror(input)) {
       fprintf(stderr, "Couldn't read plaintext.\n");
-      exit(EXIT_FAILURE);
+      goto abort;
+    }
+    DEBUG_ONLY(hexDump("read plaintext chunk",
+          CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
+
+    /* determine chunk type */
+    chunk_type = 0; /* nothing special about this chunk for now */
+    if (nread == CHUNK_PT_BYTES) {
+      /* check if we're right before EOF */
+      if ((c = getc(input)) == EOF) {
+        /* this is the last chunk */
+        chunk_type = LAST_CHUNK;
+      } else {
+        /* not the last chunk, put character back */
+        if (ungetc(c, input) == EOF) {
+          fprintf(stderr, "Couldn't put character back to plaintext.\n");
+          goto abort;
+        }
+
+        /* might be the first */
+        if (is_first_chunk) chunk_type = FIRST_CHUNK;
+      }
+    } else if (feof(input)) { /* already hit EOF */
+       /* this is the last chunk */
+      chunk_type = LAST_CHUNK;
+    } else if (is_first_chunk) {
+      /* Since fread() guarantees that it reads the specified number of bytes
+       * if possible, this code should never be reached. If fread() read less
+       * bytes, it must have hit EOF already, which is handled above.
+       *
+       * But what the hell. Better be safe.
+       */
+      chunk_type = FIRST_CHUNK;
     }
 
-    /* new nonce */
-    randombytes_buf(nonce, sizeof nonce);
-    DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
+    /* set chunk type */
+    chunk.data[CHUNK_TYPE_INDEX] = chunk_type;
+    DEBUG_ONLY(hexDump("chunk type", &chunk.data[CHUNK_TYPE_INDEX], 1));
 
-    /* encrypt chunk */
-    crypto_secretbox_easy(ct.data, CT_AFTER_MAC(ct.data), PT_LEN(ct.used),
-        nonce, key);
-    DEBUG_ONLY(hexDump("chunk MAC", ct.data, MAC_BYTES));
-    DEBUG_ONLY(hexDump("ciphertext chunk", CT_AFTER_MAC(ct.data),
-          PT_LEN(ct.used)));
+    /* encrypt chunk_type and plaintext (in-place) */
+    crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk.data), CHUNK_CT(chunk.data),
+        CHUNK_CT_LEN(chunk.used), nonce, 1, key); /* 1 = initial counter */
+    DEBUG_ONLY(hexDump("ciphertext chunk", CHUNK_CT(chunk.data),
+          CHUNK_CT_LEN(chunk.used)));
 
-    /* print ciphertext */
-    if (fwrite(nonce, sizeof nonce, 1, output) < 1 || /* nonce */
-        fwrite(ct.data, ct.used, 1, output) < 1) { /* MAC and CT */
+    /* compute MAC */
+    crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
+    crypto_onetimeauth_init(&auth_state, subkey);
+    crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
+        CHUNK_CT_LEN(chunk.used));
+    if (chunk_type != FIRST_CHUNK) {
+      /* include previous MAC */
+      crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
+    }
+    DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk.data), MAC_BYTES));
+    crypto_onetimeauth_final(&auth_state, CHUNK_MAC(chunk.data));
+    memcpy(previous_mac, CHUNK_MAC(chunk.data), MAC_BYTES); /* remember MAC */
 
+    /* print MAC + chunk_type + ciphertext */
+    if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
       perror("Couldn't write ciphertext");
-      exit(EXIT_FAILURE);
+      goto abort;
     }
 
-    /* update mac_mac_state */
-    crypto_onetimeauth_update(&mac_mac_state, ct.data,
-        crypto_onetimeauth_BYTES);
-  }
-  free_ct(&ct);
+    /* increment nonce */
+    sodium_increment(nonce, sizeof nonce);
 
-  /* print mac_mac */
-  crypto_onetimeauth_final(&mac_mac_state, mac_mac);
-  DEBUG_ONLY(hexDump("MAC of MACs", mac_mac, crypto_onetimeauth_BYTES));
-  if (fwrite(mac_mac, sizeof mac_mac, 1, output) < 1) {
-    perror("Couldn't write ciphertext");
-    exit(EXIT_FAILURE);
+    /* not first chunk anymore */
+    is_first_chunk = false;
   }
+  sodium_free(subkey);
+  free_chunk(&chunk);
+  return;
+
+abort:
+  sodium_free(subkey);
+  free_chunk(&chunk);
+  exit(EXIT_FAILURE);
 }
 
 int main(int argc, char *argv[]) {
