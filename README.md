@@ -217,7 +217,7 @@ eventually finds out the ciphertext has been truncated, it exits immediately
 with an error code.
 
 In other words: Don't use Crypto Box if you're redirecting the plaintext to
-another command which must never ever read a single byte of truncated truncated
+another command which must never ever read a single byte of truncated plaintext
 (even before it will be terminated right after `open_box` exits with an error
 code).
 
