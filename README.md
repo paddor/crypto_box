@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/paddor/crypto_box.png?branch=master)](https://travis-ci.org/paddor/crypto_box?branch=master)
+
 # Crypto Box
 Simple secret-key encryption without the PGP/GPG/OpenSSL/OMG jungle. Secure by
 default by leveraging [libsodium](https://github.com/jedisct1/libsodium)'s
