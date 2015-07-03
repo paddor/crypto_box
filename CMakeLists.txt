@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.2)
+include_directories(.)
+add_executable(lock_box src/lock_box.c src/crypto_box.c)
+add_executable(open_box src/open_box.c src/crypto_box.c)
+target_link_libraries(lock_box PRIVATE sodium argp)
+target_link_libraries(open_box PRIVATE sodium argp)
+add_library(check SHARED IMPORTED)
+configure_file(config.h.in config.h)
