@@ -1,6 +1,6 @@
 language: c
 before_install:
-  - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ trusty main universe"
+  - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ vivid main universe"
   - sudo apt-get update -qq
 install:
   - sudo apt-get install cmake check
