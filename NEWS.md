@@ -1,9 +1,14 @@
-News for crypto_box 0.4.0
+News for Crypto Box 0.5.0
+=========================
+* Increased chunk size from 64 KiB to 256 KiB
+* More space efficient output format: A single nonce and no more MAC of MACs.
+
+News for Crypto Box 0.4.0
 =========================
 * Now the programs encrypt and decrypt in chunks. Encrypting a 100GB file is
   now possible with just a few KB of RAM! See README for details.
 
-News for crypto_box 0.3.0
+News for Crypto Box 0.3.0
 =========================
 * Fixed segfault when open_box is used without specifying a key.
 * The option `-a`/`--ask` is now implemented. Option `-f`/`--file` has been
@@ -13,7 +18,7 @@ News for crypto_box 0.3.0
 * A warning is issued before writing ciphertext to terminal.
 
 
-News for crypto_box 0.2.0
+News for Crypto Box 0.2.0
 =========================
 * Added option `-k`/`--key-file` to support getting the key from the first 32
   bytes of a file. If the file doesn't exist, it'll be created and a newly
