@@ -27,7 +27,7 @@
 *.i*86
 *.x86_64
 *.hex
-seal_box
+lock_box
 open_box
 
 # Debug files
