@@ -34,11 +34,12 @@ INCLUDE (FindPkgConfig)
 pkg_check_modules(LIBCHECK REQUIRED check)
 pkg_check_modules(LIBSODIUM REQUIRED libsodium)
 
+# OSX
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 #pkg_check_modules(LIBARGP REQUIRED libargp)
   find_library(HAVE_LIBARGP argp)
   if(NOT HAVE_LIBARGP)
-	  message(FATAL_ERROR "Couldn't find argp! Install with: brew install argp-standalone")
+    message(FATAL_ERROR "Couldn't find argp! Install with: brew install argp-standalone")
   endif()
 
   target_link_libraries(lock_box PRIVATE argp)
