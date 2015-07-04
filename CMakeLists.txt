@@ -64,4 +64,4 @@ endif()
 # TESTING
 enable_testing()
 add_test(NAME sanity COMMAND check_sanity)
-add_test(NAME sodium_sanity COMMAND check_sodium_sanity)
+#add_test(NAME sodium_sanity COMMAND check_sodium_sanity)
