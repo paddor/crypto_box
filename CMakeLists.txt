@@ -22,16 +22,22 @@ target_link_libraries(check_sodium_sanity PRIVATE check sodium)
 # CMake MODULES
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckFunctionExists)
+INCLUDE (FindPkgConfig)
 
 
 # PLATFORM CHECK
 
 # libraries
-find_library(HAVE_LIBCHECK check)
-find_library(HAVE_LIBSODIUM sodium)
+pkg_check_modules(LIBCHECK REQUIRED check)
+pkg_check_modules(LIBSODIUM REQUIRED libsodium)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+#pkg_check_modules(LIBARGP REQUIRED libargp)
   find_library(HAVE_LIBARGP argp)
+  if(NOT HAVE_LIBARGP)
+	  message(FATAL_ERROR "Couldn't find argp! Install with: brew install argp-standalone")
+  endif()
+
   target_link_libraries(lock_box PRIVATE argp)
   target_link_libraries(open_box PRIVATE argp)
 endif()
@@ -64,4 +70,4 @@ endif()
 # TESTING
 enable_testing()
 add_test(NAME sanity COMMAND check_sanity)
-#add_test(NAME sodium_sanity COMMAND check_sodium_sanity)
+add_test(NAME sodium_sanity COMMAND check_sodium_sanity)
