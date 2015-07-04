@@ -12,8 +12,8 @@ add_executable(open_box src/open_box.c src/crypto_box.c)
 add_executable(check_sodium_sanity test/check_sodium_sanity.c)
 
 # LIBRARIES
-target_link_libraries(lock_box PRIVATE sodium argp)
-target_link_libraries(open_box PRIVATE sodium argp)
+target_link_libraries(lock_box PRIVATE sodium)
+target_link_libraries(open_box PRIVATE sodium)
 target_link_libraries(check_sodium_sanity PRIVATE check sodium)
 
 
@@ -30,6 +30,8 @@ find_library(HAVE_LIBSODIUM sodium)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   find_library(HAVE_LIBARGP argp)
+  target_link_libraries(lock_box PRIVATE argp)
+  target_link_libraries(open_box PRIVATE argp)
 endif()
 
 # headers
