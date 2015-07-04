@@ -15,7 +15,7 @@ add_executable(check_sodium_sanity test/check_sodium_sanity.c)
 target_link_libraries(lock_box PRIVATE sodium argp)
 target_link_libraries(open_box PRIVATE sodium argp)
 
-target_link_libraries(check_sodium_sanity PRIVATE check sodium)
+target_link_libraries(check_sodium_sanity PRIVATE check sodium m pthread)
 
 # TESTING
 enable_testing()
