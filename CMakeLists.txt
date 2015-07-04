@@ -14,8 +14,47 @@ add_executable(check_sodium_sanity test/check_sodium_sanity.c)
 # LIBRARIES
 target_link_libraries(lock_box PRIVATE sodium argp)
 target_link_libraries(open_box PRIVATE sodium argp)
+target_link_libraries(check_sodium_sanity PRIVATE check sodium)
 
-target_link_libraries(check_sodium_sanity PRIVATE check sodium m pthread rt)
+
+# CMake MODULES
+INCLUDE (CheckIncludeFiles)
+INCLUDE (CheckFunctionExists)
+
+
+# PLATFORM CHECK
+
+# libraries
+find_library(HAVE_LIBCHECK check)
+find_library(HAVE_LIBSODIUM sodium)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  find_library(HAVE_LIBARGP argp)
+endif()
+
+# headers
+CHECK_INCLUDE_FILES("stdio.h" HAVE_FCNTL_H)
+CHECK_INCLUDE_FILES("fcntl.h" HAVE_FCNTL_H)
+CHECK_INCLUDE_FILES("stdint.h" HAVE_STDINT_H)
+CHECK_INCLUDE_FILES("stdlib.h" HAVE_STDLIB_H)
+CHECK_INCLUDE_FILES("string.h" HAVE_STRING_H)
+CHECK_INCLUDE_FILES("unistd.h" HAVE_UNISTD_H)
+CHECK_INCLUDE_FILES("sys/stat.h" HAVE_SYS_STAT_H)
+CHECK_INCLUDE_FILES("stdbool.h" HAVE__BOOL)
+CHECK_INCLUDE_FILES("memory.h" HAVE_MEMORY_H)
+CHECK_INCLUDE_FILES("argp.h" HAVE_ARGP_H)
+
+# types
+
+# functions
+CHECK_FUNCTION_EXISTS(atexit HAVE_ATEXIT)
+CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  target_link_libraries(check_sodium_sanity PRIVATE m pthread rt)
+endif()
+
+
 
 # TESTING
 enable_testing()
