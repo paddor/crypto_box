@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/paddor/crypto_box.png?branch=master)](https://travis-ci.org/paddor/crypto_box?branch=master)
+[![Build Status](https://travis-ci.org/paddor/crypto_box.png?branch=cmake)](https://travis-ci.org/paddor/crypto_box?branch=cmake)
 
 # Crypto Box
 Simple secret-key encryption without the PGP/GPG/OpenSSL/OMG jungle. Secure by
