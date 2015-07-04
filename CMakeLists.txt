@@ -9,11 +9,13 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(lock_box src/lock_box.c src/crypto_box.c)
 add_executable(open_box src/open_box.c src/crypto_box.c)
 
+add_executable(check_sanity test/check_sanity.c)
 add_executable(check_sodium_sanity test/check_sodium_sanity.c)
 
 # LIBRARIES
 target_link_libraries(lock_box PRIVATE sodium)
 target_link_libraries(open_box PRIVATE sodium)
+target_link_libraries(check_sanity PRIVATE check)
 target_link_libraries(check_sodium_sanity PRIVATE check sodium)
 
 
@@ -53,6 +55,7 @@ CHECK_FUNCTION_EXISTS(atexit HAVE_ATEXIT)
 CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  target_link_libraries(check_sanity PRIVATE m pthread rt)
   target_link_libraries(check_sodium_sanity PRIVATE m pthread rt)
 endif()
 
@@ -60,4 +63,5 @@ endif()
 
 # TESTING
 enable_testing()
+add_test(NAME sanity COMMAND check_sanity)
 add_test(NAME sodium_sanity COMMAND check_sodium_sanity)

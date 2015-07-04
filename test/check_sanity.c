@@ -1,12 +1,11 @@
 #include <stdlib.h>
 #include <check.h>
-#include <sodium.h>
 #include <stdio.h>
+#include <stdbool.h>
 
-START_TEST(test_sodium_sanity)
+START_TEST(test_sanity)
 {
-  ck_assert_msg(sodium_init() == 0,
-    "unable to initialize libsodium");
+  ck_assert(true);
 }
 END_TEST
 
@@ -14,16 +13,16 @@ END_TEST
 static Suite *crypto_box_suite(void)
 {
     Suite *s;
-    TCase *tc_libsodium;
+    TCase *tc_core;
 
     s = suite_create("Sanity Suite");
 
-    /* Sodium test case */
-    tc_libsodium = tcase_create("libsodum");
+    /* Core test case */
+    tc_core = tcase_create("Core");
 
-    tcase_add_test(tc_libsodium, test_sodium_sanity);
+    tcase_add_test(tc_core, test_sanity);
 
-    suite_add_tcase(s, tc_libsodium);
+    suite_add_tcase(s, tc_core);
 
     return s;
 }
