@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 2.8.12)
 
+# project name and language
+project("Crypto Box" C)
+
 # config.h
 file(STRINGS VERSION package_version)
 configure_file(config.h.in config.h)
