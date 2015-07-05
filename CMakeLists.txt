@@ -3,50 +3,15 @@ cmake_minimum_required(VERSION 2.8.12)
 # project name and language
 project("Crypto Box" C)
 
-# config.h
-file(STRINGS VERSION package_version)
-configure_file(config.h.in config.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
-# EXECUTABLES
-add_executable(lock_box src/lock_box.c src/crypto_box.c)
-add_executable(open_box src/open_box.c src/crypto_box.c)
-
-add_executable(check_sanity test/check_sanity.c)
-add_executable(check_sodium_sanity test/check_sodium_sanity.c)
-
-# LIBRARIES
-target_link_libraries(lock_box PRIVATE sodium)
-target_link_libraries(open_box PRIVATE sodium)
-target_link_libraries(check_sanity PRIVATE check)
-target_link_libraries(check_sodium_sanity PRIVATE check sodium)
-
-
 # CMake MODULES
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckFunctionExists)
 INCLUDE (FindPkgConfig)
 
-
-# PLATFORM CHECK
-
-# libraries
-pkg_check_modules(LIBCHECK REQUIRED check)
+# REQUIRED LIBRARIES
 pkg_check_modules(LIBSODIUM REQUIRED libsodium)
 
-# OSX
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-#pkg_check_modules(LIBARGP REQUIRED libargp)
-  find_library(HAVE_LIBARGP argp)
-  if(NOT HAVE_LIBARGP)
-    message(FATAL_ERROR "Couldn't find argp! Install with: brew install argp-standalone")
-  endif()
-
-  target_link_libraries(lock_box PRIVATE argp)
-  target_link_libraries(open_box PRIVATE argp)
-endif()
-
-# headers
+# HEADERS
 CHECK_INCLUDE_FILES("stdio.h" HAVE_STDIO_H)
 CHECK_INCLUDE_FILES("fcntl.h" HAVE_FCNTL_H)
 CHECK_INCLUDE_FILES("stdint.h" HAVE_STDINT_H)
@@ -91,20 +56,38 @@ if(NOT HAVE_ARGP_H)
 	message(FATAL_ERROR "Couldn't find argp.h")
 endif()
 
-# types
+# TYPES
+# TODO: uint8_t, ...
 
-# functions
+# FUNCTIONS
 CHECK_FUNCTION_EXISTS(atexit HAVE_ATEXIT)
 CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
 
-if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
-  target_link_libraries(check_sanity PRIVATE m pthread rt)
-  target_link_libraries(check_sodium_sanity PRIVATE m pthread rt)
+# config.h
+file(STRINGS VERSION package_version)
+configure_file(config.h.in config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+# EXECUTABLES
+add_executable(lock_box src/lock_box.c src/crypto_box.c)
+add_executable(open_box src/open_box.c src/crypto_box.c)
+
+# LINKING
+target_link_libraries(lock_box PRIVATE ${LIBSODIUM_LDFLAGS})
+target_link_libraries(open_box PRIVATE ${LIBSODIUM_LDFLAGS})
+
+# OSX
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  find_library(HAVE_LIBARGP argp)
+  if(NOT HAVE_LIBARGP)
+    message(FATAL_ERROR "Couldn't find argp! Install with: brew install argp-standalone")
+  endif()
+
+  # linking
+  target_link_libraries(lock_box PRIVATE argp)
+  target_link_libraries(open_box PRIVATE argp)
 endif()
-
-
 
 # TESTING
 enable_testing()
-add_test(NAME sanity COMMAND check_sanity)
-add_test(NAME sodium_sanity COMMAND check_sodium_sanity)
+add_subdirectory("test")
