@@ -52,6 +52,11 @@ missing
 stamp-h1
 .deps/
 
+# CMake
+/CMakeFiles
+/cmake_install.cmake
+/CMakeCache.txt
+
 # releases
 build/
 crypto_box-*.tar.*
