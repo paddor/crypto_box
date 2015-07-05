@@ -4,7 +4,7 @@ before_install:
   - sudo apt-get update -qq
 install:
   - sudo apt-get install cmake check
-  - scripts/install-libsodium.sh
+  - ci-scripts/install-libsodium
 before_script:
   - mkdir -p build/test && cd build/test
   - cmake ../..
