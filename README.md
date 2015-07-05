@@ -1,4 +1,4 @@
-[![Build Status on Travis CI](https://travis-ci.org/paddor/crypto_box.png?branch=cmake)](https://travis-ci.org/paddor/crypto_box?branch=master)
+[![Build Status on Travis CI](https://travis-ci.org/paddor/crypto_box.png?branch=master)](https://travis-ci.org/paddor/crypto_box?branch=master)
 [![Build Status on drone.io](https://drone.io/github.com/paddor/crypto_box/status.png)](https://drone.io/github.com/paddor/crypto_box/latest)
 [![Build Status on semaphore](https://semaphoreci.com/api/v1/projects/d5f56226-394c-453a-83c7-757b11f9279f/474288/badge.svg)](https://semaphoreci.com/paddor/crypto_box)
 
