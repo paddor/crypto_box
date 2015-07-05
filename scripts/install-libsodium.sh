@@ -9,3 +9,4 @@ cd `mktemp -d /tmp/install-libsodium-XXXX`
 wget $SODIUM_URL || exit 1
 tar xf libsodium-*.tar.gz && cd libsodium-* || exit 1
 ./configure && make && make check && sudo make install || exit 1
+sudo ldconfig || exit 1
