@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 # This is needed because Ubuntu precise (12.04 LTS) doesn't know libsodium yet
 # and I don't wanna use wily (unstable) because CMake 3.3 is not needed (CMake

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 REPO_SOURCE="deb http://us.archive.ubuntu.com/ubuntu/ utopic main universe"
 sudo add-apt-repository "$REPO_SOURCE" || exit 1
 sudo apt-get update -qq || exit 1
