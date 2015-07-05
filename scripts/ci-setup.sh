@@ -1,5 +1,6 @@
 #!/bin/bash
-sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ utopic main universe"
-sudo apt-get update -qq
-sudo apt-get install check cmake -y
-scripts/install-libsodium.sh
+REPO_SOURCE="deb http://us.archive.ubuntu.com/ubuntu/ utopic main universe"
+sudo add-apt-repository $REPO_SOURCE || exit 1
+sudo apt-get update -qq || exit 1
+sudo apt-get install check cmake -y || exit 1
+scripts/install-libsodium.sh || exit 1
