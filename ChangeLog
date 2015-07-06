@@ -1,3 +1,8 @@
+Sun Jul 5 2015  Patrik Wenger  <paddor@gmail.com>
+	* lock_box.c (lock_box) <compute MAC>: Fix condition to find out if
+	it's the first chunk. Use is_first_chunk instead of
+	chunk_type!=FIRST_CHUNK.
+
 Thu Jul 2 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (#include <stdbool.h>): Added.
 	* crypto_box.h (struct ciphertext): Renamed to struct chunk.
