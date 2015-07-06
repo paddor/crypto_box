@@ -91,7 +91,7 @@ void lock_box(FILE *input, FILE *output) {
     crypto_onetimeauth_init(&auth_state, subkey);
     crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
         CHUNK_CT_LEN(chunk.used));
-    if (chunk_type != FIRST_CHUNK) {
+    if (!is_first_chunk) {
       /* include previous MAC */
       crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
     }
