@@ -3,7 +3,7 @@ set -e
 lock_box=../lock_box
 open_box=../open_box
 KEY_FILE=round_trip.key
-TXT_FILE=../../../test/lorem.txt
+TXT_FILE=`dirname $0`/lorem.txt
 BOX_FILE=lorem.box
 NEW_TXT_FILE=lorem.txt
 $lock_box -k $KEY_FILE < $TXT_FILE > $BOX_FILE
