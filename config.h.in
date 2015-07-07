@@ -2,7 +2,7 @@
 #define PACKAGE "crypto_box"
 
 /* Define to the address where bug reports for this package should be sent. */
-#define PACKAGE_BUGREPORT "paddor@gmail.com"
+#define PACKAGE_BUGREPORT "https://github.com/paddor/crypto_box/issues"
 
 /* Define to the full name of this package. */
 #define PACKAGE_NAME "${PROJECT_NAME}"
