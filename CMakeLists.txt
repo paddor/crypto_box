@@ -3,7 +3,16 @@ cmake_minimum_required(VERSION 2.8.12)
 # project name and language
 project("Crypto Box" C)
 
-# CMake MODULES
+# variables for packaging
+set(CPACK_PACKAGE_NAME "crypto_box")
+set(CPACK_PACKAGE_VERSION_MAJOR "0")
+set(CPACK_PACKAGE_VERSION_MINOR "5")
+set(CPACK_PACKAGE_VERSION_PATCH "0")
+
+# CMake module for packaging
+INCLUDE (CPack)
+
+# CMake modules for checking dependencies
 INCLUDE (CheckIncludeFiles)
 INCLUDE (CheckFunctionExists)
 INCLUDE (FindPkgConfig)
@@ -64,7 +73,6 @@ CHECK_FUNCTION_EXISTS(atexit HAVE_ATEXIT)
 CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
 
 # config.h
-file(STRINGS VERSION package_version)
 configure_file(config.h.in config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
