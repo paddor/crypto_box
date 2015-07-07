@@ -75,8 +75,8 @@ CHECK_FUNCTION_EXISTS(atexit HAVE_ATEXIT)
 CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
 
 # config.h
-configure_file(config.h.in config.h)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+configure_file(src/config.h.in src/config.h)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
 # EXECUTABLES
 add_executable(lock_box src/lock_box.c src/crypto_box.c)
