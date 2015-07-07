@@ -59,7 +59,8 @@ struct chunk chunk;
 struct arguments arguments;
 extern void init_chunk(struct chunk *chunk);
 extern void free_chunk(struct chunk *chunk);
-extern void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]);
+extern void get_key(const struct arguments * const arguments, uint8_t
+    key[KEY_BYTES]);
 extern void key_mlock(void);
 extern FILE* open_input(struct arguments *arguments);
 extern void close_input(FILE *input);
