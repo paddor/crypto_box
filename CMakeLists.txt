@@ -78,6 +78,9 @@ CHECK_FUNCTION_EXISTS(malloc HAVE_MALLOC)
 configure_file(src/config.h.in src/config.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 
+# other header files
+include_directories(${CMAKE_SOURCE_DIR}/src)
+
 # EXECUTABLES
 add_executable(lock_box src/lock_box.c src/crypto_box.c)
 add_executable(open_box src/open_box.c src/crypto_box.c)

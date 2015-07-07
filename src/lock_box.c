@@ -1,4 +1,4 @@
-#include "crypto_box.h"
+#include "lock_box.h"
 
 void lock_box(FILE *input, FILE *output) {
   size_t nread;
