@@ -23,7 +23,7 @@ void free_chunk(struct chunk *chunk) {
 
 const char *argp_program_version = PACKAGE_STRING;
 const char *argp_program_bug_address = PACKAGE_BUGREPORT;
-static char doc[] = "Easy to use, strong symmetric encryption on the command line.";
+static char doc[] = PACKAGE_SUMMARY;
 static char args_doc[] = "[KEY]";
 static struct argp_option options[] = {
     { "key-file", 'k', "FILE", 0, "get key from file"},

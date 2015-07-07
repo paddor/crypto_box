@@ -19,6 +19,9 @@
 /* Define to the version of this package. */
 #define PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}"
 
+/* Define to the description summary of this package. */
+#define PACKAGE_SUMMARY "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}"
+
 /* Define to 1 if you have the `atexit' function. */
 #cmakedefine HAVE_ATEXIT 1
 
