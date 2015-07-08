@@ -15,6 +15,15 @@ Sun Jul 7 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c (lock_box): Local variable nonce added.
 	* open_box.c (open_box): Local variable nonce added.
 
+	* crypto_box.h <uint8 key[KEY_BYTES]>: Change type to *key.
+	* crypto_box.h (key_mlock)>: Declaration removed.
+	* crypto_box.c (key_mlock, key_munlock): Removed.
+	* crypto_box.h (key_malloc)>: Declaration added.
+	* crypto_box.c (key_malloc, key_free): Definitions added.
+	* lock_box.c open_box.c (main): Initialize key with key_malloc(). This
+	way, the memory for the key is not only locked and zeroed-out later,
+	but also protected by canaries.
+
 Sun Jul 5 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c (lock_box) <compute MAC>: Fix condition to find out if
 	it's the first chunk. Use is_first_chunk instead of

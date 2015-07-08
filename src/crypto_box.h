@@ -53,14 +53,14 @@ struct arguments {
 };
 
 extern struct argp argp_parser;
-uint8_t key[KEY_BYTES];
 struct arguments arguments;
+uint8_t *key;
 extern void init_chunk(struct chunk *chunk);
 extern void free_chunk(struct chunk *chunk);
 extern unsigned char *auth_subkey_malloc();
 extern void get_key(const struct arguments * const arguments, uint8_t
     key[KEY_BYTES]);
-extern void key_mlock(void);
+extern uint8_t *key_malloc();
 extern FILE* open_input(struct arguments *arguments);
 extern void close_input(FILE *input);
 extern void hexDump (const char *desc, const void *addr, size_t len);

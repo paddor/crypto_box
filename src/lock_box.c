@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  key_mlock();
+  key = key_malloc();
   get_key(&arguments, key);
 
   FILE *input = open_input(&arguments);

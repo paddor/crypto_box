@@ -253,20 +253,23 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
-void key_munlock(void) {
-  sodium_munlock(key, sizeof key);
+void key_free(void) {
+  sodium_free(key);
 }
 
-void key_mlock(void) {
-  if (sodium_mlock(key, sizeof key) == -1) {
-    fprintf(stderr, "Unable to lock memory for key.\n");
+uint8_t *key_malloc() {
+  uint8_t *key = sodium_malloc(KEY_BYTES);
+  if (key == NULL) {
+    fprintf(stderr, "Unable to allocate memory for key.\n");
     exit(EXIT_FAILURE);
   }
 
-  /* register unlocking before exit
+  /* register call to sodium_free() before exit
    * NOTE: This is important because the unlocking also zeroes the memory out
-   * before actually unlocking it. */
-  atexit(key_munlock);
+   * before actually unlocking and freeing it. */
+  atexit(key_free);
+
+  return key;
 }
 
 FILE* open_input(struct arguments *arguments) {
