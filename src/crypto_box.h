@@ -63,6 +63,8 @@ extern void get_key(const struct arguments * const arguments, uint8_t
 extern uint8_t *key_malloc();
 extern FILE* open_input(struct arguments *arguments);
 extern void close_input(FILE *input);
+void lock_box(FILE *input, FILE *output);
+void open_box(FILE *input, FILE *output);
 extern void hexDump (const char *desc, const void *addr, size_t len);
 
 /* TODO: Remove when libsodium 1.0.4 is out */

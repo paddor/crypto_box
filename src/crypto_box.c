@@ -326,6 +326,209 @@ void close_input(FILE *input) {
   fclose(input);
 }
 
+void lock_box(FILE *input, FILE *output) {
+  uint8_t nonce[NONCE_BYTES];
+  struct chunk chunk;
+  size_t nread;
+  int8_t chunk_type; /* first, last or in between */
+  _Bool is_first_chunk = true;
+  unsigned char *subkey;
+  unsigned char previous_mac[MAC_BYTES];
+  crypto_onetimeauth_state auth_state;
+
+  subkey = auth_subkey_malloc();
+
+  if (isatty(fileno(output)))
+    fprintf(stderr, "WARNING: Writing ciphertext to terminal.\n");
+
+  /* new nonce */
+  randombytes_buf(nonce, sizeof nonce);
+  DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
+
+  /* print nonce */
+  if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
+    perror("Couldn't write ciphertext");
+    goto abort;
+  }
+
+  init_chunk(&chunk);
+  while(!feof(input)) {
+    /* recycle chunk */
+    chunk.used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
+
+    /* read complete chunk, if possible */
+    nread = fread(&chunk.data[chunk.used], sizeof *chunk.data, CHUNK_PT_BYTES,
+        input);
+    chunk.used += nread;
+    if (nread < CHUNK_PT_BYTES && ferror(input)) {
+      fprintf(stderr, "Couldn't read plaintext.\n");
+      goto abort;
+    }
+    DEBUG_ONLY(hexDump("read plaintext chunk",
+          CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
+
+    chunk_type = determine_chunk_type(nread, CHUNK_PT_BYTES, is_first_chunk,
+        input);
+    if (chunk_type == -1) goto abort;
+
+    /* set chunk type */
+    chunk.data[CHUNK_TYPE_INDEX] = chunk_type;
+    DEBUG_ONLY(hexDump("chunk type", &chunk.data[CHUNK_TYPE_INDEX], 1));
+
+    /* encrypt chunk_type and plaintext (in-place) */
+    crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk.data), CHUNK_CT(chunk.data),
+        CHUNK_CT_LEN(chunk.used), nonce, 1, key); /* 1 = initial counter */
+    DEBUG_ONLY(hexDump("ciphertext chunk", CHUNK_CT(chunk.data),
+          CHUNK_CT_LEN(chunk.used)));
+
+    /* compute MAC */
+    crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
+    crypto_onetimeauth_init(&auth_state, subkey);
+    crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
+        CHUNK_CT_LEN(chunk.used));
+    if (!is_first_chunk) {
+      /* include previous MAC */
+      crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
+    }
+    DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk.data), MAC_BYTES));
+    crypto_onetimeauth_final(&auth_state, CHUNK_MAC(chunk.data));
+    memcpy(previous_mac, CHUNK_MAC(chunk.data), MAC_BYTES); /* remember MAC */
+
+    /* print MAC + chunk_type + ciphertext */
+    if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
+      perror("Couldn't write ciphertext");
+      goto abort;
+    }
+
+    /* increment nonce */
+    sodium_increment(nonce, sizeof nonce);
+
+    /* not first chunk anymore */
+    is_first_chunk = false;
+  }
+  sodium_free(subkey);
+  free_chunk(&chunk);
+  return;
+
+abort:
+  sodium_free(subkey);
+  free_chunk(&chunk);
+  exit(EXIT_FAILURE);
+}
+
+void open_box(FILE *input, FILE *output) {
+  uint8_t nonce[NONCE_BYTES];
+  struct chunk chunk;
+  size_t nread;
+  int8_t chunk_type; /* what it should be, from open_box's view */
+  _Bool is_first_chunk = true;
+  unsigned char *subkey;
+  unsigned char mac_should[MAC_BYTES];
+  unsigned char previous_mac[MAC_BYTES];
+  crypto_onetimeauth_state auth_state;
+
+  subkey = auth_subkey_malloc();
+
+  /* read nonce for authentication subkey */
+  if (fread(&nonce, sizeof nonce, 1, input) < 1) {
+    fprintf(stderr, "Couldn't read ciphertext.\n");
+    exit(EXIT_FAILURE);
+  }
+
+  init_chunk(&chunk);
+  while(!feof(input)) {
+    /* recycle chunk */
+    chunk.used = 0;
+
+    /* read complete chunk, if possible */
+    nread = fread(&chunk.data[chunk.used], sizeof *chunk.data, CHUNK_CT_BYTES,
+        input);
+    chunk.used += nread;
+    DEBUG_ONLY(hexDump("ciphertext chunk read", chunk.data, chunk.used));
+
+    /* truncated header */
+    if (nread <= 17) { /* MAC + chunk_type = 17 */
+      fprintf(stderr, "Ciphertext's has been truncated.\n");
+      goto abort;
+    }
+
+    if (nread < (CHUNK_CT_BYTES) && ferror(input)) {
+      fprintf(stderr, "Couldn't read ciphertext.\n");
+      goto abort;
+    }
+
+    chunk_type = determine_chunk_type(nread, CHUNK_CT_BYTES, is_first_chunk,
+        input);
+    if (chunk_type == -1) goto abort;
+
+    /* compute MAC */
+    crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
+    crypto_onetimeauth_init(&auth_state, subkey);
+    crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
+        CHUNK_CT_LEN(chunk.used));
+    if (!is_first_chunk) {
+      /* include previous MAC */
+      crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
+    }
+    DEBUG_ONLY(hexDump("calculated chunk MAC", CHUNK_MAC(chunk.data),
+          MAC_BYTES));
+    crypto_onetimeauth_final(&auth_state, mac_should);
+    memcpy(previous_mac, mac_should, MAC_BYTES); /* remember MAC */
+
+    /* verify MAC */
+    if (sodium_memcmp(mac_should, CHUNK_MAC(chunk.data), MAC_BYTES) != 0) {
+      fprintf(stderr, "Ciphertext couldn't be verified. It has been "
+        "tampered with or you're using the wrong key.\n");
+      goto abort;
+    }
+
+    /* decrypt */
+    crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk.data), CHUNK_CT(chunk.data),
+        CHUNK_CT_LEN(chunk.used), nonce, 1, key); /* 1 = initial counter */
+    DEBUG_ONLY(hexDump("plain text", CHUNK_PT(chunk.data),
+        CHUNK_PT_LEN(chunk.used)));
+
+    /* check chunk type */
+    if (chunk.data[CHUNK_TYPE_INDEX] != chunk_type) {
+      /* Tail truncation, is the only case that might go undetected through MAC
+       * verification above. So let's print a nice error message.
+       *
+       * Any other case is impossible, as the previous MAC verification would
+       * have detected it
+       */
+      if ((chunk.data[CHUNK_TYPE_INDEX] == 0 ||
+            chunk.data[CHUNK_TYPE_INDEX] == FIRST_CHUNK)
+          && chunk_type == LAST_CHUNK) {
+        fprintf(stderr, "Ciphertext's has been truncated.\n");
+      }
+
+      goto abort;
+    }
+
+    /* print plaintext */
+    if (fwrite(CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used), 1, output) < 1)
+    {
+      perror("Couldn't write plaintext");
+      goto abort;
+    }
+
+    /* increment nonce */
+    sodium_increment(nonce, sizeof nonce);
+
+    /* not first chunk anymore */
+    is_first_chunk = false;
+  }
+
+  sodium_free(subkey);
+  free_chunk(&chunk);
+  return;
+
+abort:
+  sodium_free(subkey);
+  free_chunk(&chunk);
+  exit(EXIT_FAILURE);
+}
+
 void hexDump (const char *desc, const void *addr, size_t len) {
     size_t i;
     uint8_t buff[17];

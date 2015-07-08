@@ -7,6 +7,13 @@ Sun Jul 8 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (FIRST_CHUNK, LAST_CHUNK): New values (int based, not
 	"flag" based")
 
+	* lock_box.h open_box.h: Removed.
+	* crypto_box.h (lock_box, open_box): Moved declarations here.
+	* lock_box.c (lock_box): Removed.
+	* open_box.c (open_box): Removed.
+	* crypto_box.c (lock_box, open_box): Moved definitions here.
+	* crypto_box.c (lock_box, open_box): Moved definitions here.
+
 Sun Jul 7 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.h (lock_box): New header file.
 	* open_box.h (open_box): New header file.
