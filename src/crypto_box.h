@@ -55,7 +55,6 @@ struct arguments {
 extern struct argp argp_parser;
 uint8_t key[KEY_BYTES];
 uint8_t nonce[NONCE_BYTES];
-struct chunk chunk;
 struct arguments arguments;
 extern void init_chunk(struct chunk *chunk);
 extern void free_chunk(struct chunk *chunk);

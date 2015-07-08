@@ -1,6 +1,7 @@
 #include "lock_box.h"
 
 void lock_box(FILE *input, FILE *output) {
+  struct chunk chunk;
   size_t nread;
   uint8_t chunk_type; /* first, last or in between */
   int c;

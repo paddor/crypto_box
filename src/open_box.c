@@ -1,6 +1,7 @@
 #include "open_box.h"
 
 void open_box(FILE *input, FILE *output) {
+  struct chunk chunk;
   size_t nread;
   uint8_t chunk_type; /* what it should be, from open_box's view */
   int c;

@@ -7,6 +7,10 @@ Sun Jul 7 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (auth_subkey_malloc): Declared.
 	* crypto_box.c (auth_subkey_malloc): Defined.
 
+	* crypto_box.h <struct chunk chunk>: Removed.
+	* lock_box.c (lock_box): Local variable chunk added.
+	* open_box.c (open_box): Local variable chunk added.
+
 Sun Jul 5 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c (lock_box) <compute MAC>: Fix condition to find out if
 	it's the first chunk. Use is_first_chunk instead of
