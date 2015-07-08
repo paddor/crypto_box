@@ -18,8 +18,7 @@ wrong.  As always, it's your responsibility to keep a secret key secret.
 
 Reads plaintext from STDIN and writes ciphertext to STDOUT. Below are the
 different ways of specifying a key. The ciphertext will be sightly larger than
-the plaintext since it'll contain a nonce (24 bytes) and MAC (16 bytes) for
-each chunk and one more trailing MAC (16 bytes). See Internals.
+the plaintext. See Internals.
 
 #### Random key (no key file)
 
