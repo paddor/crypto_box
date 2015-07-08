@@ -1,9 +1,13 @@
 News for Crypto Box 0.6.0
 =========================
-* CMake
-* tests
-* better help
-* new values for chunk type
+* The build system used is now CMake, not Autotools anymore. You'll notice a
+  different installation procedure.
+* There's a test suite now. It verifies that the code works as expected.
+* Continuous Integration: The test suite is run by Travis CI, drone.io and
+  semaphoreci every time new commits are pushed. One of these would be enough,
+  but I'm still playing around to get a feeling of all of them.
+* Better help: Additional usages and a more detailed section below the options.
+* New values for chunk type. Decrypt old boxes first before upgrading.
 
 News for Crypto Box 0.5.0
 =========================
