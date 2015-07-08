@@ -16,6 +16,7 @@ INCLUDE (CPack)
 
 # CMake modules for checking dependencies
 INCLUDE (CheckIncludeFiles)
+INCLUDE (CheckTypeSize)
 INCLUDE (CheckFunctionExists)
 INCLUDE (FindPkgConfig)
 
@@ -68,7 +69,10 @@ if(NOT HAVE_ARGP_H)
 endif()
 
 # TYPES
-# TODO: uint8_t, ...
+CHECK_TYPE_SIZE(uint8_t UINT8_T LANGUAGE C)
+if(NOT HAVE_UINT8_T)
+	message(FATAL_ERROR "Type uint8_t isn't supported on this system")
+endif()
 
 # FUNCTIONS
 CHECK_FUNCTION_EXISTS(atexit HAVE_ATEXIT)
