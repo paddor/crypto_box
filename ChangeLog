@@ -1,3 +1,9 @@
+Sun Jul 8 2015  Patrik Wenger  <paddor@gmail.com>
+	* crypto_box.h (determine_chunk_type): Declared.
+	* crypto_box.c (determine_chunk_type): Defined.
+	* lock_box.c (lock_box): Use determine_chunk_type().
+	* open_box.c (open_box): Use determine_chunk_type().
+
 Sun Jul 7 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.h (lock_box): New header file.
 	* open_box.h (open_box): New header file.

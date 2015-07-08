@@ -4,8 +4,7 @@ void open_box(FILE *input, FILE *output) {
   uint8_t nonce[NONCE_BYTES];
   struct chunk chunk;
   size_t nread;
-  uint8_t chunk_type; /* what it should be, from open_box's view */
-  int c;
+  int8_t chunk_type; /* what it should be, from open_box's view */
   _Bool is_first_chunk = true;
   unsigned char *subkey;
   unsigned char mac_should[MAC_BYTES];
@@ -42,36 +41,9 @@ void open_box(FILE *input, FILE *output) {
       goto abort;
     }
 
-    /* calculate what chunk_type should be */
-    chunk_type = 0; /* nothing special about this chunk for now */
-    if (nread == CHUNK_CT_BYTES) {
-      /* check if we're right before EOF */
-      if ((c = getc(input)) == EOF) {
-
-        /* this is the last chunk */
-        chunk_type = LAST_CHUNK;
-      } else {
-        /* not the last chunk, put character back */
-        if (ungetc(c, input) == EOF) {
-          fprintf(stderr, "Couldn't put character back to ciphertext.\n");
-          goto abort;
-        }
-
-        /* might be the first */
-        if (is_first_chunk) chunk_type = FIRST_CHUNK;
-      }
-    } else if (feof(input)) { /* already hit EOF */
-       /* this should be the last chunk */
-      chunk_type = LAST_CHUNK;
-    } else if (is_first_chunk) {
-      /* Since fread() guarantees that it reads the specified number of bytes
-       * if possible, this code should never be reached. If fread() read less
-       * bytes, it must have hit EOF already, which is handled above.
-       *
-       * But what the hell. Better be safe.
-       */
-      chunk_type = FIRST_CHUNK;
-    }
+    chunk_type = determine_chunk_type(nread, CHUNK_CT_BYTES, is_first_chunk,
+        input);
+    if (chunk_type == -1) goto abort;
 
     /* compute MAC */
     crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */

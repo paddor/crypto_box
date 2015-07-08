@@ -31,6 +31,42 @@ unsigned char *auth_subkey_malloc() {
   return subkey;
 }
 
+
+int8_t determine_chunk_type(size_t nread, size_t chunk_bytes, _Bool
+    is_first_chunk, FILE *input) {
+
+  int c;
+  uint8_t chunk_type = 0; /* nothing special about this chunk for now */
+  if (nread == chunk_bytes) {
+    /* check if we're right before EOF */
+    if ((c = getc(input)) == EOF) {
+      /* this is the last chunk */
+      chunk_type = LAST_CHUNK;
+    } else {
+      /* not the last chunk, put character back */
+      if (ungetc(c, input) == EOF) {
+        fprintf(stderr, "Couldn't put character back.\n");
+        return -1;
+      }
+
+      /* might be the first */
+      if (is_first_chunk) chunk_type = FIRST_CHUNK;
+    }
+  } else if (feof(input)) { /* already hit EOF */
+     /* this is the last chunk */
+    chunk_type = LAST_CHUNK;
+  } else if (is_first_chunk) {
+    /* Since fread() guarantees that it reads the specified number of bytes
+     * if possible, this code should never be reached. If fread() read less
+     * bytes, it must have hit EOF already, which is handled above.
+     *
+     * But what the hell. Better be safe.
+     */
+    chunk_type = FIRST_CHUNK;
+  }
+  return chunk_type;
+}
+
 const char *argp_program_version = PACKAGE_STRING;
 static char doc[] =
   PACKAGE_SUMMARY
