@@ -15,7 +15,7 @@ START_TEST(test_round_trip)
 
   int fd_ct, fd_pt2;
   FILE *pt1, *ct, *pt2;
-  char template[] = "/tmp/round_trip.XXXXX";
+  char template[] = "/tmp/round_trip.XXXXXX";
 
   /* generate names and open temporary files */
   char *fname_pt2 = malloc(sizeof template);
