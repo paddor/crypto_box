@@ -24,7 +24,11 @@ void free_chunk(struct chunk *chunk) {
 const char *argp_program_version = PACKAGE_STRING;
 const char *argp_program_bug_address = PACKAGE_BUGREPORT;
 static char doc[] = PACKAGE_SUMMARY;
-static char args_doc[] = "[KEY]";
+static char args_doc[] =
+  "\n"
+  "<key>\n"
+  "--key-file <key_file>\n"
+  "--ask --file <input_file>";
 static struct argp_option options[] = {
     { "key-file", 'k', "FILE", 0, "get key from file"},
     { "ask", 'a', 0, 0, "Ask for the key (requires -f)"},
