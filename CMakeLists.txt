@@ -6,7 +6,7 @@ project("Crypto Box" C)
 # variables for packaging
 set(CPACK_PACKAGE_NAME "crypto_box")
 set(CPACK_PACKAGE_VERSION_MAJOR "0")
-set(CPACK_PACKAGE_VERSION_MINOR "5")
+set(CPACK_PACKAGE_VERSION_MINOR "6")
 set(CPACK_PACKAGE_VERSION_PATCH "0")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
 	"Easy to use, strong symmetric encryption on the command line.")
