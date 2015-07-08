@@ -32,10 +32,8 @@
 #define CHUNK_TYPE_INDEX MAC_BYTES
 #define CHUNK_CT_BYTES 262144 /* 256 KiB */
 #define CHUNK_PT_BYTES (CHUNK_CT_BYTES - MAC_BYTES - 1) /* 256 KiB - 17 */
-/* 0b1000_0000 = 128 */
-#define FIRST_CHUNK 0x80U
-/* 0b0100_0000 =  64 */
-#define LAST_CHUNK  0x40U
+#define FIRST_CHUNK 1U
+#define LAST_CHUNK  2U
 
 struct chunk {
   uint8_t *data; /* MAC + chunk_type + {PT,CT} */

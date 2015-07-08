@@ -4,6 +4,9 @@ Sun Jul 8 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c (lock_box): Use determine_chunk_type().
 	* open_box.c (open_box): Use determine_chunk_type().
 
+	* crypto_box.h (FIRST_CHUNK, LAST_CHUNK): New values (int based, not
+	"flag" based")
+
 Sun Jul 7 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.h (lock_box): New header file.
 	* open_box.h (open_box): New header file.

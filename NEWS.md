@@ -3,6 +3,7 @@ News for Crypto Box 0.6.0
 * CMake
 * tests
 * better help
+* new values for chunk type
 
 News for Crypto Box 0.5.0
 =========================
