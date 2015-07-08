@@ -1,3 +1,9 @@
+News for Crypto Box 0.6.0
+=========================
+* CMake
+* tests
+* better help
+
 News for Crypto Box 0.5.0
 =========================
 * Increased chunk size from 64 KiB to 256 KiB
