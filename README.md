@@ -256,8 +256,6 @@ can be used to encrypt up to 256KiB. So:
 ## TODO
 
 * lock and zero out key in arguments (possible?)
-* test suite
-* switch to CMake
 * K&R style function definitions
 * explicit creation of key file to avoid an attacker to create a key file
   - -K/--new-key-file
