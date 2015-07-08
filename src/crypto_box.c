@@ -22,8 +22,20 @@ void free_chunk(struct chunk *chunk) {
 
 
 const char *argp_program_version = PACKAGE_STRING;
-const char *argp_program_bug_address = PACKAGE_BUGREPORT;
-static char doc[] = PACKAGE_SUMMARY;
+static char doc[] =
+  PACKAGE_SUMMARY
+  "\vlock_box:\n"
+  "Reads plaintext from STDIN and writes ciphertext to STDOUT.\n"
+  "The ciphertext will be sightly larger than the plaintext. In the first\n"
+  "form, a randomly generated key will be used. The key will be printed to\n"
+  "STDOUT in hex format.\n"
+  "\n"
+  "open_box:\n"
+  "Reads ciphertext from STDIN and writes plaintext to STDOUT.\n"
+  "\n"
+  "For further details, please go to " PACKAGE_URL ".\n"
+  "\n"
+  "Please repport issues on " PACKAGE_BUGREPORT ".\n";
 static char args_doc[] =
   "\n"
   "<key>\n"
