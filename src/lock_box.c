@@ -9,13 +9,7 @@ void lock_box(FILE *input, FILE *output) {
   unsigned char previous_mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
 
-  /* allocate memory for authentication subkey */
-  subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
-  if (subkey == NULL) {
-    fprintf(stderr, "Memory for authentication subkey couldn't be "
-        "allocated.\n");
-    goto abort;
-  }
+  subkey = auth_subkey_malloc();
 
   if (isatty(fileno(output)))
     fprintf(stderr, "WARNING: Writing ciphertext to terminal.\n");

@@ -20,6 +20,16 @@ void free_chunk(struct chunk *chunk) {
   chunk->size = 0;
 }
 
+/* allocate memory for authentication subkey */
+unsigned char *auth_subkey_malloc() {
+  unsigned char *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
+  if (subkey == NULL) {
+    fprintf(stderr, "Memory for authentication subkey couldn't be "
+        "allocated.\n");
+    exit(EXIT_FAILURE);
+  }
+  return subkey;
+}
 
 const char *argp_program_version = PACKAGE_STRING;
 static char doc[] =

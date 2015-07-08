@@ -2,6 +2,11 @@ Sun Jul 7 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.h (lock_box): New header file.
 	* open_box.h (open_box): New header file.
 
+	* lock_box.c open_box.c (lock_box, open_box): Extract
+	authentication subkey allocation to auth_subkey_malloc().
+	* crypto_box.h (auth_subkey_malloc): Declared.
+	* crypto_box.c (auth_subkey_malloc): Defined.
+
 Sun Jul 5 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c (lock_box) <compute MAC>: Fix condition to find out if
 	it's the first chunk. Use is_first_chunk instead of
