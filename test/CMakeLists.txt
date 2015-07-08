@@ -11,7 +11,7 @@ add_executable(check_sodium_sanity check_sodium_sanity.c)
 # TESTS
 add_test(NAME sanity COMMAND check_sanity)
 add_test(NAME sodium_sanity COMMAND check_sodium_sanity)
-add_test(NAME round_trip COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/round_trip.sh")
+add_test(NAME round_trip COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/round_trip.sh ${CMAKE_CURRENT_SOURCE_DIR}/lorem.txt)
 add_test(NAME check_box_size COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/check_box_size.sh")
 
 # LINKING
