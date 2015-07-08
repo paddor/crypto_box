@@ -81,9 +81,12 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/src)
 # other header files
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+# OBJECT files (so they're compiled only once)
+add_library(crypto_box.o OBJECT src/crypto_box.c)
+
 # EXECUTABLES
-add_executable(lock_box src/lock_box.c src/crypto_box.c)
-add_executable(open_box src/open_box.c src/crypto_box.c)
+add_executable(lock_box src/lock_box.c $<TARGET_OBJECTS:crypto_box.o>)
+add_executable(open_box src/open_box.c $<TARGET_OBJECTS:crypto_box.o>)
 
 # LINKING
 target_link_libraries(lock_box PRIVATE ${LIBSODIUM_LDFLAGS})
