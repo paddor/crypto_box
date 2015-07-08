@@ -257,8 +257,6 @@ can be used to encrypt up to 256KiB. So:
 
 * lock and zero out key in arguments (possible?)
 * K&R style function definitions
-* explicit creation of key file to avoid an attacker to create a key file
-  - -K/--new-key-file
 * hex ciphertext (-H)
 
 ## License
