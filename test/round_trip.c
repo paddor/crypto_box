@@ -5,9 +5,8 @@
 #include <stdio.h>
 
 static char *input_file_name;
-
-START_TEST(test_round_trip)
-
+static void round_trip(void)
+{
   if (sodium_init() == -1) {
     fprintf(stderr, "unable to initialize libsodium\n");
     exit(EXIT_FAILURE);
@@ -78,6 +77,16 @@ START_TEST(test_round_trip)
   /* compare PT1 and PT2 hashes */
   ck_assert_int_eq(0, sodium_memcmp(hash_pt1, hash_pt2,
         crypto_generichash_BYTES));
+}
+
+START_TEST(test_binary_round_trip)
+  arguments.ct_format = BIN;
+  round_trip();
+END_TEST
+
+START_TEST(test_hex_round_trip)
+  arguments.ct_format = HEX;
+  round_trip();
 END_TEST
 
 
@@ -89,9 +98,10 @@ static Suite *crypto_box_suite(void)
     s = suite_create("Crypto Box");
 
     /* Core test case */
-    tc_core = tcase_create("Core");
+    tc_core = tcase_create("Round Trip");
 
-    tcase_add_test(tc_core, test_round_trip);
+    tcase_add_test(tc_core, test_binary_round_trip);
+    tcase_add_test(tc_core, test_hex_round_trip);
 
     suite_add_tcase(s, tc_core);
 
