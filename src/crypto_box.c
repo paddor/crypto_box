@@ -1,6 +1,8 @@
 #include "crypto_box.h"
 
-void init_chunk(struct chunk *chunk) {
+void
+init_chunk(struct chunk *chunk)
+{
   /* we allocate CHUNK_CT_BYTES, which is the maximum of data needed, and
    * slightly bigger than CHUNK_PT_BYTES
    */
@@ -13,7 +15,9 @@ void init_chunk(struct chunk *chunk) {
   chunk->size = CHUNK_CT_BYTES;
 }
 
-void free_chunk(struct chunk *chunk) {
+void
+free_chunk(struct chunk *chunk)
+{
   free(chunk->data);
   chunk->data = NULL;
   chunk->used = 0;
@@ -21,7 +25,9 @@ void free_chunk(struct chunk *chunk) {
 }
 
 /* allocate memory for authentication subkey */
-unsigned char *auth_subkey_malloc() {
+unsigned char *
+auth_subkey_malloc()
+{
   unsigned char *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
   if (subkey == NULL) {
     fprintf(stderr, "Memory for authentication subkey couldn't be "
@@ -32,8 +38,10 @@ unsigned char *auth_subkey_malloc() {
 }
 
 
-int8_t determine_chunk_type(size_t nread, size_t chunk_bytes, _Bool
-    is_first_chunk, FILE *input) {
+int8_t
+determine_chunk_type(size_t nread, size_t chunk_bytes,
+    _Bool is_first_chunk, FILE *input)
+{
 
   int c;
   uint8_t chunk_type = 0; /* nothing special about this chunk for now */
@@ -98,7 +106,9 @@ static struct argp_option options[] = {
 /* initialize with default values */
 struct arguments arguments = { .input_source = STDIN, .ct_format = BIN };
 
-error_t parse_options(int key, char *arg, struct argp_state *state) {
+error_t
+parse_options(int key, char *arg, struct argp_state *state)
+{
   struct arguments *arguments = state->input;
   switch (key) {
   case 'k':
@@ -135,7 +145,9 @@ error_t parse_options(int key, char *arg, struct argp_state *state) {
 
 struct argp argp_parser = { options, parse_options, args_doc, doc, 0, 0, 0 };
 
-void get_key_from_file(const char *key_file, uint8_t *key) {
+void
+get_key_from_file(const char *key_file, uint8_t *key)
+{
   FILE *f = fopen(key_file, "r");
   if(f == NULL && errno != ENOENT) {
     perror("Couldn't open key file");
@@ -186,7 +198,9 @@ void get_key_from_file(const char *key_file, uint8_t *key) {
   fclose(f);
 }
 
-void get_key_from_str(const char *str, uint8_t *key) {
+void
+get_key_from_str(const char *str, uint8_t *key)
+{
   size_t bin_len, bytes_read;
   const char * hex_end; // pointer to last parsed hex character
 
@@ -217,7 +231,8 @@ void get_key_from_str(const char *str, uint8_t *key) {
     }
 }
 
-char *read_line(char *buf, size_t len)
+char *
+read_line(char *buf, size_t len)
   /* Read at most len characters from stdin and writes them to buf.  If the
    * input line contains more characters, discard the rest.
    *
@@ -255,7 +270,9 @@ char *read_line(char *buf, size_t len)
  * in the key, which don't add any more bytes to the binary key.
  */
 #define HEX_KEY_MAXLEN (128)
-void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
+void
+get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
+{
   switch (arguments->key_source) {
     case RANDOM:
       randombytes_buf(key, KEY_BYTES);
@@ -289,11 +306,15 @@ void get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES]) {
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
-void key_free(void) {
+void
+key_free(void)
+{
   sodium_free(key);
 }
 
-uint8_t *key_malloc() {
+uint8_t *
+key_malloc()
+{
   uint8_t *key = sodium_malloc(KEY_BYTES);
   if (key == NULL) {
     fprintf(stderr, "Unable to allocate memory for key.\n");
@@ -308,7 +329,9 @@ uint8_t *key_malloc() {
   return key;
 }
 
-FILE* open_input(struct arguments *arguments) {
+FILE*
+open_input(struct arguments *arguments)
+{
   if (arguments->input_source == INPUT_FILE) {
     FILE *input = fopen(arguments->input_file, "r");
     if (input == NULL) {
@@ -321,12 +344,16 @@ FILE* open_input(struct arguments *arguments) {
   }
 }
 
-void close_input(FILE *input) {
+void
+close_input(FILE *input)
+{
   if (input == stdin) return;
   fclose(input);
 }
 
-void lock_box(FILE *input, FILE *output) {
+void
+lock_box(FILE *input, FILE *output)
+{
   uint8_t nonce[NONCE_BYTES];
   struct chunk chunk;
   size_t nread;
@@ -416,7 +443,9 @@ abort:
   exit(EXIT_FAILURE);
 }
 
-void open_box(FILE *input, FILE *output) {
+void
+open_box(FILE *input, FILE *output)
+{
   uint8_t nonce[NONCE_BYTES];
   struct chunk chunk;
   size_t nread;
@@ -529,7 +558,9 @@ abort:
   exit(EXIT_FAILURE);
 }
 
-void hexDump (const char *desc, const void *addr, size_t len) {
+void
+hexDump(const char *desc, const void *addr, size_t len)
+{
     size_t i;
     uint8_t buff[17];
     uint8_t *pc = (uint8_t*)addr;

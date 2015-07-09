@@ -1,6 +1,7 @@
 #include "crypto_box.h"
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   arguments.key_source = RANDOM;
   argp_parse(&argp_parser, argc, argv, 0, 0, &arguments);
 
