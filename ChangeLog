@@ -8,6 +8,9 @@ Sun Jul 9 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box, open_box) [arguments.ct_format==HEX]:
 	Write/read nonce and chunks in hex.
 
+	* crypto_box.c (lock_box) <if (isatty(...))>: Issue warning only if
+	ciphertext would be binary.
+
 Sun Jul 8 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (determine_chunk_type): Declared.
 	* crypto_box.c (determine_chunk_type): Defined.

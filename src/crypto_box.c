@@ -366,8 +366,8 @@ lock_box(FILE *input, FILE *output)
 
   subkey = auth_subkey_malloc();
 
-  if (isatty(fileno(output)))
-    fprintf(stderr, "WARNING: Writing ciphertext to terminal.\n");
+  if (isatty(fileno(output)) && arguments.ct_format == BIN)
+    fprintf(stderr, "WARNING: Writing binary ciphertext to terminal.\n");
 
   /* new nonce */
   randombytes_buf(nonce, sizeof nonce);
