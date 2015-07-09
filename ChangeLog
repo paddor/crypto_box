@@ -5,6 +5,9 @@ Sun Jul 9 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (get_key) <case CMD>: Zero out key in command line
 	argument after reading it.
 
+	* crypto_box.c (lock_box, open_box) [arguments.ct_format==HEX]:
+	Write/read nonce and chunks in hex.
+
 Sun Jul 8 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (determine_chunk_type): Declared.
 	* crypto_box.c (determine_chunk_type): Defined.

@@ -7,6 +7,7 @@ News for Crypto Box 0.6.0
   semaphoreci every time new commits are pushed. One of these would be enough,
   but I'm still playing around to get a feeling of all of them.
 * Better help: Additional usages and a more detailed section below the options.
+* Option `-H`/`--hex` is now implemented. It'll write/read ciphertext in hex.
 * New values for chunk type. Decrypt old boxes first before upgrading.
 
 News for Crypto Box 0.5.0

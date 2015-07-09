@@ -374,9 +374,18 @@ lock_box(FILE *input, FILE *output)
   DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 
   /* print nonce */
-  if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
-    perror("Couldn't write ciphertext");
-    goto abort;
+  switch (arguments.ct_format) {
+    case BIN:
+      if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
+        perror("Couldn't write ciphertext");
+        goto abort;
+      }
+      break;
+    case HEX:
+      for(size_t i = 0; i < sizeof nonce; ++i) {
+        fprintf(output, "%02hhx", nonce[i]);
+      }
+      break;
   }
 
   init_chunk(&chunk);
@@ -423,9 +432,22 @@ lock_box(FILE *input, FILE *output)
     memcpy(previous_mac, CHUNK_MAC(chunk.data), MAC_BYTES); /* remember MAC */
 
     /* print MAC + chunk_type + ciphertext */
-    if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
-      perror("Couldn't write ciphertext");
-      goto abort;
+    switch (arguments.ct_format) {
+      case BIN:
+        if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
+          perror("Couldn't write ciphertext");
+          goto abort;
+        }
+        break;
+      case HEX:
+        for(size_t i = 0; i < chunk.used; ++i) {
+          int ret = fprintf(output, "%02hhx", chunk.data[i]);
+          if (ret < 0) {
+            perror("Couldn't write ciphertext");
+            goto abort;
+          }
+        }
+        break;
     }
 
     /* increment nonce */
@@ -459,10 +481,23 @@ open_box(FILE *input, FILE *output)
 
   subkey = auth_subkey_malloc();
 
-  /* read nonce for authentication subkey */
-  if (fread(&nonce, sizeof nonce, 1, input) < 1) {
-    fprintf(stderr, "Couldn't read ciphertext.\n");
-    exit(EXIT_FAILURE);
+  /* read nonce */
+  switch (arguments.ct_format) {
+    case BIN:
+      if (fread(&nonce, sizeof nonce, 1, input) < 1) {
+        fprintf(stderr, "Couldn't read ciphertext.\n");
+        exit(EXIT_FAILURE);
+      }
+      break;
+    case HEX:
+      for(size_t i = 0; i < sizeof nonce; ++i) {
+        int ret = fscanf(input, "%2hhx", nonce+i);
+        if(ret == EOF) {
+          perror("Couldn't read ciphertext.");
+          exit(EXIT_FAILURE);
+        }
+      }
+      break;
   }
 
   init_chunk(&chunk);
@@ -471,8 +506,21 @@ open_box(FILE *input, FILE *output)
     chunk.used = 0;
 
     /* read complete chunk, if possible */
-    nread = fread(&chunk.data[chunk.used], sizeof *chunk.data, CHUNK_CT_BYTES,
-        input);
+    switch (arguments.ct_format) {
+      case BIN:
+        nread = fread(&chunk.data[chunk.used], sizeof *chunk.data,
+            CHUNK_CT_BYTES, input);
+        break;
+      case HEX:
+        nread = 0;
+        for(size_t i = 0; i < CHUNK_CT_BYTES; ++i) {
+          if (fscanf(input, "%2hhx", &chunk.data[chunk.used + i]) == 1)
+            ++nread;
+          else
+            break;
+        }
+        break;
+    }
     chunk.used += nread;
     DEBUG_ONLY(hexDump("ciphertext chunk read", chunk.data, chunk.used));
 
