@@ -166,11 +166,11 @@ Poly1305 will ensure the integrity of your data. Never use encryption without
 authentication to verify the integrity of the encrypted data. If you don't care
 if someone tampers with your data, you might as well just send plaintext.
 
-### Memory locking
+### Memory Safety
 The memory used for the secret key is locked before the key is stored in it and
 zeroed out and unlocked before the programs exit. This applies to the randomly
-generated key and the one given on STDIN (with `-a`/`--ask`). It doesn't apply
-to the one given on the command line (see TODO).
+generated key and the one given on STDIN (with `-a`/`--ask`). The key given as
+a command line argument is zeroed out right after reading it (but not locked).
 
 ### Chunking
 Encryption and decryption are done in chunks. This means that only a small
@@ -255,7 +255,6 @@ can be used to encrypt up to 256KiB. So:
 
 ## TODO
 
-* lock and zero out key in arguments (possible?)
 * hex ciphertext (-H)
 
 ## License

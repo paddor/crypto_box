@@ -285,6 +285,7 @@ get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
       break;
     case CMD:
       get_key_from_str(arguments->key, key);
+      sodium_memzero(arguments->key, strlen(arguments->key));
       break;
     case ASK:
       fprintf (stderr, "Enter key: ");

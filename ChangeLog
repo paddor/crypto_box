@@ -2,6 +2,9 @@ Sun Jul 9 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c lock_box.c open_box.c: Use K&R style function
 	definitions.
 
+	* crypto_box.c (get_key) <case CMD>: Zero out key in command line
+	argument after reading it.
+
 Sun Jul 8 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (determine_chunk_type): Declared.
 	* crypto_box.c (determine_chunk_type): Defined.
