@@ -39,12 +39,6 @@ START_TEST(test_round_trip)
 
   if (pt1 == NULL || ct == NULL || pt2 == NULL) exit(EXIT_FAILURE);
 
-  /* unlink temporary files right away */
-  if(unlink(fname_ct) == -1 || unlink(fname_pt2) == -1) {
-    perror("Couldn't unlink temporary files");
-    exit(EXIT_FAILURE);
-  }
-
   /* generate random key */
   key = key_malloc();
   randombytes_buf(key, KEY_BYTES);
