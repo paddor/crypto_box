@@ -255,7 +255,7 @@ can be used to encrypt up to 256KiB. So:
 
 ## TODO
 
-* hex ciphertext (-H)
+* optimized/cleaner implementation of hex CT (-H)
 
 ## License
 
