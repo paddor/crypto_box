@@ -28,8 +28,8 @@ static void round_trip(void)
     perror("Couldn't create temporary file");
     exit(EXIT_FAILURE);
   }
-  printf("ciphertext file: %s\n", fname_ct);
-  printf("plaintext (2) file: %s\n", fname_pt2);
+  fprintf(stderr, "ciphertext file: %s\n", fname_ct);
+  fprintf(stderr, "plaintext (2) file: %s\n", fname_pt2);
 
   /* open/associate file descriptors with file streams (FILE*) */
   pt1 = fopen(input_file_name, "r");
