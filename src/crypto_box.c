@@ -356,6 +356,7 @@ void
 lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
+  uint8_t * nonce_hex;
   struct chunk chunk;
   size_t nread;
   int8_t chunk_type; /* first, last or in between */
@@ -382,9 +383,24 @@ lock_box(FILE *input, FILE *output)
       }
       break;
     case HEX:
-      for(size_t i = 0; i < sizeof nonce; ++i) {
-        fprintf(output, "%02hhx", nonce[i]);
+      nonce_hex = sodium_malloc(2 * sizeof nonce + 1);
+      if (nonce_hex == NULL) {
+        fprintf(stderr, "Couldn't allocate memory for hex nonce.\n");
+        goto abort;
       }
+      if (NULL == sodium_bin2hex((char *) nonce_hex, 2 * sizeof nonce + 1, nonce,
+            sizeof nonce)) {
+        fprintf(stderr, "Couldn't convert nonce to hex.\n");
+        sodium_free(nonce_hex);
+        goto abort;
+
+      }
+      if (fwrite(nonce_hex, 2 * sizeof nonce, 1, output) < 1) {
+        perror("Couldn't write ciphertext");
+        sodium_free(nonce_hex);
+        goto abort;
+      }
+      sodium_free(nonce_hex);
       break;
   }
 
