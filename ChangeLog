@@ -1,3 +1,6 @@
+Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
+	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
+
 Sun Jul 9 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c lock_box.c open_box.c: Use K&R style function
 	definitions.

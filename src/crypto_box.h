@@ -30,7 +30,7 @@
 #define CHUNK_CT(x) (x + MAC_BYTES)
 #define CHUNK_CT_LEN(x) (x - MAC_BYTES)
 #define CHUNK_TYPE_INDEX MAC_BYTES
-#define CHUNK_CT_BYTES 262144 /* 256 KiB */
+#define CHUNK_CT_BYTES 262144UL /* 256 KiB */
 #define CHUNK_PT_BYTES (CHUNK_CT_BYTES - MAC_BYTES - 1) /* 256 KiB - 17 */
 #define FIRST_CHUNK 1U
 #define LAST_CHUNK  2U
