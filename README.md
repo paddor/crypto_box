@@ -255,6 +255,9 @@ can be used to encrypt up to 256KiB. So:
 
 ## TODO
 
+* `cb_` prefix for functions ("crypto box")
+* refactor
+
 ## License
 
 ISC. See LICENSE file.
