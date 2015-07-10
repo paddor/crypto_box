@@ -356,7 +356,8 @@ void
 lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
-  uint8_t * nonce_hex;
+  uint8_t *hex_buf;
+  char *hex_result; /* result of bin->hex conversion */
   struct chunk chunk;
   size_t nread;
   int8_t chunk_type; /* first, last or in between */
@@ -365,8 +366,19 @@ lock_box(FILE *input, FILE *output)
   unsigned char previous_mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
 
+  /* memory for authentication subkeys */
   subkey = auth_subkey_malloc();
 
+  /* allocate memory for hex ciphertexts */
+  if (arguments.ct_format == HEX) {
+    hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
+    if (hex_buf == NULL) {
+      fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
+      goto abort_auth_subkey;
+    }
+  }
+
+  /* ciphertext to TTY warning */
   if (isatty(fileno(output)) && arguments.ct_format == BIN)
     fprintf(stderr, "WARNING: Writing binary ciphertext to terminal.\n");
 
@@ -379,28 +391,20 @@ lock_box(FILE *input, FILE *output)
     case BIN:
       if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
         perror("Couldn't write ciphertext");
-        goto abort;
+        goto abort_hex_buf;
       }
       break;
     case HEX:
-      nonce_hex = sodium_malloc(2 * sizeof nonce + 1);
-      if (nonce_hex == NULL) {
-        fprintf(stderr, "Couldn't allocate memory for hex nonce.\n");
-        goto abort;
-      }
-      if (NULL == sodium_bin2hex((char *) nonce_hex, 2 * sizeof nonce + 1, nonce,
-            sizeof nonce)) {
+      hex_result = sodium_bin2hex((char *) hex_buf, 2 * sizeof nonce + 1,
+          nonce, sizeof nonce);
+      if (hex_result == NULL) {
         fprintf(stderr, "Couldn't convert nonce to hex.\n");
-        sodium_free(nonce_hex);
-        goto abort;
-
+        goto abort_hex_buf;
       }
-      if (fwrite(nonce_hex, 2 * sizeof nonce, 1, output) < 1) {
+      if (fwrite(hex_buf, 2 * sizeof nonce, 1, output) < 1) {
         perror("Couldn't write ciphertext");
-        sodium_free(nonce_hex);
-        goto abort;
+        goto abort_hex_buf;
       }
-      sodium_free(nonce_hex);
       break;
   }
 
@@ -415,14 +419,14 @@ lock_box(FILE *input, FILE *output)
     chunk.used += nread;
     if (nread < CHUNK_PT_BYTES && ferror(input)) {
       fprintf(stderr, "Couldn't read plaintext.\n");
-      goto abort;
+      goto abort_chunk;
     }
     DEBUG_ONLY(hexDump("read plaintext chunk",
           CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
 
     chunk_type = determine_chunk_type(nread, CHUNK_PT_BYTES, is_first_chunk,
         input);
-    if (chunk_type == -1) goto abort;
+    if (chunk_type == -1) goto abort_chunk;
 
     /* set chunk type */
     chunk.data[CHUNK_TYPE_INDEX] = chunk_type;
@@ -452,16 +456,19 @@ lock_box(FILE *input, FILE *output)
       case BIN:
         if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
           perror("Couldn't write ciphertext");
-          goto abort;
+          goto abort_chunk;
         }
         break;
       case HEX:
-        for(size_t i = 0; i < chunk.used; ++i) {
-          int ret = fprintf(output, "%02hhx", chunk.data[i]);
-          if (ret < 0) {
-            perror("Couldn't write ciphertext");
-            goto abort;
-          }
+        hex_result = sodium_bin2hex((char *) hex_buf, 2 * chunk.used + 1,
+            chunk.data, chunk.used);
+        if (hex_result == NULL) {
+          fprintf(stderr, "Couldn't convert ciphertext to hex.\n");
+          goto abort_chunk;
+        }
+        if (fwrite(hex_buf, chunk.used * 2, 1, output) < 1) {
+          perror("Couldn't write ciphertext");
+          goto abort_chunk;
         }
         break;
     }
@@ -472,13 +479,17 @@ lock_box(FILE *input, FILE *output)
     /* not first chunk anymore */
     is_first_chunk = false;
   }
+  if (arguments.ct_format == HEX) sodium_free(hex_buf);
   sodium_free(subkey);
   free_chunk(&chunk);
   return;
 
-abort:
-  sodium_free(subkey);
+abort_chunk:
   free_chunk(&chunk);
+abort_hex_buf:
+  sodium_free(hex_buf);
+abort_auth_subkey:
+  sodium_free(subkey);
   exit(EXIT_FAILURE);
 }
 
@@ -486,6 +497,10 @@ void
 open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
+  uint8_t *hex_buf;
+  int hex_result; /* result of hex->bin conversion */
+  size_t bin_len; /* length of binary data written during conversion  */
+  const char * hex_end; /* pointer to last parsed hex character */
   struct chunk chunk;
   size_t nread;
   int8_t chunk_type; /* what it should be, from open_box's view */
@@ -495,23 +510,37 @@ open_box(FILE *input, FILE *output)
   unsigned char previous_mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
 
+  /* memory for authentication subkeys */
   subkey = auth_subkey_malloc();
+
+  /* allocate memory for hex ciphertexts */
+  if (arguments.ct_format == HEX) {
+    hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
+    if (hex_buf == NULL) {
+      fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
+      goto abort_auth_subkey;
+    }
+  }
 
   /* read nonce */
   switch (arguments.ct_format) {
     case BIN:
       if (fread(&nonce, sizeof nonce, 1, input) < 1) {
         fprintf(stderr, "Couldn't read ciphertext.\n");
-        exit(EXIT_FAILURE);
+        goto abort_auth_subkey;
       }
       break;
     case HEX:
-      for(size_t i = 0; i < sizeof nonce; ++i) {
-        int ret = fscanf(input, "%2hhx", nonce+i);
-        if(ret == EOF) {
-          perror("Couldn't read ciphertext.");
-          exit(EXIT_FAILURE);
-        }
+      if (fread(hex_buf, sizeof nonce * 2, 1, input) < 1) {
+        fprintf(stderr, "Couldn't read ciphertext.\n");
+        goto abort_hex_buf;
+      }
+
+      hex_result = sodium_hex2bin(nonce, sizeof nonce, (const char*) hex_buf,
+        sizeof nonce * 2, NULL, &bin_len, NULL);
+      if (hex_result != 0 || bin_len < sizeof nonce) {
+        fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+        goto abort_hex_buf;
       }
       break;
   }
@@ -524,16 +553,22 @@ open_box(FILE *input, FILE *output)
     /* read complete chunk, if possible */
     switch (arguments.ct_format) {
       case BIN:
-        nread = fread(&chunk.data[chunk.used], sizeof *chunk.data,
-            CHUNK_CT_BYTES, input);
+        nread = fread(chunk.data, sizeof *chunk.data, chunk.size, input);
         break;
       case HEX:
-        nread = 0;
-        for(size_t i = 0; i < CHUNK_CT_BYTES; ++i) {
-          if (fscanf(input, "%2hhx", &chunk.data[chunk.used + i]) == 1)
-            ++nread;
-          else
-            break;
+        nread = fread(hex_buf, 2, CHUNK_CT_BYTES, input);
+        if (nread < CHUNK_CT_BYTES) {
+          if (ferror(input)) {
+            fprintf(stderr, "Couldn't read ciphertext.\n");
+            goto abort_chunk;
+          }
+        }
+
+        hex_result = sodium_hex2bin(chunk.data, chunk.size,
+            (const char*) hex_buf, nread*2, NULL, &bin_len, &hex_end);
+        if (hex_result != 0 || bin_len < nread) {
+          fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+          goto abort_chunk;
         }
         break;
     }
@@ -543,17 +578,17 @@ open_box(FILE *input, FILE *output)
     /* truncated header */
     if (nread <= 17) { /* MAC + chunk_type = 17 */
       fprintf(stderr, "Ciphertext's has been truncated.\n");
-      goto abort;
+      goto abort_chunk;
     }
 
     if (nread < (CHUNK_CT_BYTES) && ferror(input)) {
       fprintf(stderr, "Couldn't read ciphertext.\n");
-      goto abort;
+      goto abort_chunk;
     }
 
     chunk_type = determine_chunk_type(nread, CHUNK_CT_BYTES, is_first_chunk,
         input);
-    if (chunk_type == -1) goto abort;
+    if (chunk_type == -1) goto abort_chunk;
 
     /* compute MAC */
     crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
@@ -573,7 +608,7 @@ open_box(FILE *input, FILE *output)
     if (sodium_memcmp(mac_should, CHUNK_MAC(chunk.data), MAC_BYTES) != 0) {
       fprintf(stderr, "Ciphertext couldn't be verified. It has been "
         "tampered with or you're using the wrong key.\n");
-      goto abort;
+      goto abort_chunk;
     }
 
     /* decrypt */
@@ -596,14 +631,14 @@ open_box(FILE *input, FILE *output)
         fprintf(stderr, "Ciphertext's has been truncated.\n");
       }
 
-      goto abort;
+      goto abort_chunk;
     }
 
     /* print plaintext */
     if (fwrite(CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used), 1, output) < 1)
     {
       perror("Couldn't write plaintext");
-      goto abort;
+      goto abort_chunk;
     }
 
     /* increment nonce */
@@ -613,13 +648,17 @@ open_box(FILE *input, FILE *output)
     is_first_chunk = false;
   }
 
+  if (arguments.ct_format == HEX) sodium_free(hex_buf);
   sodium_free(subkey);
   free_chunk(&chunk);
   return;
 
-abort:
-  sodium_free(subkey);
+abort_chunk:
   free_chunk(&chunk);
+abort_hex_buf:
+  sodium_free(hex_buf);
+abort_auth_subkey:
+  sodium_free(subkey);
   exit(EXIT_FAILURE);
 }
 

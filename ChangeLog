@@ -1,6 +1,10 @@
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 
+	* crypto_box.c (lock_box, open_box): Optimize conversion to and from
+	hex. Convert whole chunks using sodium_hex2bin() and sodium_bin2hex().
+	Further simplify cleanup (free()ing) using different labels and goto.
+
 Sun Jul 9 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c lock_box.c open_box.c: Use K&R style function
 	definitions.
