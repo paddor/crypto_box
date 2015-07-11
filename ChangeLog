@@ -18,6 +18,10 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (read_nonce): Solely depend on hex_buf parameter to
 	determine if CT is hex or not.
 
+	* crypto_box.c (open_box): Extract verification of chunk to
+	verify_ct_chunk().
+	* crypto_box.c (verify_ct_chunk): Defined.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

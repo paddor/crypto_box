@@ -570,6 +570,36 @@ int read_ct_chunk(struct chunk *chunk, uint8_t *hex_buf, FILE *input)
   return 0;
 }
 
+int
+verify_ct_chunk(
+    struct chunk const * const chunk,
+    _Bool is_first_chunk,
+    uint8_t const * const nonce,
+    uint8_t const * const key,
+    uint8_t *subkey,
+    crypto_onetimeauth_state * const auth_state)
+{
+  static unsigned char mac[MAC_BYTES];
+
+  /* compute MAC */
+  crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
+  crypto_onetimeauth_init(auth_state, subkey);
+  crypto_onetimeauth_update(auth_state, CHUNK_CT(chunk->data),
+      CHUNK_CT_LEN(chunk->used));
+  if (!is_first_chunk) {
+    /* include previous MAC */
+    crypto_onetimeauth_update(auth_state, mac, MAC_BYTES);
+  }
+  DEBUG_ONLY(hexDump("read chunk MAC", CHUNK_MAC(chunk->data),
+        MAC_BYTES));
+  DEBUG_ONLY(hexDump("calculated chunk MAC", mac,
+        MAC_BYTES));
+  crypto_onetimeauth_final(auth_state, mac);
+
+  /* compare MACs */
+  return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MAC_BYTES);
+}
+
 void
 open_box(FILE *input, FILE *output)
 {
@@ -579,8 +609,6 @@ open_box(FILE *input, FILE *output)
   int8_t chunk_type; /* what it should be, from open_box's view */
   _Bool is_first_chunk = true;
   unsigned char *subkey;
-  unsigned char mac_should[MAC_BYTES];
-  unsigned char previous_mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
 
   /* memory for authentication subkeys */
@@ -604,22 +632,8 @@ open_box(FILE *input, FILE *output)
         input);
     if (chunk_type == -1) goto abort_chunk;
 
-    /* compute MAC */
-    crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
-    crypto_onetimeauth_init(&auth_state, subkey);
-    crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
-        CHUNK_CT_LEN(chunk.used));
-    if (!is_first_chunk) {
-      /* include previous MAC */
-      crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
-    }
-    DEBUG_ONLY(hexDump("calculated chunk MAC", CHUNK_MAC(chunk.data),
-          MAC_BYTES));
-    crypto_onetimeauth_final(&auth_state, mac_should);
-    memcpy(previous_mac, mac_should, MAC_BYTES); /* remember MAC */
-
     /* verify MAC */
-    if (sodium_memcmp(mac_should, CHUNK_MAC(chunk.data), MAC_BYTES) != 0) {
+    if (verify_ct_chunk(&chunk, is_first_chunk, nonce, key, subkey, &auth_state) == -1) {
       fprintf(stderr, "Ciphertext couldn't be verified. It has been "
         "tampered with or you're using the wrong key.\n");
       goto abort_chunk;
