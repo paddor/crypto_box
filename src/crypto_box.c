@@ -634,6 +634,17 @@ check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
   return -1;
 }
 
+int
+write_pt_chunk(struct chunk const * const chunk, FILE *output)
+{
+  if (fwrite(CHUNK_PT(chunk->data), CHUNK_PT_LEN(chunk->used), 1, output) < 1)
+  {
+    perror("Couldn't write plaintext");
+    return -1;
+  }
+  return 0;
+}
+
 void
 open_box(FILE *input, FILE *output)
 {
@@ -679,11 +690,7 @@ open_box(FILE *input, FILE *output)
       goto abort_chunk;
 
     /* print plaintext */
-    if (fwrite(CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used), 1, output) < 1)
-    {
-      perror("Couldn't write plaintext");
-      goto abort_chunk;
-    }
+    if (write_pt_chunk(&chunk, output) == -1) goto abort_chunk;
 
     /* increment nonce */
     sodium_increment(nonce, sizeof nonce);
