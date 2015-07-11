@@ -20,6 +20,7 @@ init_chunk(struct chunk *chunk)
   }
   chunk->used = 0;
   chunk->size = CHUNK_CT_BYTES;
+  chunk->is_first_chunk = true;
 }
 
 void
@@ -46,13 +47,15 @@ auth_subkey_malloc()
 
 
 int8_t
-determine_chunk_type(size_t nread, size_t chunk_bytes,
-    _Bool is_first_chunk, FILE *input)
+determine_chunk_type(
+    struct chunk const * const chunk,
+    size_t chunk_bytes,
+    FILE *input)
 {
 
   int c;
   uint8_t chunk_type = 0; /* nothing special about this chunk for now */
-  if (nread == chunk_bytes) {
+  if (chunk->used == chunk_bytes) {
     /* check if we're right before EOF */
     if ((c = getc(input)) == EOF) {
       /* this is the last chunk */
@@ -65,12 +68,12 @@ determine_chunk_type(size_t nread, size_t chunk_bytes,
       }
 
       /* might be the first */
-      if (is_first_chunk) chunk_type = FIRST_CHUNK;
+      if (chunk->is_first_chunk) chunk_type = FIRST_CHUNK;
     }
   } else if (feof(input)) { /* already hit EOF */
      /* this is the last chunk */
     chunk_type = LAST_CHUNK;
-  } else if (is_first_chunk) {
+  } else if (chunk->is_first_chunk) {
     /* Since fread() guarantees that it reads the specified number of bytes
      * if possible, this code should never be reached. If fread() read less
      * bytes, it must have hit EOF already, which is handled above.
@@ -380,7 +383,6 @@ lock_box(FILE *input, FILE *output)
   struct chunk chunk;
   size_t nread;
   int8_t chunk_type; /* first, last or in between */
-  _Bool is_first_chunk = true;
   unsigned char *subkey;
   unsigned char previous_mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
@@ -437,8 +439,7 @@ lock_box(FILE *input, FILE *output)
     DEBUG_ONLY(hexDump("read plaintext chunk",
           CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
 
-    chunk_type = determine_chunk_type(nread, CHUNK_PT_BYTES, is_first_chunk,
-        input);
+    chunk_type = determine_chunk_type(&chunk, CHUNK_PT_BYTES, input);
     if (chunk_type == -1) goto abort_chunk;
 
     /* set chunk type */
@@ -456,7 +457,7 @@ lock_box(FILE *input, FILE *output)
     crypto_onetimeauth_init(&auth_state, subkey);
     crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
         CHUNK_CT_LEN(chunk.used));
-    if (!is_first_chunk) {
+    if (!chunk.is_first_chunk) {
       /* include previous MAC */
       crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
     }
@@ -490,7 +491,7 @@ lock_box(FILE *input, FILE *output)
     sodium_increment(nonce, sizeof nonce);
 
     /* not first chunk anymore */
-    is_first_chunk = false;
+    chunk.is_first_chunk = false;
   }
   sodium_free(hex_buf);
   sodium_free(subkey);
@@ -572,7 +573,6 @@ int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
 int
 verify_ct_chunk(
     struct chunk const * const chunk,
-    _Bool is_first_chunk,
     uint8_t const * const nonce,
     uint8_t const * const key,
     uint8_t *subkey,
@@ -585,10 +585,8 @@ verify_ct_chunk(
   crypto_onetimeauth_init(auth_state, subkey);
   crypto_onetimeauth_update(auth_state, CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used));
-  if (!is_first_chunk) {
-    /* include previous MAC */
+  if (!chunk->is_first_chunk) /* include previous MAC */
     crypto_onetimeauth_update(auth_state, mac, MAC_BYTES);
-  }
   DEBUG_ONLY(hexDump("read chunk MAC", CHUNK_MAC(chunk->data),
         MAC_BYTES));
   DEBUG_ONLY(hexDump("calculated chunk MAC", mac,
@@ -648,7 +646,6 @@ int
 decrypt_next_chunk(
     struct chunk *chunk,
     uint8_t *hex_buf,
-    _Bool is_first_chunk,
     uint8_t * const nonce,
     uint8_t const * const key,
     uint8_t *subkey,
@@ -665,7 +662,7 @@ decrypt_next_chunk(
   if (read_ct_chunk(chunk, hex_buf, input) == -1) return -1;
 
   /* verify MAC */
-  if (verify_ct_chunk(chunk, is_first_chunk, nonce, key, subkey, auth_state) == -1) {
+  if (verify_ct_chunk(chunk, nonce, key, subkey, auth_state) == -1) {
     fprintf(stderr, "Ciphertext couldn't be verified. It has been "
       "tampered with or you're using the wrong key.\n");
     return -1;
@@ -675,8 +672,7 @@ decrypt_next_chunk(
   decrypt_chunk(chunk, nonce, key);
 
   /* check chunk type */
-  chunk_type = determine_chunk_type(chunk->used, CHUNK_CT_BYTES,
-      is_first_chunk, input);
+  chunk_type = determine_chunk_type(chunk, CHUNK_CT_BYTES, input);
   if (chunk_type == -1 || check_chunk_type(chunk, chunk_type) == -1)
     return -1;
 
@@ -695,7 +691,6 @@ open_box(FILE *input, FILE *output)
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
   struct chunk chunk;
-  _Bool is_first_chunk = true;
   unsigned char *subkey = NULL;
   crypto_onetimeauth_state auth_state;
 
@@ -709,11 +704,11 @@ open_box(FILE *input, FILE *output)
   if (read_nonce(nonce, hex_buf, input) == -1) goto abort;
 
   init_chunk(&chunk);
-  if(decrypt_next_chunk(&chunk, hex_buf, is_first_chunk, nonce, key, subkey,
+  if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
       &auth_state, input, output) == -1) goto abort;
-  is_first_chunk = false; /* not first chunk anymore */
+  chunk.is_first_chunk = true; /* not first chunk anymore */
   while(!feof(input)) {
-    if(decrypt_next_chunk(&chunk, hex_buf, is_first_chunk, nonce, key, subkey,
+    if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
         &auth_state, input, output) == -1) goto abort;
   }
 

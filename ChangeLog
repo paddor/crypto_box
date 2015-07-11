@@ -41,6 +41,9 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	decrypt_next_chunk().
 	* crypto_box.c (decrypt_next_chunk): Defined.
 
+	* crypto_box.h (struct chunk): _Bool is_first_chunk added. Users
+	changed.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

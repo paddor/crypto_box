@@ -39,6 +39,7 @@ struct chunk {
   uint8_t *data; /* MAC + chunk_type + {PT,CT} */
   size_t used;
   size_t size;
+  _Bool is_first_chunk;
 };
 
 struct arguments {
@@ -58,8 +59,8 @@ extern void init_chunk(struct chunk *chunk);
 extern void free_chunk(struct chunk *chunk);
 extern int hex_ct_malloc(uint8_t ** const hex_buf);
 extern unsigned char *auth_subkey_malloc();
-extern int8_t determine_chunk_type(size_t nread, size_t chunk_bytes, _Bool
-    is_first_chunk, FILE *input);
+extern int8_t determine_chunk_type(struct chunk const * const, size_t
+    chunk_bytes, FILE *input);
 extern void get_key(const struct arguments * const arguments, uint8_t
     key[KEY_BYTES]);
 extern uint8_t *key_malloc();
