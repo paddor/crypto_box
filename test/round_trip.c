@@ -7,10 +7,7 @@
 static char *input_file_name;
 static void round_trip(void)
 {
-  if (sodium_init() == -1) {
-    fprintf(stderr, "unable to initialize libsodium\n");
-    exit(EXIT_FAILURE);
-  }
+  crypto_box_init();
 
   int fd_ct, fd_pt2;
   FILE *pt1, *ct, *pt2;

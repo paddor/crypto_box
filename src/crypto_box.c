@@ -1,5 +1,12 @@
 #include "crypto_box.h"
 
+void crypto_box_init(void) {
+  if (sodium_init() == -1) {
+    fprintf(stderr, "unable to initialize libsodium\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
 void
 init_chunk(struct chunk *chunk)
 {

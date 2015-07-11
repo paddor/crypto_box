@@ -1,3 +1,8 @@
+Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
+	* lock_box.c open_box.c (main): Extract sodium initialization.
+	* crypto_box.h (crypto_box_init): Declared.
+	* crypto_box.c (crypto_box_init): Defined.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

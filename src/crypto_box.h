@@ -53,6 +53,7 @@ struct arguments {
 extern struct argp argp_parser;
 struct arguments arguments;
 uint8_t *key;
+extern void crypto_box_init(void);
 extern void init_chunk(struct chunk *chunk);
 extern void free_chunk(struct chunk *chunk);
 extern unsigned char *auth_subkey_malloc();
