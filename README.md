@@ -257,6 +257,15 @@ can be used to encrypt up to 256KiB. So:
 
 * `cb_` prefix for functions ("crypto box")
 * refactor
+* return -1, -2, ... from lock_box() and open_box(), exit() in main()
+* more tests
+  - tampered ciphertext
+    * incomplete chunk
+    * replaced byte sequence
+    * completely missing chunk (head, middle, tail)
+    * truncated to < 17 bytes, 0 bytes
+    * no nonce
+    * appended chunk
 
 ## License
 
