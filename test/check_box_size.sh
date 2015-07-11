@@ -1,7 +1,10 @@
-#!/bin/bash -x
+#!/bin/sh -x
 set -e
 lock_box=../lock_box
 TXT_FILE=`dirname $0`/lorem.txt
-BOX_FILE=`mktemp -t lorem.box.XXX`
+BOX_FILE=`mktemp -t lorem.box.XXXXXX`
 $lock_box < $TXT_FILE > $BOX_FILE
-(( `wc -c < $TXT_FILE` == `wc -c < $BOX_FILE` - 41))
+TXT_FILE_SIZE=`wc -c < $TXT_FILE`
+BOX_FILE_SIZE=`wc -c < $BOX_FILE`
+BOX_FILE_SIZE_SHOULD=`expr $TXT_FILE_SIZE + 41`
+[ "$BOX_FILE_SIZE_SHOULD" -eq "$BOX_FILE_SIZE" ]
