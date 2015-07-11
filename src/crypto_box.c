@@ -512,26 +512,23 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
 {
   size_t bin_len; /* length of binary data written during conversion  */
   int hex_result; /* result of hex->bin conversion */
-  switch (arguments.ct_format) {
-    case BIN:
-      if (fread(nonce, NONCE_BYTES, 1, input) < 1) {
-        fprintf(stderr, "Couldn't read ciphertext.\n");
-        return -1;
-      }
-      break;
-    case HEX:
-      if (fread(hex_buf, NONCE_BYTES * 2, 1, input) < 1) {
-        fprintf(stderr, "Couldn't read ciphertext.\n");
-        return -1;
-      }
+  if (hex_buf == NULL) {
+    if (fread(nonce, NONCE_BYTES, 1, input) < 1) {
+      fprintf(stderr, "Couldn't read ciphertext.\n");
+      return -1;
+    }
+  } else {
+    if (fread(hex_buf, NONCE_BYTES * 2, 1, input) < 1) {
+      fprintf(stderr, "Couldn't read ciphertext.\n");
+      return -1;
+    }
 
-      hex_result = sodium_hex2bin(nonce, NONCE_BYTES, (const char*) hex_buf,
-        NONCE_BYTES * 2, NULL, &bin_len, NULL);
-      if (hex_result != 0 || bin_len < NONCE_BYTES) {
-        fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
-        return -1;
-      }
-      break;
+    hex_result = sodium_hex2bin(nonce, NONCE_BYTES, (const char*) hex_buf,
+      NONCE_BYTES * 2, NULL, &bin_len, NULL);
+    if (hex_result != 0 || bin_len < NONCE_BYTES) {
+      fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+      return -1;
+    }
   }
   return 0;
 }
