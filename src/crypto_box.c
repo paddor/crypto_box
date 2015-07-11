@@ -533,7 +533,7 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   return 0;
 }
 
-int read_ct_chunk(struct chunk *chunk, uint8_t *hex_buf, FILE *input)
+int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
 {
   if (hex_buf == NULL) {
     chunk->used = fread(chunk->data, sizeof *chunk->data, chunk->size, input);
