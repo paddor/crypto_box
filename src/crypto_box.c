@@ -361,6 +361,7 @@ close_input(FILE *input)
 
 int
 hex_ct_malloc(uint8_t ** const hex_buf) {
+  *hex_buf = NULL;
   if (arguments.ct_format != HEX) return 0;
 
   *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
