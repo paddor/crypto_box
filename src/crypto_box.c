@@ -597,7 +597,7 @@ open_box(FILE *input, FILE *output)
     /* recycle chunk */
     chunk.used = 0;
 
-    /* read complete chunk, if possible */
+    /* read chunk */
     if (read_ct_chunk(&chunk, hex_buf, input) == -1) goto abort_chunk;
 
     chunk_type = determine_chunk_type(chunk.used, CHUNK_CT_BYTES, is_first_chunk,
