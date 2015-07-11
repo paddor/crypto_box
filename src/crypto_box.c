@@ -389,7 +389,7 @@ lock_box(FILE *input, FILE *output)
   subkey = auth_subkey_malloc();
 
   /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&hex_buf) == -1) goto abort_hex_buf;
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort_auth_subkey;
 
   /* ciphertext to TTY warning */
   if (isatty(fileno(output)) && arguments.ct_format == BIN)
@@ -527,7 +527,7 @@ open_box(FILE *input, FILE *output)
   subkey = auth_subkey_malloc();
 
   /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&hex_buf) == -1) goto abort_hex_buf;
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort_auth_subkey;
 
   /* read nonce */
   switch (arguments.ct_format) {
