@@ -22,6 +22,10 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	verify_ct_chunk().
 	* crypto_box.c (verify_ct_chunk): Defined.
 
+	* crypto_box.c (open_box): Extract decryption of chunk to
+	decrypt_chunk().
+	* crypto_box.c (decrypt_chunk): Defined.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

@@ -601,6 +601,19 @@ verify_ct_chunk(
 }
 
 void
+decrypt_chunk(
+    struct chunk * const chunk,
+    uint8_t const * const nonce,
+    uint8_t const * const key)
+{
+  crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk->data), CHUNK_CT(chunk->data),
+      CHUNK_CT_LEN(chunk->used), nonce, 1, key); /* 1 = initial counter */
+
+  DEBUG_ONLY(hexDump("plain text", CHUNK_PT(chunk->data),
+      CHUNK_PT_LEN(chunk->used)));
+}
+
+void
 open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
@@ -640,10 +653,7 @@ open_box(FILE *input, FILE *output)
     }
 
     /* decrypt */
-    crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk.data), CHUNK_CT(chunk.data),
-        CHUNK_CT_LEN(chunk.used), nonce, 1, key); /* 1 = initial counter */
-    DEBUG_ONLY(hexDump("plain text", CHUNK_PT(chunk.data),
-        CHUNK_PT_LEN(chunk.used)));
+    decrypt_chunk(&chunk, nonce, key);
 
     /* check chunk type */
     if (chunk.data[CHUNK_TYPE_INDEX] != chunk_type) {
