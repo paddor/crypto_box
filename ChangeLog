@@ -34,6 +34,9 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	write_pt_chunk().
 	* crypto_box.c (write_pt_chunk): Defined.
 
+	* crypto_box.c (lock_box, open_box): Initialize hex_buf to NULL and
+	sodium_free() unconditionally.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

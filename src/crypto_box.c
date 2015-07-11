@@ -362,7 +362,6 @@ close_input(FILE *input)
 int
 hex_ct_malloc(uint8_t ** const hex_buf)
 {
-  *hex_buf = NULL;
   if (arguments.ct_format != HEX) return 0;
 
   *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
@@ -376,7 +375,7 @@ void
 lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
-  uint8_t *hex_buf;
+  uint8_t *hex_buf = NULL;
   char *hex_result; /* result of bin->hex conversion */
   struct chunk chunk;
   size_t nread;
@@ -493,7 +492,7 @@ lock_box(FILE *input, FILE *output)
     /* not first chunk anymore */
     is_first_chunk = false;
   }
-  if (arguments.ct_format == HEX) sodium_free(hex_buf);
+  sodium_free(hex_buf);
   sodium_free(subkey);
   free_chunk(&chunk);
   return;
@@ -649,7 +648,7 @@ void
 open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
-  uint8_t *hex_buf;
+  uint8_t *hex_buf = NULL;
   struct chunk chunk;
   int8_t chunk_type; /* what it should be, from open_box's view */
   _Bool is_first_chunk = true;
@@ -699,7 +698,7 @@ open_box(FILE *input, FILE *output)
     is_first_chunk = false;
   }
 
-  if (arguments.ct_format == HEX) sodium_free(hex_buf);
+  sodium_free(hex_buf);
   sodium_free(subkey);
   free_chunk(&chunk);
   return;
