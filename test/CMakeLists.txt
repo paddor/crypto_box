@@ -3,6 +3,7 @@ INCLUDE (FindPkgConfig)
 
 # REQUIRED LIBRARIES
 pkg_check_modules(LIBCHECK REQUIRED check)
+include_directories(${LIBCHECK_INCLUDE_DIRS})
 
 # TEST EXECUTABLES
 add_executable(check_sanity check_sanity.c)

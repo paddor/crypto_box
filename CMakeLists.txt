@@ -25,6 +25,7 @@ INCLUDE (FindPkgConfig)
 
 # REQUIRED LIBRARIES
 pkg_check_modules(LIBSODIUM REQUIRED libsodium)
+include_directories(${LIBSODIUM_INCLUDE_DIRS})
 
 # HEADERS
 CHECK_INCLUDE_FILES("stdio.h" HAVE_STDIO_H)
@@ -67,7 +68,7 @@ endif()
 if(NOT HAVE_MEMORY_H)
 	message(FATAL_ERROR "Couldn't find memory.h")
 endif()
-if(NOT HAVE_ARGP_H)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Linux" AND NOT HAVE_ARGP_H)
 	message(FATAL_ERROR "Couldn't find argp.h")
 endif()
 
@@ -99,11 +100,11 @@ add_executable(open_box src/open_box.c $<TARGET_OBJECTS:crypto_box.o>)
 target_link_libraries(lock_box PRIVATE ${LIBSODIUM_LDFLAGS})
 target_link_libraries(open_box PRIVATE ${LIBSODIUM_LDFLAGS})
 
-# OSX
-if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+# non-Linux systems like OSX and OpenBSD
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   find_library(HAVE_LIBARGP argp)
   if(NOT HAVE_LIBARGP)
-    message(FATAL_ERROR "Couldn't find argp! Install with: brew install argp-standalone")
+    message(FATAL_ERROR "Couldn't find argp! Try installing 'argp-standalone'.")
   endif()
 
   # linking
