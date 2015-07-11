@@ -613,6 +613,27 @@ decrypt_chunk(
       CHUNK_PT_LEN(chunk->used)));
 }
 
+int
+check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
+{
+  if (chunk->data[CHUNK_TYPE_INDEX] == chunk_type) return 0;
+
+  /* Tail truncation, is the only case that might go undetected through MAC
+   * verification above. So let's print a nice error message.
+   *
+   * Any other case is impossible, as the previous MAC verification would
+   * have detected it
+   */
+  if ((chunk->data[CHUNK_TYPE_INDEX] == 0 ||
+        chunk->data[CHUNK_TYPE_INDEX] == FIRST_CHUNK)
+      && chunk_type == LAST_CHUNK) {
+
+    fprintf(stderr, "Ciphertext's has been truncated.\n");
+  }
+
+  return -1;
+}
+
 void
 open_box(FILE *input, FILE *output)
 {
@@ -641,10 +662,6 @@ open_box(FILE *input, FILE *output)
     /* read chunk */
     if (read_ct_chunk(&chunk, hex_buf, input) == -1) goto abort_chunk;
 
-    chunk_type = determine_chunk_type(chunk.used, CHUNK_CT_BYTES, is_first_chunk,
-        input);
-    if (chunk_type == -1) goto abort_chunk;
-
     /* verify MAC */
     if (verify_ct_chunk(&chunk, is_first_chunk, nonce, key, subkey, &auth_state) == -1) {
       fprintf(stderr, "Ciphertext couldn't be verified. It has been "
@@ -656,21 +673,10 @@ open_box(FILE *input, FILE *output)
     decrypt_chunk(&chunk, nonce, key);
 
     /* check chunk type */
-    if (chunk.data[CHUNK_TYPE_INDEX] != chunk_type) {
-      /* Tail truncation, is the only case that might go undetected through MAC
-       * verification above. So let's print a nice error message.
-       *
-       * Any other case is impossible, as the previous MAC verification would
-       * have detected it
-       */
-      if ((chunk.data[CHUNK_TYPE_INDEX] == 0 ||
-            chunk.data[CHUNK_TYPE_INDEX] == FIRST_CHUNK)
-          && chunk_type == LAST_CHUNK) {
-        fprintf(stderr, "Ciphertext's has been truncated.\n");
-      }
-
+    chunk_type = determine_chunk_type(chunk.used, CHUNK_CT_BYTES,
+        is_first_chunk, input);
+    if (chunk_type == -1 || check_chunk_type(&chunk, chunk_type) == -1)
       goto abort_chunk;
-    }
 
     /* print plaintext */
     if (fwrite(CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used), 1, output) < 1)
