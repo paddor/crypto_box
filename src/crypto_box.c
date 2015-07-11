@@ -644,58 +644,77 @@ write_pt_chunk(struct chunk const * const chunk, FILE *output)
   return 0;
 }
 
+int
+decrypt_next_chunk(
+    struct chunk *chunk,
+    uint8_t *hex_buf,
+    _Bool is_first_chunk,
+    uint8_t * const nonce,
+    uint8_t const * const key,
+    uint8_t *subkey,
+    crypto_onetimeauth_state * const auth_state,
+    FILE *input,
+    FILE *output)
+{
+  int8_t chunk_type; /* what it should be, from open_box's view */
+
+  /* recycle chunk */
+  chunk->used = 0;
+
+  /* read chunk */
+  if (read_ct_chunk(chunk, hex_buf, input) == -1) return -1;
+
+  /* verify MAC */
+  if (verify_ct_chunk(chunk, is_first_chunk, nonce, key, subkey, auth_state) == -1) {
+    fprintf(stderr, "Ciphertext couldn't be verified. It has been "
+      "tampered with or you're using the wrong key.\n");
+    return -1;
+  }
+
+  /* decrypt */
+  decrypt_chunk(chunk, nonce, key);
+
+  /* check chunk type */
+  chunk_type = determine_chunk_type(chunk->used, CHUNK_CT_BYTES,
+      is_first_chunk, input);
+  if (chunk_type == -1 || check_chunk_type(chunk, chunk_type) == -1)
+    return -1;
+
+  /* print plaintext */
+  if (write_pt_chunk(chunk, output) == -1) return -1;
+
+  /* increment nonce */
+  sodium_increment(nonce, sizeof nonce);
+
+  return 0;
+}
+
 void
 open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
   struct chunk chunk;
-  int8_t chunk_type; /* what it should be, from open_box's view */
   _Bool is_first_chunk = true;
-  unsigned char *subkey;
+  unsigned char *subkey = NULL;
   crypto_onetimeauth_state auth_state;
 
   /* memory for authentication subkeys */
   subkey = auth_subkey_malloc();
 
   /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&hex_buf) == -1) goto abort_auth_subkey;
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort;
 
   /* read nonce */
-  if (read_nonce(nonce, hex_buf, input) == -1) goto abort_hex_buf;
+  if (read_nonce(nonce, hex_buf, input) == -1) goto abort;
 
   init_chunk(&chunk);
+  if(decrypt_next_chunk(&chunk, hex_buf, is_first_chunk, nonce, key, subkey,
+      &auth_state, input, output) == -1) goto abort;
+  is_first_chunk = false; /* not first chunk anymore */
   while(!feof(input)) {
-    /* recycle chunk */
-    chunk.used = 0;
-
-    /* read chunk */
-    if (read_ct_chunk(&chunk, hex_buf, input) == -1) goto abort_chunk;
-
-    /* verify MAC */
-    if (verify_ct_chunk(&chunk, is_first_chunk, nonce, key, subkey, &auth_state) == -1) {
-      fprintf(stderr, "Ciphertext couldn't be verified. It has been "
-        "tampered with or you're using the wrong key.\n");
-      goto abort_chunk;
-    }
-
-    /* decrypt */
-    decrypt_chunk(&chunk, nonce, key);
-
-    /* check chunk type */
-    chunk_type = determine_chunk_type(chunk.used, CHUNK_CT_BYTES,
-        is_first_chunk, input);
-    if (chunk_type == -1 || check_chunk_type(&chunk, chunk_type) == -1)
-      goto abort_chunk;
-
-    /* print plaintext */
-    if (write_pt_chunk(&chunk, output) == -1) goto abort_chunk;
-
-    /* increment nonce */
-    sodium_increment(nonce, sizeof nonce);
-
-    /* not first chunk anymore */
-    is_first_chunk = false;
+    if(decrypt_next_chunk(&chunk, hex_buf, is_first_chunk, nonce, key, subkey,
+        &auth_state, input, output) == -1) goto abort;
   }
 
   sodium_free(hex_buf);
@@ -703,11 +722,9 @@ open_box(FILE *input, FILE *output)
   free_chunk(&chunk);
   return;
 
-abort_chunk:
+abort:
   free_chunk(&chunk);
-abort_hex_buf:
   sodium_free(hex_buf);
-abort_auth_subkey:
   sodium_free(subkey);
   exit(EXIT_FAILURE);
 }
