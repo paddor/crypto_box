@@ -56,6 +56,7 @@ uint8_t *key;
 extern void crypto_box_init(void);
 extern void init_chunk(struct chunk *chunk);
 extern void free_chunk(struct chunk *chunk);
+extern int hex_ct_malloc(uint8_t ** const hex_buf);
 extern unsigned char *auth_subkey_malloc();
 extern int8_t determine_chunk_type(size_t nread, size_t chunk_bytes, _Bool
     is_first_chunk, FILE *input);

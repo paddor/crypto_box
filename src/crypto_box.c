@@ -359,6 +359,16 @@ close_input(FILE *input)
   fclose(input);
 }
 
+int hex_ct_malloc(uint8_t ** const hex_buf) {
+  if (arguments.ct_format != HEX) return 0;
+
+  *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
+  if (*hex_buf != NULL) return 0;
+
+  fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
+  return -1;
+}
+
 void
 lock_box(FILE *input, FILE *output)
 {
@@ -377,13 +387,7 @@ lock_box(FILE *input, FILE *output)
   subkey = auth_subkey_malloc();
 
   /* allocate memory for hex ciphertexts */
-  if (arguments.ct_format == HEX) {
-    hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
-    if (hex_buf == NULL) {
-      fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
-      goto abort_auth_subkey;
-    }
-  }
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort_hex_buf;
 
   /* ciphertext to TTY warning */
   if (isatty(fileno(output)) && arguments.ct_format == BIN)
@@ -521,13 +525,7 @@ open_box(FILE *input, FILE *output)
   subkey = auth_subkey_malloc();
 
   /* allocate memory for hex ciphertexts */
-  if (arguments.ct_format == HEX) {
-    hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
-    if (hex_buf == NULL) {
-      fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
-      goto abort_auth_subkey;
-    }
-  }
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort_hex_buf;
 
   /* read nonce */
   switch (arguments.ct_format) {
