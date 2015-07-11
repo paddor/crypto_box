@@ -11,6 +11,10 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (open_box): Extract reading of nonce to read_nonce().
 	* crypto_box.c (read_nonce): Defined.
 
+	* crypto_box.c (open_box): Extract reading of a CT chunk to
+	read_ct_chunk().
+	* crypto_box.c (read_ct_chunk): Defined.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

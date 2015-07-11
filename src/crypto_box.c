@@ -536,16 +536,49 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   return 0;
 }
 
+int read_ct_chunk(struct chunk *chunk, uint8_t *hex_buf, FILE *input)
+{
+  if (hex_buf == NULL) {
+    chunk->used = fread(chunk->data, sizeof *chunk->data, chunk->size, input);
+  } else {
+    size_t nread = fread(hex_buf, 2, CHUNK_CT_BYTES, input);
+    if (nread < CHUNK_CT_BYTES && ferror(input)) {
+      fprintf(stderr, "Couldn't read ciphertext.\n");
+      return -1;
+    }
+
+    int hex_result; /* result of hex->bin conversion */
+    hex_result = sodium_hex2bin(chunk->data, chunk->size,
+        (const char*) hex_buf, nread * 2, NULL, &chunk->used, NULL);
+    if (hex_result != 0 || chunk->used < nread) {
+      fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+      return -1;
+    }
+  }
+
+  DEBUG_ONLY(hexDump("ciphertext chunk read", chunk->data, chunk->used));
+
+  /* truncated header */
+  if (chunk->used <= 17) { /* MAC + chunk_type = 17 */
+    fprintf(stderr, "Ciphertext's has been truncated.\n");
+    return -1;
+  }
+
+  /* read error */
+  if (chunk->used < (CHUNK_CT_BYTES) && ferror(input)) {
+    fprintf(stderr, "Couldn't read ciphertext.\n");
+    return -1;
+  }
+
+  return 0;
+}
+
 void
 open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf;
-  int hex_result; /* result of hex->bin conversion */
-  size_t bin_len; /* length of binary data written during conversion  */
-  const char * hex_end; /* pointer to last parsed hex character */
   struct chunk chunk;
-  size_t nread;
   int8_t chunk_type; /* what it should be, from open_box's view */
   _Bool is_first_chunk = true;
   unsigned char *subkey;
@@ -568,42 +601,9 @@ open_box(FILE *input, FILE *output)
     chunk.used = 0;
 
     /* read complete chunk, if possible */
-    switch (arguments.ct_format) {
-      case BIN:
-        nread = fread(chunk.data, sizeof *chunk.data, chunk.size, input);
-        break;
-      case HEX:
-        nread = fread(hex_buf, 2, CHUNK_CT_BYTES, input);
-        if (nread < CHUNK_CT_BYTES) {
-          if (ferror(input)) {
-            fprintf(stderr, "Couldn't read ciphertext.\n");
-            goto abort_chunk;
-          }
-        }
+    if (read_ct_chunk(&chunk, hex_buf, input) == -1) goto abort_chunk;
 
-        hex_result = sodium_hex2bin(chunk.data, chunk.size,
-            (const char*) hex_buf, nread*2, NULL, &bin_len, &hex_end);
-        if (hex_result != 0 || bin_len < nread) {
-          fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
-          goto abort_chunk;
-        }
-        break;
-    }
-    chunk.used += nread;
-    DEBUG_ONLY(hexDump("ciphertext chunk read", chunk.data, chunk.used));
-
-    /* truncated header */
-    if (nread <= 17) { /* MAC + chunk_type = 17 */
-      fprintf(stderr, "Ciphertext's has been truncated.\n");
-      goto abort_chunk;
-    }
-
-    if (nread < (CHUNK_CT_BYTES) && ferror(input)) {
-      fprintf(stderr, "Couldn't read ciphertext.\n");
-      goto abort_chunk;
-    }
-
-    chunk_type = determine_chunk_type(nread, CHUNK_CT_BYTES, is_first_chunk,
+    chunk_type = determine_chunk_type(chunk.used, CHUNK_CT_BYTES, is_first_chunk,
         input);
     if (chunk_type == -1) goto abort_chunk;
 
