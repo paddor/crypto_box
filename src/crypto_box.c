@@ -506,6 +506,34 @@ abort_auth_subkey:
   exit(EXIT_FAILURE);
 }
 
+int
+read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input) {
+  size_t bin_len; /* length of binary data written during conversion  */
+  int hex_result; /* result of hex->bin conversion */
+  switch (arguments.ct_format) {
+    case BIN:
+      if (fread(nonce, NONCE_BYTES, 1, input) < 1) {
+        fprintf(stderr, "Couldn't read ciphertext.\n");
+        return -1;
+      }
+      break;
+    case HEX:
+      if (fread(hex_buf, NONCE_BYTES * 2, 1, input) < 1) {
+        fprintf(stderr, "Couldn't read ciphertext.\n");
+        return -1;
+      }
+
+      hex_result = sodium_hex2bin(nonce, NONCE_BYTES, (const char*) hex_buf,
+        NONCE_BYTES * 2, NULL, &bin_len, NULL);
+      if (hex_result != 0 || bin_len < NONCE_BYTES) {
+        fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+        return -1;
+      }
+      break;
+  }
+  return 0;
+}
+
 void
 open_box(FILE *input, FILE *output)
 {
@@ -530,27 +558,7 @@ open_box(FILE *input, FILE *output)
   if (hex_ct_malloc(&hex_buf) == -1) goto abort_auth_subkey;
 
   /* read nonce */
-  switch (arguments.ct_format) {
-    case BIN:
-      if (fread(&nonce, sizeof nonce, 1, input) < 1) {
-        fprintf(stderr, "Couldn't read ciphertext.\n");
-        goto abort_auth_subkey;
-      }
-      break;
-    case HEX:
-      if (fread(hex_buf, sizeof nonce * 2, 1, input) < 1) {
-        fprintf(stderr, "Couldn't read ciphertext.\n");
-        goto abort_hex_buf;
-      }
-
-      hex_result = sodium_hex2bin(nonce, sizeof nonce, (const char*) hex_buf,
-        sizeof nonce * 2, NULL, &bin_len, NULL);
-      if (hex_result != 0 || bin_len < sizeof nonce) {
-        fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
-        goto abort_hex_buf;
-      }
-      break;
-  }
+  if (read_nonce(nonce, hex_buf, input) == -1) goto abort_hex_buf;
 
   init_chunk(&chunk);
   while(!feof(input)) {
