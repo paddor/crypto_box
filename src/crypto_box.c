@@ -360,7 +360,8 @@ close_input(FILE *input)
 }
 
 int
-hex_ct_malloc(uint8_t ** const hex_buf) {
+hex_ct_malloc(uint8_t ** const hex_buf)
+{
   *hex_buf = NULL;
   if (arguments.ct_format != HEX) return 0;
 
@@ -507,7 +508,8 @@ abort_auth_subkey:
 }
 
 int
-read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input) {
+read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
+{
   size_t bin_len; /* length of binary data written during conversion  */
   int hex_result; /* result of hex->bin conversion */
   switch (arguments.ct_format) {
