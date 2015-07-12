@@ -27,6 +27,9 @@ INCLUDE (FindPkgConfig)
 pkg_check_modules(LIBSODIUM REQUIRED libsodium)
 include_directories(${LIBSODIUM_INCLUDE_DIRS})
 
+# OPTIONAL LIBRARIES
+pkg_check_modules(LIBCHECK check)
+
 # HEADERS
 CHECK_INCLUDE_FILES("stdio.h" HAVE_STDIO_H)
 CHECK_INCLUDE_FILES("fcntl.h" HAVE_FCNTL_H)
@@ -125,5 +128,7 @@ if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 endif()
 
 # TESTING
-enable_testing()
-add_subdirectory("test")
+if (${LIBCHECK_FOUND})
+  enable_testing()
+  add_subdirectory("test")
+endif()
