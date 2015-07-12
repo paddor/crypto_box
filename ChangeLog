@@ -1,3 +1,8 @@
+Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
+	* crypto_box.c (lock_box): Extract reading of a PT chunk to
+	read_pt_chunk().
+	* crypto_box.c (read_pt_chunk): Defined.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.

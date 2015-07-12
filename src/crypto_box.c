@@ -398,6 +398,21 @@ print_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *output)
   return 0;
 }
 
+int
+read_pt_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
+{
+  size_t nread = fread(&chunk->data[chunk->used], sizeof *chunk->data,
+      CHUNK_PT_BYTES, input);
+  chunk->used += nread;
+  if (nread < CHUNK_PT_BYTES && ferror(input)) {
+    fprintf(stderr, "Couldn't read plaintext.\n");
+    return -1;
+  }
+  DEBUG_ONLY(hexDump("read plaintext chunk",
+        CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
+  return 0;
+}
+
 void
 lock_box(FILE *input, FILE *output)
 {
@@ -434,15 +449,7 @@ lock_box(FILE *input, FILE *output)
     chunk.used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
 
     /* read complete chunk, if possible */
-    nread = fread(&chunk.data[chunk.used], sizeof *chunk.data, CHUNK_PT_BYTES,
-        input);
-    chunk.used += nread;
-    if (nread < CHUNK_PT_BYTES && ferror(input)) {
-      fprintf(stderr, "Couldn't read plaintext.\n");
-      goto abort;
-    }
-    DEBUG_ONLY(hexDump("read plaintext chunk",
-          CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
+    if(read_pt_chunk(&chunk, hex_buf, input) == -1) goto abort;
 
     chunk_type = determine_chunk_type(&chunk, CHUNK_PT_BYTES, input);
     if (chunk_type == -1) goto abort;
