@@ -597,19 +597,6 @@ verify_ct_chunk(
   return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MAC_BYTES);
 }
 
-void
-decrypt_chunk(
-    struct chunk * const chunk,
-    uint8_t const * const nonce,
-    uint8_t const * const key)
-{
-  crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk->data), CHUNK_CT(chunk->data),
-      CHUNK_CT_LEN(chunk->used), nonce, 1, key); /* 1 = initial counter */
-
-  DEBUG_ONLY(hexDump("plain text", CHUNK_PT(chunk->data),
-      CHUNK_PT_LEN(chunk->used)));
-}
-
 int
 check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
 {
@@ -669,7 +656,11 @@ decrypt_next_chunk(
   }
 
   /* decrypt */
-  decrypt_chunk(chunk, nonce, key);
+  crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk->data), CHUNK_CT(chunk->data),
+      CHUNK_CT_LEN(chunk->used), nonce, 1, key); /* 1 = initial counter */
+
+  DEBUG_ONLY(hexDump("plain text", CHUNK_PT(chunk->data),
+      CHUNK_PT_LEN(chunk->used)));
 
   /* check chunk type */
   chunk_type = determine_chunk_type(chunk, CHUNK_CT_BYTES, input);
