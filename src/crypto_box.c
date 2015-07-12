@@ -585,23 +585,26 @@ verify_ct_chunk(
     struct chunk const * const chunk,
     uint8_t const * const nonce,
     uint8_t const * const key,
-    uint8_t *subkey,
-    crypto_onetimeauth_state * const auth_state)
+    uint8_t *subkey)
 {
   static unsigned char mac[MAC_BYTES];
+  crypto_onetimeauth_state auth_state;
+
+  /* derive subkey */
+  crypto_stream(subkey, crypto_onetimeauth_KEYBYTES, nonce, key);
 
   /* compute MAC */
-  crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
-  crypto_onetimeauth_init(auth_state, subkey);
-  crypto_onetimeauth_update(auth_state, CHUNK_CT(chunk->data),
+  crypto_onetimeauth_init(&auth_state, subkey);
+  crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used));
   if (!chunk->is_first_chunk) /* include previous MAC */
-    crypto_onetimeauth_update(auth_state, mac, MAC_BYTES);
+    crypto_onetimeauth_update(&auth_state, mac, MAC_BYTES);
+  crypto_onetimeauth_final(&auth_state, mac);
+
   DEBUG_ONLY(hexDump("read chunk MAC", CHUNK_MAC(chunk->data),
         MAC_BYTES));
   DEBUG_ONLY(hexDump("calculated chunk MAC", mac,
         MAC_BYTES));
-  crypto_onetimeauth_final(auth_state, mac);
 
   /* compare MACs */
   return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MAC_BYTES);
@@ -646,7 +649,6 @@ decrypt_next_chunk(
     uint8_t * const nonce,
     uint8_t const * const key,
     uint8_t *subkey,
-    crypto_onetimeauth_state * const auth_state,
     FILE *input,
     FILE *output)
 {
@@ -659,7 +661,7 @@ decrypt_next_chunk(
   if (read_ct_chunk(chunk, hex_buf, input) == -1) return -1;
 
   /* verify MAC */
-  if (verify_ct_chunk(chunk, nonce, key, subkey, auth_state) == -1) {
+  if (verify_ct_chunk(chunk, nonce, key, subkey) == -1) {
     fprintf(stderr, "Ciphertext couldn't be verified. It has been "
       "tampered with or you're using the wrong key.\n");
     return -1;
@@ -693,7 +695,6 @@ open_box(FILE *input, FILE *output)
   uint8_t *hex_buf = NULL;
   struct chunk chunk;
   unsigned char *subkey = NULL;
-  crypto_onetimeauth_state auth_state;
 
   /* memory for authentication subkeys */
   subkey = auth_subkey_malloc();
@@ -709,13 +710,13 @@ open_box(FILE *input, FILE *output)
 
   /* decrypt first chunk */
   if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
-      &auth_state, input, output) == -1) goto abort;
+      input, output) == -1) goto abort;
 
   /* decrypt remaining chunks */
   chunk.is_first_chunk = false; /* not first chunk anymore */
   while(!feof(input)) {
     if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
-        &auth_state, input, output) == -1) goto abort;
+        input, output) == -1) goto abort;
   }
 
   /* cleanup */
