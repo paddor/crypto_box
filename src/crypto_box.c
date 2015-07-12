@@ -753,13 +753,13 @@ open_box(FILE *input, FILE *output)
   init_chunk(&chunk);
 
   /* decrypt first chunk */
-  if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+  if (decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
       input, output) == -1) goto abort;
 
   /* decrypt remaining chunks */
   chunk.is_first_chunk = false; /* not first chunk anymore */
-  while(!feof(input)) {
-    if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+  while (!feof(input)) {
+    if (decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
         input, output) == -1) goto abort;
   }
 
