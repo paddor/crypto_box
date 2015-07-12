@@ -414,17 +414,40 @@ read_pt_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
 }
 
 void
+construct_chunk_mac(
+    struct chunk const * const chunk,
+    uint8_t const * const nonce,
+    uint8_t const * const key,
+    uint8_t * const subkey)
+{
+  static unsigned char previous_mac[MAC_BYTES];
+  crypto_onetimeauth_state auth_state;
+
+  crypto_stream(subkey, crypto_onetimeauth_KEYBYTES, nonce, key);
+  crypto_onetimeauth_init(&auth_state, subkey);
+  crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk->data),
+      CHUNK_CT_LEN(chunk->used));
+  if (!chunk->is_first_chunk) {
+    /* include previous MAC */
+    crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
+  }
+  crypto_onetimeauth_final(&auth_state, CHUNK_MAC(chunk->data));
+
+  /* remember MAC */
+  memcpy(previous_mac, CHUNK_MAC(chunk->data), MAC_BYTES);
+
+  DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk->data), MAC_BYTES));
+}
+
+void
 lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
   char *hex_result; /* result of bin->hex conversion */
   struct chunk chunk;
-  size_t nread;
   int8_t chunk_type; /* first, last or in between */
   unsigned char *subkey = NULL;
-  unsigned char previous_mac[MAC_BYTES];
-  crypto_onetimeauth_state auth_state;
 
   /* memory for authentication subkeys */
   subkey = auth_subkey_malloc();
@@ -465,17 +488,7 @@ lock_box(FILE *input, FILE *output)
           CHUNK_CT_LEN(chunk.used)));
 
     /* compute MAC */
-    crypto_stream(subkey, sizeof subkey, nonce, key); /* new subkey */
-    crypto_onetimeauth_init(&auth_state, subkey);
-    crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk.data),
-        CHUNK_CT_LEN(chunk.used));
-    if (!chunk.is_first_chunk) {
-      /* include previous MAC */
-      crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
-    }
-    DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk.data), MAC_BYTES));
-    crypto_onetimeauth_final(&auth_state, CHUNK_MAC(chunk.data));
-    memcpy(previous_mac, CHUNK_MAC(chunk.data), MAC_BYTES); /* remember MAC */
+    construct_chunk_mac(&chunk, nonce, key, subkey);
 
     /* print MAC + chunk_type + ciphertext */
     switch (arguments.ct_format) {
