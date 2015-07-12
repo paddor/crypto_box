@@ -2,10 +2,17 @@
 
 # Runtime
 * libsodium (on Mac: `brew install libsodium`)
-* Mac only: argp (`brew install argp-standalone`)
+* OSX/BSD only: argp (`brew install argp-standalone`)
 
-# Development (and running the test suite)
-* Check (on Mac: `brew install check`)
+# Development (and running `make test`)
+* Check (on OSX: `brew install check`)
 
 # Installation
-This project uses CMake. Instructions follow soon.
+This project uses CMake. Basic installation instructions:
+
+```
+tar xf crypto_box-0.6.0-Source.tar.xz
+cd crypto_box-0.6.0-Source
+cmake -D CMAKE_BUILD_TYPE=Release .
+make && make install
+```

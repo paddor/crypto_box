@@ -15,6 +15,14 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
 	"Easy to use, strong symmetric encryption on the command line.")
 
 # CMake module for packaging
+SET(CPACK_SOURCE_GENERATOR "TBZ2;TGZ;TXZ")
+SET(CPACK_SOURCE_IGNORE_FILES
+"/\\\\.git/;\
+/\\\\.gitignore$;\
+/\\\\.travis.yml$;\
+/session\\\\.vim$;\
+/ci-scripts/;\
+/\\\\.DS_Store$")
 INCLUDE (CPack)
 
 # CMake modules for checking dependencies
@@ -132,3 +140,7 @@ if (${LIBCHECK_FOUND})
   enable_testing()
   add_subdirectory("test")
 endif()
+
+# INSTALLATION
+INCLUDE(GNUInstallDirs)
+INSTALL(TARGETS lock_box open_box RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
