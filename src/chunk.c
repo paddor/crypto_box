@@ -1,6 +1,6 @@
 #include "chunk.h"
 
-int
+static int
 hex_ct_malloc(uint8_t ** const hex_buf)
 {
   if (arguments.ct_format != HEX) return 0;
@@ -13,7 +13,7 @@ hex_ct_malloc(uint8_t ** const hex_buf)
 }
 
 /* allocate memory for authentication subkey */
-int
+static int
 auth_subkey_malloc(unsigned char ** const subkey)
 {
   *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);

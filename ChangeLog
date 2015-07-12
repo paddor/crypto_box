@@ -64,6 +64,9 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* encryption.c (encrypt_next_chunk): Removed parameters hex_buf and
 	subkey.
 
+	* chunk.c key.c encryption.c decryption.c: Make all functions that
+	don't need to be exposed static.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.

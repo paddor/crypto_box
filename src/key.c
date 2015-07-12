@@ -1,6 +1,6 @@
 #include "key.h"
 
-void
+static void
 get_key_from_file(const char *key_file, uint8_t *key)
 {
   FILE *f = fopen(key_file, "r");
@@ -53,7 +53,7 @@ get_key_from_file(const char *key_file, uint8_t *key)
   fclose(f);
 }
 
-void
+static void
 get_key_from_str(const char *str, uint8_t *key)
 {
   size_t bin_len, bytes_read;
@@ -86,7 +86,7 @@ get_key_from_str(const char *str, uint8_t *key)
     }
 }
 
-char *
+static char *
 read_line(char *buf, size_t len)
   /* Read at most len characters from stdin and writes them to buf.  If the
    * input line contains more characters, discard the rest.
@@ -162,7 +162,7 @@ get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
-void
+static void
 key_free(void)
 {
   sodium_free(key);

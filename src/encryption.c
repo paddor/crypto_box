@@ -1,6 +1,6 @@
 #include "encryption.h"
 
-int
+static int
 print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 {
   if (hex_buf == NULL) {
@@ -24,7 +24,7 @@ print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
   return 0;
 }
 
-int
+static int
 read_pt_chunk(struct chunk * const chunk, FILE *input)
 {
   size_t nread = fread(&chunk->data[chunk->used], sizeof *chunk->data,
@@ -39,7 +39,7 @@ read_pt_chunk(struct chunk * const chunk, FILE *input)
   return 0;
 }
 
-void
+static void
 construct_chunk_mac(
     struct chunk const * const chunk,
     uint8_t const * const nonce,
@@ -64,7 +64,7 @@ construct_chunk_mac(
   DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk->data), MAC_BYTES));
 }
 
-int
+static int
 print_ct_chunk(
   struct chunk const * const chunk,
   FILE *output)
@@ -90,7 +90,7 @@ print_ct_chunk(
   return 0;
 }
 
-int
+static int
 encrypt_next_chunk(
     struct chunk *chunk,
     uint8_t * const nonce,

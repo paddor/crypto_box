@@ -1,6 +1,6 @@
 #include "decryption.h"
 
-int
+static int
 read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
 {
   size_t bin_len; /* length of binary data written during conversion  */
@@ -26,7 +26,8 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   return 0;
 }
 
-int read_ct_chunk(struct chunk * const chunk, FILE *input)
+static int
+read_ct_chunk(struct chunk * const chunk, FILE *input)
 {
   if (chunk->hex_buf == NULL) {
     chunk->used = fread(chunk->data, sizeof *chunk->data, chunk->size, input);
@@ -63,7 +64,7 @@ int read_ct_chunk(struct chunk * const chunk, FILE *input)
   return 0;
 }
 
-int
+static int
 verify_chunk(
     struct chunk const * const chunk,
     uint8_t const * const nonce,
@@ -92,7 +93,7 @@ verify_chunk(
   return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MAC_BYTES);
 }
 
-int
+static int
 check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
 {
   if (chunk->data[CHUNK_TYPE_INDEX] == chunk_type) return 0;
@@ -113,7 +114,7 @@ check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
   return -1;
 }
 
-int
+static int
 write_pt_chunk(struct chunk const * const chunk, FILE *output)
 {
   if (fwrite(CHUNK_PT(chunk->data), CHUNK_PT_LEN(chunk->used), 1, output) < 1)
@@ -125,7 +126,7 @@ write_pt_chunk(struct chunk const * const chunk, FILE *output)
   return 0;
 }
 
-int
+static int
 decrypt_next_chunk(
     struct chunk *chunk,
     uint8_t * const nonce,
