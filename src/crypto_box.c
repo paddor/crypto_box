@@ -439,12 +439,38 @@ construct_chunk_mac(
   DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk->data), MAC_BYTES));
 }
 
+int
+print_ct_chunk(
+  struct chunk const * const chunk,
+  uint8_t *hex_buf,
+  FILE *output)
+{
+  if (hex_buf == NULL) {
+    if (fwrite(chunk->data, chunk->used, 1, output) < 1) {
+      perror("Couldn't write ciphertext");
+      return -1;
+    }
+  } else {
+    char *hex_result; /* result of bin->hex conversion */
+    hex_result = sodium_bin2hex((char *) hex_buf, 2 * chunk->used + 1,
+        chunk->data, chunk->used);
+    if (hex_result == NULL) {
+      fprintf(stderr, "Couldn't convert ciphertext to hex.\n");
+      return -1;
+    }
+    if (fwrite(hex_buf, chunk->used * 2, 1, output) < 1) {
+      perror("Couldn't write ciphertext");
+      return -1;
+    }
+  }
+  return 0;
+}
+
 void
 lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
-  char *hex_result; /* result of bin->hex conversion */
   struct chunk chunk;
   int8_t chunk_type; /* first, last or in between */
   unsigned char *subkey = NULL;
@@ -491,26 +517,7 @@ lock_box(FILE *input, FILE *output)
     construct_chunk_mac(&chunk, nonce, key, subkey);
 
     /* print MAC + chunk_type + ciphertext */
-    switch (arguments.ct_format) {
-      case BIN:
-        if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
-          perror("Couldn't write ciphertext");
-          goto abort;
-        }
-        break;
-      case HEX:
-        hex_result = sodium_bin2hex((char *) hex_buf, 2 * chunk.used + 1,
-            chunk.data, chunk.used);
-        if (hex_result == NULL) {
-          fprintf(stderr, "Couldn't convert ciphertext to hex.\n");
-          goto abort;
-        }
-        if (fwrite(hex_buf, chunk.used * 2, 1, output) < 1) {
-          perror("Couldn't write ciphertext");
-          goto abort;
-        }
-        break;
-    }
+    if (print_ct_chunk(&chunk, hex_buf, output) == -1) goto abort;
 
     /* increment nonce */
     sodium_increment(nonce, sizeof nonce);

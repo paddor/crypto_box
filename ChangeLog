@@ -22,6 +22,10 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (read_pt_chunk): Remove unused hex_buf parameter.
 	Caller changed.
 
+	* crypto_box.c (lock_box): Extract printing of CT chunk to
+	print_ct_chunk().
+	* crypto_box.c (print_ct_chunk): Defined.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
