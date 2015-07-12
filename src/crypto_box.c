@@ -409,7 +409,7 @@ read_pt_chunk(struct chunk * const chunk, FILE *input)
     return -1;
   }
   DEBUG_ONLY(hexDump("read plaintext chunk",
-        CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
+        CHUNK_PT(chunk->data), CHUNK_PT_LEN(chunk->used)));
   return 0;
 }
 
