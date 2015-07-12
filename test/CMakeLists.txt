@@ -8,7 +8,12 @@ include_directories(${LIBCHECK_INCLUDE_DIRS})
 # TEST EXECUTABLES
 add_executable(check_sanity check_sanity.c)
 add_executable(check_sodium_sanity check_sodium_sanity.c)
-add_executable(c_round_trip round_trip.c $<TARGET_OBJECTS:crypto_box.o>)
+add_executable(c_round_trip round_trip.c
+	$<TARGET_OBJECTS:crypto_box.o>
+	$<TARGET_OBJECTS:chunk.o>
+	$<TARGET_OBJECTS:key.o>
+	$<TARGET_OBJECTS:encryption.o>
+	$<TARGET_OBJECTS:decryption.o>)
 
 # TESTS
 add_test(NAME sanity COMMAND check_sanity)

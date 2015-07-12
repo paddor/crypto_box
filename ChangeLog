@@ -48,6 +48,11 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (read_ct_chunk, write_ct_chunk): Handle empty plaintext
 	nicely.
 
+	* crypto_box.h: Split up to multiple files: chunk.h, key.h,
+	encryption.h, decryption.h.
+	* crypto_box.c: Split up to multiple files: chunk.c, key.c,
+	encryption.c, decryption.c.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.

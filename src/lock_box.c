@@ -1,4 +1,6 @@
 #include "crypto_box.h"
+#include "key.h"
+#include "encryption.h"
 
 int
 main(int argc, char *argv[])
