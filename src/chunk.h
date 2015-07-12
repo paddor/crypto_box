@@ -24,7 +24,6 @@ struct chunk {
   _Bool is_first_chunk;
 };
 
-extern void crypto_box_init(void);
 extern int chunk_malloc(struct chunk ** const chunk);
 extern void chunk_free(struct chunk * const chunk);
 extern int8_t determine_chunk_type(struct chunk const * const, size_t

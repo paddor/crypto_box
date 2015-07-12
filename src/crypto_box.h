@@ -37,6 +37,7 @@ extern struct argp argp_parser;
 struct arguments arguments;
 
 /* utility functions */
+extern void crypto_box_init(void);
 extern FILE* open_input(struct arguments *arguments);
 extern void close_input(FILE *input);
 extern void hexDump(const char *desc, const void *addr, size_t len);
