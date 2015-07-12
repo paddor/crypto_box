@@ -694,21 +694,27 @@ open_box(FILE *input, FILE *output)
   /* read nonce */
   if (read_nonce(nonce, hex_buf, input) == -1) goto abort;
 
+  /* initialize chunk */
   init_chunk(&chunk);
+
+  /* decrypt first chunk */
   if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
       &auth_state, input, output) == -1) goto abort;
-  chunk.is_first_chunk = true; /* not first chunk anymore */
+
+  /* decrypt remaining chunks */
+  chunk.is_first_chunk = false; /* not first chunk anymore */
   while(!feof(input)) {
     if(decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
         &auth_state, input, output) == -1) goto abort;
   }
 
+  /* cleanup */
   sodium_free(hex_buf);
   sodium_free(subkey);
   free_chunk(&chunk);
   return;
 
-abort:
+abort: /* error */
   free_chunk(&chunk);
   sodium_free(hex_buf);
   sodium_free(subkey);
