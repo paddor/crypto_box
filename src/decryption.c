@@ -98,7 +98,7 @@ check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
 {
   if (chunk->data[CHUNK_TYPE_INDEX] == chunk_type) return 0;
 
-  /* Tail truncation, is the only case that might go undetected through MAC
+  /* Tail truncation is the only case that might go undetected through MAC
    * verification above. So let's print a nice error message.
    *
    * Any other case is impossible, as the previous MAC verification would
