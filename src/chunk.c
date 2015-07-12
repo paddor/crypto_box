@@ -68,7 +68,7 @@ chunk_free(struct chunk * const chunk)
   free(chunk);
 }
 
-int8_t
+static int8_t
 determine_chunk_type(
     struct chunk const * const chunk,
     size_t chunk_bytes,
@@ -107,6 +107,16 @@ determine_chunk_type(
     chunk_type = FIRST_CHUNK;
   }
   return chunk_type;
+}
+
+int8_t determine_pt_chunk_type(struct chunk const * const chunk, FILE *input)
+{
+  return determine_chunk_type(chunk, CHUNK_PT_BYTES, input);
+}
+
+int8_t determine_ct_chunk_type(struct chunk const * const chunk, FILE *input)
+{
+  return determine_chunk_type(chunk, CHUNK_CT_BYTES, input);
 }
 
 // vim: et:ts=2:sw=2

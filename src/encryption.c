@@ -106,7 +106,7 @@ encrypt_next_chunk(
   /* read complete chunk, if possible */
   if(read_pt_chunk(chunk, input) == -1) return -1;
 
-  chunk_type = determine_chunk_type(chunk, CHUNK_PT_BYTES, input);
+  chunk_type = determine_pt_chunk_type(chunk, input);
   if (chunk_type == -1) return -1;
 
   /* set chunk type */

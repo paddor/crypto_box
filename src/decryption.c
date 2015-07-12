@@ -157,7 +157,7 @@ decrypt_next_chunk(
       CHUNK_PT_LEN(chunk->used)));
 
   /* check chunk type */
-  chunk_type = determine_chunk_type(chunk, CHUNK_CT_BYTES, input);
+  chunk_type = determine_ct_chunk_type(chunk, input);
   if (chunk_type == -1 || check_chunk_type(chunk, chunk_type) == -1)
     return -1;
 

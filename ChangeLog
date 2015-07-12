@@ -67,6 +67,13 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* chunk.c key.c encryption.c decryption.c: Make all functions that
 	don't need to be exposed static.
 
+	* chunk.h (determine_chunk_type): Declaration removed.
+	* chunk.h (determine_pt_chunk_type, determine_ct_chunk_type):
+	Declared.
+	* chunk.c (determine_pt_chunk_type, determine_ct_chunk_type): Defined.
+	* encryption.c (encrypt_next_chunk): Changed.
+	* decryption.c (decrypt_next_chunk): Changed.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
