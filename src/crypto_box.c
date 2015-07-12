@@ -7,29 +7,36 @@ void crypto_box_init(void) {
   }
 }
 
-void
-init_chunk(struct chunk *chunk)
+int
+init_chunk(struct chunk ** const chunk)
 {
+  *chunk = malloc(sizeof(struct chunk));
+  if (*chunk == NULL) {
+    fprintf(stderr, "chunk couldn't be allocated\n");
+    return -1;
+  }
+  (*chunk)->size = 0;
+  (*chunk)->used = 0;
+  (*chunk)->is_first_chunk = true;
+
   /* we allocate CHUNK_CT_BYTES, which is the maximum of data needed, and
    * slightly bigger than CHUNK_PT_BYTES
    */
-  chunk->data = malloc(CHUNK_CT_BYTES * sizeof *chunk->data);
-  if (chunk->data == NULL) {
+  (*chunk)->data = malloc(CHUNK_CT_BYTES * sizeof *(*chunk)->data);
+  if ((*chunk)->data == NULL) {
     fprintf(stderr, "chunk data couldn't be allocated\n");
-    exit(EXIT_FAILURE);
+    return -1;
   }
-  chunk->used = 0;
-  chunk->size = CHUNK_CT_BYTES;
-  chunk->is_first_chunk = true;
+  (*chunk)->size = CHUNK_CT_BYTES;
+
+  return 0;
 }
 
 void
-free_chunk(struct chunk *chunk)
+free_chunk(struct chunk * const chunk)
 {
   free(chunk->data);
-  chunk->data = NULL;
-  chunk->used = 0;
-  chunk->size = 0;
+  free(chunk);
 }
 
 /* allocate memory for authentication subkey */
@@ -514,7 +521,7 @@ lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
-  struct chunk chunk;
+  struct chunk *chunk = NULL;
   unsigned char *subkey = NULL;
 
   /* memory for authentication subkeys */
@@ -535,27 +542,27 @@ lock_box(FILE *input, FILE *output)
   if (print_nonce(nonce, hex_buf, output) == -1) goto abort;
 
   /* initialize chunk */
-  init_chunk(&chunk);
+  if (init_chunk(&chunk) == -1) goto abort;
 
   /* encrypt first chunk */
-  if (encrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+  if (encrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
       input, output) == -1) goto abort;
 
   /* encrypt remaining chunks */
-  chunk.is_first_chunk = false; /* not first chunk anymore */
+  chunk->is_first_chunk = false; /* not first chunk anymore */
   while (!feof(input)) {
-    if (encrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+    if (encrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
         input, output) == -1) goto abort;
   }
 
   /* cleanup */
   sodium_free(hex_buf);
   sodium_free(subkey);
-  free_chunk(&chunk);
+  free_chunk(chunk);
   return;
 
 abort: /* error */
-  free_chunk(&chunk);
+  free_chunk(chunk);
   sodium_free(hex_buf);
   sodium_free(subkey);
   exit(EXIT_FAILURE);
@@ -737,7 +744,7 @@ open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
-  struct chunk chunk;
+  struct chunk *chunk = NULL;
   unsigned char *subkey = NULL;
 
   /* memory for authentication subkeys */
@@ -750,27 +757,27 @@ open_box(FILE *input, FILE *output)
   if (read_nonce(nonce, hex_buf, input) == -1) goto abort;
 
   /* initialize chunk */
-  init_chunk(&chunk);
+  if (init_chunk(&chunk) == -1) goto abort;
 
   /* decrypt first chunk */
-  if (decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+  if (decrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
       input, output) == -1) goto abort;
 
   /* decrypt remaining chunks */
-  chunk.is_first_chunk = false; /* not first chunk anymore */
+  chunk->is_first_chunk = false; /* not first chunk anymore */
   while (!feof(input)) {
-    if (decrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+    if (decrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
         input, output) == -1) goto abort;
   }
 
   /* cleanup */
   sodium_free(hex_buf);
   sodium_free(subkey);
-  free_chunk(&chunk);
+  free_chunk(chunk);
   return;
 
 abort: /* error */
-  free_chunk(&chunk);
+  free_chunk(chunk);
   sodium_free(hex_buf);
   sodium_free(subkey);
   exit(EXIT_FAILURE);

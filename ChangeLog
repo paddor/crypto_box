@@ -33,6 +33,12 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (encrypt_next_chunk, decrypt_next_chunk): Security fix:
 	Change `sizeof nonce`, which is just the pointer size, to NONCE_BYTES.
 
+	* crypto_box.h (init_chunk): Return type was void, now int. Parameter
+	chunk is now a pointer to a pointer. Callers changed.
+	* crypto_box.h (free_chunk): Pass pointer to chunk as const.
+	* crypto_box.c (lock_box, open_box): Make passing around chunk easier
+	and cleanup safely (even if chunk hasn't been initialized).
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
