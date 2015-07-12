@@ -261,16 +261,16 @@ can be used to encrypt up to 64 KiB. So:
 ## TODO
 
 * `cb_` prefix for functions ("crypto box")
-* refactor
-* return -1, -2, ... from lock_box() and open_box(), exit() in main()
 * more tests
   - tampered ciphertext
+    * appended chunk
     * incomplete chunk
-    * replaced byte sequence
     * completely missing chunk (head, middle, tail)
+    * replaced byte sequence
     * truncated to < 17 bytes, 0 bytes
     * no nonce
-    * appended chunk
+    * wrong chunk type
+* (C11) threads
 
 ## License
 
