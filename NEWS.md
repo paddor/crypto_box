@@ -1,3 +1,7 @@
+News for Crypto Box 0.6.1
+=========================
+* Fixed a problem with older versions of CMake fixed (like 2.8.12).
+
 News for Crypto Box 0.6.0
 =========================
 * Changed chunk size back to 64 KiB, as it performs much better with the common
