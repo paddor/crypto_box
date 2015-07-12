@@ -618,7 +618,7 @@ int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
 
   /* truncated header */
   if (chunk->used <= 17) { /* MAC + chunk_type = 17 */
-    fprintf(stderr, "Ciphertext's has been truncated.\n");
+    fprintf(stderr, "Ciphertext's header has been truncated.\n");
     return -1;
   }
 
