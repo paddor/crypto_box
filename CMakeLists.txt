@@ -17,12 +17,7 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
 # CMake module for packaging
 SET(CPACK_SOURCE_GENERATOR "TBZ2;TGZ;TXZ")
 SET(CPACK_SOURCE_IGNORE_FILES
-"/\\\\.git/;\
-/\\\\.gitignore$;\
-/\\\\.travis.yml$;\
-/session\\\\.vim$;\
-/ci-scripts/;\
-/\\\\.DS_Store$")
+"/\\\\.git/;/\\\\.gitignore$;/\\\\.travis.yml$;/session\\\\.vim$;/ci-scripts/;/\\\\.DS_Store$")
 INCLUDE (CPack)
 
 # CMake modules for checking dependencies
