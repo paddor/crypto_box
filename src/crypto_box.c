@@ -8,7 +8,7 @@ void crypto_box_init(void) {
 }
 
 int
-init_chunk(struct chunk ** const chunk)
+chunk_malloc(struct chunk ** const chunk)
 {
   *chunk = malloc(sizeof(struct chunk));
   if (*chunk == NULL) {
@@ -33,7 +33,7 @@ init_chunk(struct chunk ** const chunk)
 }
 
 void
-free_chunk(struct chunk * const chunk)
+chunk_free(struct chunk * const chunk)
 {
   free(chunk->data);
   free(chunk);
@@ -542,7 +542,7 @@ lock_box(FILE *input, FILE *output)
   if (print_nonce(nonce, hex_buf, output) == -1) goto abort;
 
   /* initialize chunk */
-  if (init_chunk(&chunk) == -1) goto abort;
+  if (chunk_malloc(&chunk) == -1) goto abort;
 
   /* encrypt first chunk */
   if (encrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
@@ -558,11 +558,11 @@ lock_box(FILE *input, FILE *output)
   /* cleanup */
   sodium_free(hex_buf);
   sodium_free(subkey);
-  free_chunk(chunk);
+  chunk_free(chunk);
   return;
 
 abort: /* error */
-  free_chunk(chunk);
+  chunk_free(chunk);
   sodium_free(hex_buf);
   sodium_free(subkey);
   exit(EXIT_FAILURE);
@@ -757,7 +757,7 @@ open_box(FILE *input, FILE *output)
   if (read_nonce(nonce, hex_buf, input) == -1) goto abort;
 
   /* initialize chunk */
-  if (init_chunk(&chunk) == -1) goto abort;
+  if (chunk_malloc(&chunk) == -1) goto abort;
 
   /* decrypt first chunk */
   if (decrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
@@ -773,11 +773,11 @@ open_box(FILE *input, FILE *output)
   /* cleanup */
   sodium_free(hex_buf);
   sodium_free(subkey);
-  free_chunk(chunk);
+  chunk_free(chunk);
   return;
 
 abort: /* error */
-  free_chunk(chunk);
+  chunk_free(chunk);
   sodium_free(hex_buf);
   sodium_free(subkey);
   exit(EXIT_FAILURE);

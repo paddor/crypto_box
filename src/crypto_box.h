@@ -55,8 +55,8 @@ extern struct argp argp_parser;
 struct arguments arguments;
 uint8_t *key;
 extern void crypto_box_init(void);
-extern int init_chunk(struct chunk ** const chunk);
-extern void free_chunk(struct chunk * const chunk);
+extern int chunk_malloc(struct chunk ** const chunk);
+extern void chunk_free(struct chunk * const chunk);
 extern int hex_ct_malloc(uint8_t ** const hex_buf);
 extern int auth_subkey_malloc(unsigned char ** const subkey);
 extern int8_t determine_chunk_type(struct chunk const * const, size_t

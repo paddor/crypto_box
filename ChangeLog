@@ -42,6 +42,9 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (auth_subkey_malloc): Change signature to behave like
 	init_chunk() and hex_ct_malloc(). Callers changed.
 
+	* crypto_box.h (init_chunk, free_chunk): Rename to chunk_malloc() and
+	chunk_free(). Definitions and callers changed.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
