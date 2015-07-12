@@ -399,7 +399,7 @@ print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 }
 
 int
-read_pt_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
+read_pt_chunk(struct chunk * const chunk, FILE *input)
 {
   size_t nread = fread(&chunk->data[chunk->used], sizeof *chunk->data,
       CHUNK_PT_BYTES, input);
@@ -472,7 +472,7 @@ lock_box(FILE *input, FILE *output)
     chunk.used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
 
     /* read complete chunk, if possible */
-    if(read_pt_chunk(&chunk, hex_buf, input) == -1) goto abort;
+    if(read_pt_chunk(&chunk, input) == -1) goto abort;
 
     chunk_type = determine_chunk_type(&chunk, CHUNK_PT_BYTES, input);
     if (chunk_type == -1) goto abort;
