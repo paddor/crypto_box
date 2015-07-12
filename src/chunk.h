@@ -19,16 +19,14 @@ struct chunk {
   size_t used;
   size_t size;
   _Bool is_first_chunk;
+  uint8_t *hex_buf;
+  unsigned char *subkey;
 };
 
 extern int chunk_malloc(struct chunk ** const chunk);
 extern void chunk_free(struct chunk * const chunk);
 extern int8_t determine_chunk_type(struct chunk const * const, size_t
     chunk_bytes, FILE *input);
-
-extern int hex_ct_malloc(uint8_t ** const hex_buf);
-extern int auth_subkey_malloc(unsigned char ** const subkey);
-
 
 // vim: et:ts=2:sw=2
 #endif

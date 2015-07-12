@@ -26,12 +26,12 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   return 0;
 }
 
-int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
+int read_ct_chunk(struct chunk * const chunk, FILE *input)
 {
-  if (hex_buf == NULL) {
+  if (chunk->hex_buf == NULL) {
     chunk->used = fread(chunk->data, sizeof *chunk->data, chunk->size, input);
   } else {
-    size_t nread = fread(hex_buf, 2, CHUNK_CT_BYTES, input);
+    size_t nread = fread(chunk->hex_buf, 2, CHUNK_CT_BYTES, input);
     if (nread < CHUNK_CT_BYTES && ferror(input)) {
       fprintf(stderr, "Couldn't read ciphertext.\n");
       return -1;
@@ -39,7 +39,7 @@ int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
 
     int hex_result; /* result of hex->bin conversion */
     hex_result = sodium_hex2bin(chunk->data, chunk->size,
-        (const char*) hex_buf, nread * 2, NULL, &chunk->used, NULL);
+        (const char*) chunk->hex_buf, nread * 2, NULL, &chunk->used, NULL);
     if (hex_result != 0 || chunk->used < nread) {
       fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
       return -1;
@@ -67,17 +67,16 @@ int
 verify_chunk(
     struct chunk const * const chunk,
     uint8_t const * const nonce,
-    uint8_t const * const key,
-    uint8_t *subkey)
+    uint8_t const * const key)
 {
   static unsigned char mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
 
   /* derive subkey */
-  crypto_stream(subkey, crypto_onetimeauth_KEYBYTES, nonce, key);
+  crypto_stream(chunk->subkey, crypto_onetimeauth_KEYBYTES, nonce, key);
 
   /* compute MAC */
-  crypto_onetimeauth_init(&auth_state, subkey);
+  crypto_onetimeauth_init(&auth_state, chunk->subkey);
   crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used));
   if (!chunk->is_first_chunk) /* include previous MAC */
@@ -129,23 +128,21 @@ write_pt_chunk(struct chunk const * const chunk, FILE *output)
 int
 decrypt_next_chunk(
     struct chunk *chunk,
-    uint8_t *hex_buf,
     uint8_t * const nonce,
     uint8_t const * const key,
-    uint8_t *subkey,
     FILE *input,
     FILE *output)
 {
   int8_t chunk_type; /* what it should be, from open_box's view */
 
-  /* recycle chunk */
+  /* recycle chunk data */
   chunk->used = 0;
 
   /* read chunk */
-  if (read_ct_chunk(chunk, hex_buf, input) == -1) return -1;
+  if (read_ct_chunk(chunk, input) == -1) return -1;
 
   /* verify MAC */
-  if (verify_chunk(chunk, nonce, key, subkey) == -1) {
+  if (verify_chunk(chunk, nonce, key) == -1) {
     fprintf(stderr, "Ciphertext couldn't be verified. It has been "
       "tampered with or you're using the wrong key.\n");
     return -1;
@@ -176,43 +173,29 @@ void
 open_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
-  uint8_t *hex_buf = NULL;
   struct chunk *chunk = NULL;
-  unsigned char *subkey = NULL;
-
-  /* memory for authentication subkeys */
-  if (auth_subkey_malloc(&subkey) == -1) goto abort;
-
-  /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&hex_buf) == -1) goto abort;
-
-  /* read nonce */
-  if (read_nonce(nonce, hex_buf, input) == -1) goto abort;
 
   /* initialize chunk */
   if (chunk_malloc(&chunk) == -1) goto abort;
 
+  /* read nonce */
+  if (read_nonce(nonce, chunk->hex_buf, input) == -1) goto abort;
+
   /* decrypt first chunk */
-  if (decrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
-      input, output) == -1) goto abort;
+  if (decrypt_next_chunk(chunk, nonce, key, input, output) == -1) goto abort;
 
   /* decrypt remaining chunks */
   chunk->is_first_chunk = false; /* not first chunk anymore */
   while (!feof(input)) {
-    if (decrypt_next_chunk(chunk, hex_buf, nonce, key, subkey,
-        input, output) == -1) goto abort;
+    if (decrypt_next_chunk(chunk, nonce, key, input, output) == -1) goto abort;
   }
 
   /* cleanup */
-  sodium_free(hex_buf);
-  sodium_free(subkey);
   chunk_free(chunk);
   return;
 
 abort: /* error */
   chunk_free(chunk);
-  sodium_free(hex_buf);
-  sodium_free(subkey);
   exit(EXIT_FAILURE);
 }
 // vim: et:ts=2:sw=2

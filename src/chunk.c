@@ -1,9 +1,35 @@
 #include "chunk.h"
 
 int
+hex_ct_malloc(uint8_t ** const hex_buf)
+{
+  if (arguments.ct_format != HEX) return 0;
+
+  *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
+  if (*hex_buf != NULL) return 0;
+
+  fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
+  return -1;
+}
+
+/* allocate memory for authentication subkey */
+int
+auth_subkey_malloc(unsigned char ** const subkey)
+{
+  *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
+  if (*subkey == NULL) {
+    fprintf(stderr, "Memory for authentication subkey couldn't be "
+        "allocated.\n");
+    return -1;
+  }
+  return 0;
+}
+
+int
 chunk_malloc(struct chunk ** const chunk)
 {
   *chunk = malloc(sizeof(struct chunk));
+
   if (*chunk == NULL) {
     fprintf(stderr, "chunk couldn't be allocated\n");
     return -1;
@@ -11,6 +37,8 @@ chunk_malloc(struct chunk ** const chunk)
   (*chunk)->size = 0;
   (*chunk)->used = 0;
   (*chunk)->is_first_chunk = true;
+  (*chunk)->hex_buf = NULL;
+  (*chunk)->subkey = NULL;
 
   /* we allocate CHUNK_CT_BYTES, which is the maximum of data needed, and
    * slightly bigger than CHUNK_PT_BYTES
@@ -22,6 +50,12 @@ chunk_malloc(struct chunk ** const chunk)
   }
   (*chunk)->size = CHUNK_CT_BYTES;
 
+  /* memory for authentication subkeys */
+  if (auth_subkey_malloc(&(*chunk)->subkey) == -1) return -1;
+
+  /* allocate memory for hex ciphertexts */
+  if (hex_ct_malloc(&(*chunk)->hex_buf) == -1) return -1;
+
   return 0;
 }
 
@@ -29,6 +63,8 @@ void
 chunk_free(struct chunk * const chunk)
 {
   free(chunk->data);
+  sodium_free(chunk->hex_buf);
+  sodium_free(chunk->subkey);
   free(chunk);
 }
 
@@ -71,31 +107,6 @@ determine_chunk_type(
     chunk_type = FIRST_CHUNK;
   }
   return chunk_type;
-}
-
-int
-hex_ct_malloc(uint8_t ** const hex_buf)
-{
-  if (arguments.ct_format != HEX) return 0;
-
-  *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
-  if (*hex_buf != NULL) return 0;
-
-  fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
-  return -1;
-}
-
-/* allocate memory for authentication subkey */
-int
-auth_subkey_malloc(unsigned char ** const subkey)
-{
-  *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
-  if (*subkey == NULL) {
-    fprintf(stderr, "Memory for authentication subkey couldn't be "
-        "allocated.\n");
-    return -1;
-  }
-  return 0;
 }
 
 // vim: et:ts=2:sw=2

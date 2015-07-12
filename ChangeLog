@@ -53,6 +53,17 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c: Split up to multiple files: chunk.c, key.c,
 	encryption.c, decryption.c.
 
+	* chunk.h (struct chunk): Add members subkey and hex_buf. Users
+	changed.
+	* decryption.c (read_ct_chunk): Removed parameter subkey.
+	* decryption.c (verify_chunk): Removed parameter subkey.
+	* decryption.c (decrypt_next_chunk): Removed parameters hex_buf and
+	subkey.
+	* encryption.c (construct_chunk_mac): Removed parameter subkey.
+	* encryption.c (print_ct_chunk): Removed parameter hex_buf.
+	* encryption.c (encrypt_next_chunk): Removed parameters hex_buf and
+	subkey.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
