@@ -2,7 +2,7 @@
 set -e
 TXT_FILE="$1"
 BIG_FILE="big.txt"
-CHUNK_SIZE=262144
+CHUNK_SIZE=65535
 touch $BIG_FILE
 while [ `wc -c < $BIG_FILE` -le $CHUNK_SIZE ]
 do

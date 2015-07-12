@@ -191,7 +191,7 @@ That means that `lock_box` will output 24 additional bytes for the nonce plus
 fixed number of 24+16=40 additional bytes for the whole input. According to
 libsodium's documentation, one single MAC isn't suited for huge files.
 
-The chunk size is 256 KiB (or less for the last chunk, depending on input
+The chunk size is 64 KiB (or less for the last chunk, depending on input
 size).  This makes the speed and size overheads negligible and still allows a
 tiny memory foot print.
 
@@ -205,7 +205,7 @@ Schematically, output from `lock_box` will look like this:
 Whereas each chunk will look like this:
 ```
 +-------------------+------------+-------------------------------------------+
-|  MAC (16 bytes)   | type (1 B) |     ciphertext (up to 256 KiB - 17 B)     |
+|  MAC (16 bytes)   | type (1 B) |     ciphertext (up to 64 KiB - 17 B)      |
 +-------------------+------------+-------------------------------------------+
 ```
 
@@ -234,23 +234,28 @@ There's no padding involved, even when the plaintext input's length is 0. The
 plaintext's length can be calculated from the ciphertext's length.
 
 ## Limitations
-No real limitations. Just don't encrypt more than
-1393796574908163946345982392040522594123776 YiB at once with one key.
+Due to the filter nature and lack of a header that specifies the length of the
+data, there are real limitations in the length of a file/data stream you can
+encrypt (at once). Of course, reasonable reuse of a key is advised.
+
+To be precise: You could safely encrypt encrypt up to 3.347787592E35 YiB at
+once with one key. That's a whole lot more than all of the WWW. And more than
+ZFS can store.
 
 Explanation: We have a 24 byte nonce. That nonce is used to encrypt one
-chunk of 256KiB. After that, the nonce is incremented for the next chunk. 24
+chunk of 64 KiB. After that, the nonce is incremented for the next chunk. 24
 bytes are 192 bit, so we have 2^192 different nonces for one key. Each nonce
-can be used to encrypt up to 256KiB. So:
+can be used to encrypt up to 64 KiB. So:
 
 ```
-2^192 * 256 KiB = 1.606938044E60 KiB
-                = 1.569275434E57 MiB
-                = 1.532495541E54 GiB
-                = 1.496577677E51 TiB
-                = 1.461501637E48 PiB
-                = 1.427247693E45 EiB
-                = 1.393796575E42 ZiB
-                = 1.361129468E39 YiB
+2^192 * 64 KiB = 3.923188585E56 KiB
+               = 3.831238852E53 MiB
+               = 3.741444192E50 GiB
+               = 3.653754093E47 TiB
+               = 3.568119232E44 PiB
+               = 3.484491437E41 EiB
+               = 3.402823669E38 ZiB
+               = 3.347787592E35 YiB
 ```
 
 ## TODO

@@ -1,5 +1,7 @@
 News for Crypto Box 0.6.0
 =========================
+* Changed chunk size back to 64 KiB, as it performs much better with the common
+  pipeline buffers size of 64 KiB.
 * Option `-H`/`--hex` is now implemented. It'll write/read ciphertext in hex.
 * Better help: Additional usages and a more detailed section below the options.
 * New values for chunk type. Decrypt old boxes first before upgrading.
