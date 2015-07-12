@@ -594,7 +594,7 @@ int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
 }
 
 int
-verify_ct_chunk(
+verify_chunk(
     struct chunk const * const chunk,
     uint8_t const * const nonce,
     uint8_t const * const key,
@@ -674,7 +674,7 @@ decrypt_next_chunk(
   if (read_ct_chunk(chunk, hex_buf, input) == -1) return -1;
 
   /* verify MAC */
-  if (verify_ct_chunk(chunk, nonce, key, subkey) == -1) {
+  if (verify_chunk(chunk, nonce, key, subkey) == -1) {
     fprintf(stderr, "Ciphertext couldn't be verified. It has been "
       "tampered with or you're using the wrong key.\n");
     return -1;

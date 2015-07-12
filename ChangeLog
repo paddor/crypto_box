@@ -17,6 +17,8 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	construct_chunk_mac().
 	* crypto_box.c (construct_chunk_mac): Defined.
 
+	* crypto_box.c (verify_ct_chunk): Rename to verify_chunk().
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
