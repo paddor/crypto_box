@@ -504,7 +504,7 @@ encrypt_next_chunk(
   if (print_ct_chunk(chunk, hex_buf, output) == -1) return -1;
 
   /* increment nonce */
-  sodium_increment(nonce, sizeof nonce);
+  sodium_increment(nonce, NONCE_BYTES);
 
   return 0;
 }
@@ -727,7 +727,7 @@ decrypt_next_chunk(
   if (write_pt_chunk(chunk, output) == -1) return -1;
 
   /* increment nonce */
-  sodium_increment(nonce, sizeof nonce);
+  sodium_increment(nonce, NONCE_BYTES);
 
   return 0;
 }

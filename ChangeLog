@@ -30,6 +30,9 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	encrypt_next_chunk().
 	* crypto_box.c (encrypt_next_chunk): Defined.
 
+	* crypto_box.c (encrypt_next_chunk, decrypt_next_chunk): Security fix:
+	Change `sizeof nonce`, which is just the pointer size, to NONCE_BYTES.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
