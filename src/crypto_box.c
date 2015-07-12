@@ -40,16 +40,16 @@ free_chunk(struct chunk * const chunk)
 }
 
 /* allocate memory for authentication subkey */
-unsigned char *
-auth_subkey_malloc()
+int
+auth_subkey_malloc(unsigned char ** const subkey)
 {
-  unsigned char *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
-  if (subkey == NULL) {
+  *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
+  if (*subkey == NULL) {
     fprintf(stderr, "Memory for authentication subkey couldn't be "
         "allocated.\n");
-    exit(EXIT_FAILURE);
+    return -1;
   }
-  return subkey;
+  return 0;
 }
 
 
@@ -525,7 +525,7 @@ lock_box(FILE *input, FILE *output)
   unsigned char *subkey = NULL;
 
   /* memory for authentication subkeys */
-  subkey = auth_subkey_malloc();
+  if (auth_subkey_malloc(&subkey) == -1) goto abort;
 
   /* allocate memory for hex ciphertexts */
   if (hex_ct_malloc(&hex_buf) == -1) goto abort;;
@@ -748,7 +748,7 @@ open_box(FILE *input, FILE *output)
   unsigned char *subkey = NULL;
 
   /* memory for authentication subkeys */
-  subkey = auth_subkey_malloc();
+  if (auth_subkey_malloc(&subkey) == -1) goto abort;
 
   /* allocate memory for hex ciphertexts */
   if (hex_ct_malloc(&hex_buf) == -1) goto abort;

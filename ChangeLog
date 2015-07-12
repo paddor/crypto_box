@@ -39,6 +39,9 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box, open_box): Make passing around chunk easier
 	and cleanup safely (even if chunk hasn't been initialized).
 
+	* crypto_box.h (auth_subkey_malloc): Change signature to behave like
+	init_chunk() and hex_ct_malloc(). Callers changed.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
