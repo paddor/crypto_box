@@ -466,13 +466,55 @@ print_ct_chunk(
   return 0;
 }
 
+int
+encrypt_next_chunk(
+    struct chunk *chunk,
+    uint8_t *hex_buf,
+    uint8_t * const nonce,
+    uint8_t const * const key,
+    uint8_t *subkey,
+    FILE *input,
+    FILE *output)
+{
+  int8_t chunk_type; /* first, last or in between */
+
+  /* recycle chunk */
+  chunk->used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
+
+  /* read complete chunk, if possible */
+  if(read_pt_chunk(chunk, input) == -1) return -1;
+
+  chunk_type = determine_chunk_type(chunk, CHUNK_PT_BYTES, input);
+  if (chunk_type == -1) return -1;
+
+  /* set chunk type */
+  chunk->data[CHUNK_TYPE_INDEX] = chunk_type;
+  DEBUG_ONLY(hexDump("chunk type", chunk->data[CHUNK_TYPE_INDEX], 1));
+
+  /* encrypt chunk_type and plaintext (in-place) */
+  crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk->data), CHUNK_CT(chunk->data),
+      CHUNK_CT_LEN(chunk->used), nonce, 1, key); /* 1 = initial counter */
+  DEBUG_ONLY(hexDump("ciphertext chunk", CHUNK_CT(chunk->data),
+        CHUNK_CT_LEN(chunk->used)));
+
+  /* compute MAC */
+  construct_chunk_mac(chunk, nonce, key, subkey);
+
+  /* print MAC + chunk_type + ciphertext */
+  if (print_ct_chunk(chunk, hex_buf, output) == -1) return -1;
+
+  /* increment nonce */
+  sodium_increment(nonce, sizeof nonce);
+
+  return 0;
+}
+
 void
 lock_box(FILE *input, FILE *output)
 {
   uint8_t nonce[NONCE_BYTES];
   uint8_t *hex_buf = NULL;
   struct chunk chunk;
-  int8_t chunk_type; /* first, last or in between */
   unsigned char *subkey = NULL;
 
   /* memory for authentication subkeys */
@@ -492,45 +534,27 @@ lock_box(FILE *input, FILE *output)
   /* print nonce */
   if (print_nonce(nonce, hex_buf, output) == -1) goto abort;
 
+  /* initialize chunk */
   init_chunk(&chunk);
-  while(!feof(input)) {
-    /* recycle chunk */
-    chunk.used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
 
-    /* read complete chunk, if possible */
-    if(read_pt_chunk(&chunk, input) == -1) goto abort;
+  /* encrypt first chunk */
+  if (encrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+      input, output) == -1) goto abort;
 
-    chunk_type = determine_chunk_type(&chunk, CHUNK_PT_BYTES, input);
-    if (chunk_type == -1) goto abort;
-
-    /* set chunk type */
-    chunk.data[CHUNK_TYPE_INDEX] = chunk_type;
-    DEBUG_ONLY(hexDump("chunk type", &chunk.data[CHUNK_TYPE_INDEX], 1));
-
-    /* encrypt chunk_type and plaintext (in-place) */
-    crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk.data), CHUNK_CT(chunk.data),
-        CHUNK_CT_LEN(chunk.used), nonce, 1, key); /* 1 = initial counter */
-    DEBUG_ONLY(hexDump("ciphertext chunk", CHUNK_CT(chunk.data),
-          CHUNK_CT_LEN(chunk.used)));
-
-    /* compute MAC */
-    construct_chunk_mac(&chunk, nonce, key, subkey);
-
-    /* print MAC + chunk_type + ciphertext */
-    if (print_ct_chunk(&chunk, hex_buf, output) == -1) goto abort;
-
-    /* increment nonce */
-    sodium_increment(nonce, sizeof nonce);
-
-    /* not first chunk anymore */
-    chunk.is_first_chunk = false;
+  /* encrypt remaining chunks */
+  chunk.is_first_chunk = false; /* not first chunk anymore */
+  while (!feof(input)) {
+    if (encrypt_next_chunk(&chunk, hex_buf, nonce, key, subkey,
+        input, output) == -1) goto abort;
   }
+
+  /* cleanup */
   sodium_free(hex_buf);
   sodium_free(subkey);
   free_chunk(&chunk);
   return;
 
-abort:
+abort: /* error */
   free_chunk(&chunk);
   sodium_free(hex_buf);
   sodium_free(subkey);
