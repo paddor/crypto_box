@@ -617,7 +617,7 @@ int read_ct_chunk(struct chunk * const chunk, uint8_t *hex_buf, FILE *input)
   DEBUG_ONLY(hexDump("ciphertext chunk read", chunk->data, chunk->used));
 
   /* truncated header */
-  if (chunk->used <= 17) { /* MAC + chunk_type = 17 */
+  if (chunk->used < 17) { /* MAC + chunk_type = 17 */
     fprintf(stderr, "Ciphertext's header has been truncated.\n");
     return -1;
   }
@@ -687,6 +687,7 @@ write_pt_chunk(struct chunk const * const chunk, FILE *output)
 {
   if (fwrite(CHUNK_PT(chunk->data), CHUNK_PT_LEN(chunk->used), 1, output) < 1)
   {
+    if (CHUNK_PT_LEN(chunk->used) == 0) return 0; /* special case: empty PT */
     perror("Couldn't write plaintext");
     return -1;
   }

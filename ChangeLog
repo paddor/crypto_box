@@ -45,6 +45,9 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (init_chunk, free_chunk): Rename to chunk_malloc() and
 	chunk_free(). Definitions and callers changed.
 
+	* crypto_box.c (read_ct_chunk, write_ct_chunk): Handle empty plaintext
+	nicely.
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.
