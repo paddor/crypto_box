@@ -528,7 +528,7 @@ lock_box(FILE *input, FILE *output)
   if (auth_subkey_malloc(&subkey) == -1) goto abort;
 
   /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&hex_buf) == -1) goto abort;;
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort;
 
   /* ciphertext to TTY warning */
   if (isatty(fileno(output)) && arguments.ct_format == BIN)
