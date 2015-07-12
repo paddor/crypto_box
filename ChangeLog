@@ -51,6 +51,9 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	one label ("abort"). Initialize hex_buf and subkey to NULL and then
 	sodium_free() unconditionally.
 
+	* crypto_box.c (lock_box): Extract printing nonce to print_nonce().
+	* crypto_box.c (print_nonce): Defined.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 

@@ -374,6 +374,30 @@ hex_ct_malloc(uint8_t ** const hex_buf)
   return -1;
 }
 
+int
+print_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *output)
+{
+  if (hex_buf == NULL) {
+    if (fwrite(nonce, NONCE_BYTES, 1, output) < 1) {
+      perror("Couldn't write ciphertext");
+      return -1;
+    }
+  } else {
+    char *hex_result; /* result of bin->hex conversion */
+    hex_result = sodium_bin2hex((char *) hex_buf, 2 * NONCE_BYTES + 1,
+        nonce, NONCE_BYTES);
+    if (hex_result == NULL) {
+      fprintf(stderr, "Couldn't convert nonce to hex.\n");
+      return -1;
+    }
+    if (fwrite(hex_buf, 2 * NONCE_BYTES, 1, output) < 1) {
+      perror("Couldn't write ciphertext");
+      return -1;
+    }
+  }
+  return 0;
+}
+
 void
 lock_box(FILE *input, FILE *output)
 {
@@ -402,26 +426,7 @@ lock_box(FILE *input, FILE *output)
   DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 
   /* print nonce */
-  switch (arguments.ct_format) {
-    case BIN:
-      if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
-        perror("Couldn't write ciphertext");
-        goto abort;;
-      }
-      break;
-    case HEX:
-      hex_result = sodium_bin2hex((char *) hex_buf, 2 * sizeof nonce + 1,
-          nonce, sizeof nonce);
-      if (hex_result == NULL) {
-        fprintf(stderr, "Couldn't convert nonce to hex.\n");
-        goto abort;;
-      }
-      if (fwrite(hex_buf, 2 * sizeof nonce, 1, output) < 1) {
-        perror("Couldn't write ciphertext");
-        goto abort;;
-      }
-      break;
-  }
+  if (print_nonce(nonce, hex_buf, output) == -1) goto abort;
 
   init_chunk(&chunk);
   while(!feof(input)) {
