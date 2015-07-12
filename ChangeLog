@@ -10,6 +10,9 @@ Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (verify_ct_chunk): Remove auth_state parameter and
 	declare it within the function body. Callers changed.
 
+	* crypto_box.c (print_nonce): Pass nonce parameter as const (not only
+	const pointer).
+
 Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Extract sodium initialization.
 	* crypto_box.h (crypto_box_init): Declared.

@@ -375,7 +375,7 @@ hex_ct_malloc(uint8_t ** const hex_buf)
 }
 
 int
-print_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *output)
+print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 {
   if (hex_buf == NULL) {
     if (fwrite(nonce, NONCE_BYTES, 1, output) < 1) {
