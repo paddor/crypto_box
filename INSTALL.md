@@ -1,10 +1,10 @@
 # Dependencies
 
-# Runtime
+## Runtime
 * libsodium (on Mac: `brew install libsodium`)
 * OSX/BSD only: argp (`brew install argp-standalone`)
 
-# Development (and running `make test`)
+## Development (and running `make test`)
 * Check (on OSX: `brew install check`)
 
 # Installation
