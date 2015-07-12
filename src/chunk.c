@@ -43,7 +43,7 @@ chunk_malloc(struct chunk ** const chunk)
   /* we allocate CHUNK_CT_BYTES, which is the maximum of data needed, and
    * slightly bigger than CHUNK_PT_BYTES
    */
-  (*chunk)->data = malloc(CHUNK_CT_BYTES * sizeof *(*chunk)->data);
+  (*chunk)->data = malloc(CHUNK_CT_BYTES);
   if ((*chunk)->data == NULL) {
     fprintf(stderr, "chunk data couldn't be allocated\n");
     return -1;

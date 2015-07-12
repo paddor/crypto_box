@@ -27,7 +27,7 @@ print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 static int
 read_pt_chunk(struct chunk * const chunk, FILE *input)
 {
-  size_t nread = fread(&chunk->data[chunk->used], sizeof *chunk->data,
+  size_t nread = fread(&chunk->data[chunk->used], 1,
       CHUNK_PT_BYTES, input);
   chunk->used += nread;
   if (nread < CHUNK_PT_BYTES && ferror(input)) {

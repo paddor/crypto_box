@@ -30,7 +30,7 @@ static int
 read_ct_chunk(struct chunk * const chunk, FILE *input)
 {
   if (chunk->hex_buf == NULL) {
-    chunk->used = fread(chunk->data, sizeof *chunk->data, chunk->size, input);
+    chunk->used = fread(chunk->data, 1, chunk->size, input);
   } else {
     size_t nread = fread(chunk->hex_buf, 2, CHUNK_CT_BYTES, input);
     if (nread < CHUNK_CT_BYTES && ferror(input)) {
