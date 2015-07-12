@@ -212,8 +212,7 @@ Whereas each chunk will look like this:
 ## Caveats
 
 ### Truncated ciphertext input produces incomplete plaintext output
-Due to the lack of a real header which specifies the length of the whole
-ciphertext, it's possible that `open_box` will output data, even if it
+it's possible that `open_box` will output data before it
 eventually finds out that the ciphertext has been truncated. However, it will
 **never ever** output any unauthenticated data. And, of course, when it
 eventually finds out the ciphertext has been truncated, it exits immediately
@@ -224,10 +223,11 @@ another command which must never ever read a single byte of truncated plaintext
 (even before it will be terminated right after `open_box` exits with an error
 code).
 
-In a pipeline, you cannot know how long the data from STDIN is, unless you want
-to read everything into memory (or a temporary file) before starting to write
-to STDOUT. After 0.3.0, I wanted this Crypto Box to have a small memory
-footprint, no matter how large the input. That's why it works like this.
+**Reason**: In a pipeline, it's impossible to know how long the data from STDIN
+is, unless you want to read everything into memory (or a temporary file) before
+starting to write to STDOUT. Starting with 0.4.0, Crypto Box works in chunks to
+keep a small memory footprint, no matter how large the input. That's why it
+works like this.
 
 ### No padding
 There's no padding involved, even when the plaintext input's length is 0. The
