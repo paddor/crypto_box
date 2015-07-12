@@ -1,9 +1,6 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 #include "crypto_box.h"
-#include <stdlib.h>
-#include <stdint.h>
-#include <stdio.h>
 
 /* +- 1 because of the chunk_type */
 #define CHUNK_MAC(x) (x)
