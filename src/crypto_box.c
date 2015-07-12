@@ -383,7 +383,7 @@ lock_box(FILE *input, FILE *output)
   struct chunk chunk;
   size_t nread;
   int8_t chunk_type; /* first, last or in between */
-  unsigned char *subkey;
+  unsigned char *subkey = NULL;
   unsigned char previous_mac[MAC_BYTES];
   crypto_onetimeauth_state auth_state;
 
@@ -391,7 +391,7 @@ lock_box(FILE *input, FILE *output)
   subkey = auth_subkey_malloc();
 
   /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&hex_buf) == -1) goto abort_auth_subkey;
+  if (hex_ct_malloc(&hex_buf) == -1) goto abort;;
 
   /* ciphertext to TTY warning */
   if (isatty(fileno(output)) && arguments.ct_format == BIN)
@@ -406,7 +406,7 @@ lock_box(FILE *input, FILE *output)
     case BIN:
       if (fwrite(nonce, sizeof nonce, 1, output) < 1) {
         perror("Couldn't write ciphertext");
-        goto abort_hex_buf;
+        goto abort;;
       }
       break;
     case HEX:
@@ -414,11 +414,11 @@ lock_box(FILE *input, FILE *output)
           nonce, sizeof nonce);
       if (hex_result == NULL) {
         fprintf(stderr, "Couldn't convert nonce to hex.\n");
-        goto abort_hex_buf;
+        goto abort;;
       }
       if (fwrite(hex_buf, 2 * sizeof nonce, 1, output) < 1) {
         perror("Couldn't write ciphertext");
-        goto abort_hex_buf;
+        goto abort;;
       }
       break;
   }
@@ -434,13 +434,13 @@ lock_box(FILE *input, FILE *output)
     chunk.used += nread;
     if (nread < CHUNK_PT_BYTES && ferror(input)) {
       fprintf(stderr, "Couldn't read plaintext.\n");
-      goto abort_chunk;
+      goto abort;
     }
     DEBUG_ONLY(hexDump("read plaintext chunk",
           CHUNK_PT(chunk.data), CHUNK_PT_LEN(chunk.used)));
 
     chunk_type = determine_chunk_type(&chunk, CHUNK_PT_BYTES, input);
-    if (chunk_type == -1) goto abort_chunk;
+    if (chunk_type == -1) goto abort;
 
     /* set chunk type */
     chunk.data[CHUNK_TYPE_INDEX] = chunk_type;
@@ -470,7 +470,7 @@ lock_box(FILE *input, FILE *output)
       case BIN:
         if (fwrite(chunk.data, chunk.used, 1, output) < 1) {
           perror("Couldn't write ciphertext");
-          goto abort_chunk;
+          goto abort;
         }
         break;
       case HEX:
@@ -478,11 +478,11 @@ lock_box(FILE *input, FILE *output)
             chunk.data, chunk.used);
         if (hex_result == NULL) {
           fprintf(stderr, "Couldn't convert ciphertext to hex.\n");
-          goto abort_chunk;
+          goto abort;
         }
         if (fwrite(hex_buf, chunk.used * 2, 1, output) < 1) {
           perror("Couldn't write ciphertext");
-          goto abort_chunk;
+          goto abort;
         }
         break;
     }
@@ -498,11 +498,9 @@ lock_box(FILE *input, FILE *output)
   free_chunk(&chunk);
   return;
 
-abort_chunk:
+abort:
   free_chunk(&chunk);
-abort_hex_buf:
   sodium_free(hex_buf);
-abort_auth_subkey:
   sodium_free(subkey);
   exit(EXIT_FAILURE);
 }

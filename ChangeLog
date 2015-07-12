@@ -47,6 +47,10 @@ Sun Jul 11 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (decrypt_chunk): Inline it directly in
 	decrypt_next_chunk().
 
+	* crypto_box.c (lock_box): Simplify error handling here as well. Only
+	one label ("abort"). Initialize hex_buf and subkey to NULL and then
+	sodium_free() unconditionally.
+
 Sun Jul 10 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h (CHUNK_CT_BYTES): Declare as unsigned long.
 
