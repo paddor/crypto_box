@@ -13,12 +13,6 @@
 #include <sodium.h>
 #include <argp.h>
 
-#ifdef DEBUG
-  #define DEBUG_ONLY(x) (x)
-#else
-  #define DEBUG_ONLY(x)
-#endif
-
 #define NONCE_BYTES crypto_stream_xsalsa20_NONCEBYTES
 #define MAC_BYTES crypto_onetimeauth_BYTES
 
@@ -39,7 +33,6 @@ struct arguments arguments;
 extern void crypto_box_init(void);
 extern FILE* open_input(struct arguments *arguments);
 extern void close_input(FILE *input);
-extern void hexDump(const char *desc, const void *addr, size_t len);
 
 /* TODO: Remove when libsodium 1.0.4 is out */
 extern void sodium_increment(unsigned char *n, const size_t nlen);

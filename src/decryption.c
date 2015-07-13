@@ -47,8 +47,6 @@ read_ct_chunk(struct chunk * const chunk, FILE *input)
     }
   }
 
-  DEBUG_ONLY(hexDump("ciphertext chunk read", chunk->data, chunk->used));
-
   /* truncated header */
   if (chunk->used < 17) { /* MAC + chunk_type = 17 */
     fprintf(stderr, "Ciphertext's header has been truncated.\n");
@@ -83,11 +81,6 @@ verify_chunk(
   if (!chunk->is_first_chunk) /* include previous MAC */
     crypto_onetimeauth_update(&auth_state, mac, MAC_BYTES);
   crypto_onetimeauth_final(&auth_state, mac);
-
-  DEBUG_ONLY(hexDump("read chunk MAC", CHUNK_MAC(chunk->data),
-        MAC_BYTES));
-  DEBUG_ONLY(hexDump("calculated chunk MAC", mac,
-        MAC_BYTES));
 
   /* compare MACs */
   return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MAC_BYTES);
@@ -152,9 +145,6 @@ decrypt_next_chunk(
   /* decrypt */
   crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk->data), CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used), nonce, 1, key); /* 1 = initial counter */
-
-  DEBUG_ONLY(hexDump("plain text", CHUNK_PT(chunk->data),
-      CHUNK_PT_LEN(chunk->used)));
 
   /* check chunk type */
   chunk_type = determine_ct_chunk_type(chunk, input);

@@ -34,8 +34,6 @@ read_pt_chunk(struct chunk * const chunk, FILE *input)
     fprintf(stderr, "Couldn't read plaintext.\n");
     return -1;
   }
-  DEBUG_ONLY(hexDump("read plaintext chunk",
-        CHUNK_PT(chunk->data), CHUNK_PT_LEN(chunk->used)));
   return 0;
 }
 
@@ -60,8 +58,6 @@ construct_chunk_mac(
 
   /* remember MAC */
   memcpy(previous_mac, CHUNK_MAC(chunk->data), MAC_BYTES);
-
-  DEBUG_ONLY(hexDump("chunk MAC", CHUNK_MAC(chunk->data), MAC_BYTES));
 }
 
 static int
@@ -111,13 +107,10 @@ encrypt_next_chunk(
 
   /* set chunk type */
   chunk->data[CHUNK_TYPE_INDEX] = chunk_type;
-  DEBUG_ONLY(hexDump("chunk type", chunk->data[CHUNK_TYPE_INDEX], 1));
 
   /* encrypt chunk_type and plaintext (in-place) */
   crypto_stream_xsalsa20_xor_ic(CHUNK_CT(chunk->data), CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used), nonce, 1, key); /* 1 = initial counter */
-  DEBUG_ONLY(hexDump("ciphertext chunk", CHUNK_CT(chunk->data),
-        CHUNK_CT_LEN(chunk->used)));
 
   /* compute MAC */
   construct_chunk_mac(chunk, nonce, key);
@@ -146,7 +139,6 @@ lock_box(FILE *input, FILE *output, uint8_t const * const key)
 
   /* new nonce */
   randombytes_buf(nonce, sizeof nonce);
-  DEBUG_ONLY(hexDump("nonce", nonce, sizeof nonce));
 
   /* print nonce */
   if (print_nonce(nonce, chunk->hex_buf, output) == -1) goto abort;

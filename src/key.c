@@ -159,7 +159,6 @@ get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
       sodium_free(hex_key);
       break;
   }
-  DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
 int
