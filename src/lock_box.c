@@ -1,6 +1,7 @@
 #include "crypto_box.h"
 #include "key.h"
 #include "encryption.h"
+#include "util.h"
 
 static uint8_t *key;
 

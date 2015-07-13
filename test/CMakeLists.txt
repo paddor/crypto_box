@@ -12,6 +12,7 @@ add_executable(c_round_trip round_trip.c
 	$<TARGET_OBJECTS:crypto_box.o>
 	$<TARGET_OBJECTS:chunk.o>
 	$<TARGET_OBJECTS:key.o>
+	$<TARGET_OBJECTS:util.o>
 	$<TARGET_OBJECTS:encryption.o>
 	$<TARGET_OBJECTS:decryption.o>)
 

@@ -15,6 +15,11 @@ Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (MAC_BYTES): Macro removed. Users changed.
 
+	* crypto_box.h crypto_box.c (crypto_box_init, open_input, close_input)
+	(sodium_increment): Removed.
+	* util.h util.c (crypto_box_init, open_input, close_input)
+	(sodium_increment): Added.
+
 Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box): Extract reading of a PT chunk to
 	read_pt_chunk().

@@ -101,17 +101,20 @@ add_library(chunk.o OBJECT src/chunk.c)
 add_library(key.o OBJECT src/key.c)
 add_library(encryption.o OBJECT src/encryption.c)
 add_library(decryption.o OBJECT src/decryption.c)
+add_library(util.o OBJECT src/util.c)
 
 # EXECUTABLES
 add_executable(lock_box src/lock_box.c
 	$<TARGET_OBJECTS:crypto_box.o>
 	$<TARGET_OBJECTS:chunk.o>
 	$<TARGET_OBJECTS:key.o>
+	$<TARGET_OBJECTS:util.o>
 	$<TARGET_OBJECTS:encryption.o>)
 add_executable(open_box src/open_box.c
 	$<TARGET_OBJECTS:crypto_box.o>
 	$<TARGET_OBJECTS:chunk.o>
 	$<TARGET_OBJECTS:key.o>
+	$<TARGET_OBJECTS:util.o>
 	$<TARGET_OBJECTS:decryption.o>)
 
 # LINKING

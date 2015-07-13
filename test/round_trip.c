@@ -2,6 +2,7 @@
 #include "key.h"
 #include "encryption.h"
 #include "decryption.h"
+#include "util.h"
 
 #include <check.h>
 #include <stdlib.h>
