@@ -19,7 +19,6 @@
   #define DEBUG_ONLY(x)
 #endif
 
-#define KEY_BYTES crypto_stream_xsalsa20_KEYBYTES
 #define NONCE_BYTES crypto_stream_xsalsa20_NONCEBYTES
 #define MAC_BYTES crypto_onetimeauth_BYTES
 
