@@ -1,4 +1,5 @@
 #include "crypto_box.h"
+#include "arguments.h"
 #include "key.h"
 #include "encryption.h"
 #include "util.h"

@@ -1,6 +1,7 @@
 #ifndef ENCRYPTION_H
 #define ENCRYPTION_H
 #include "crypto_box.h"
+#include "arguments.h"
 #include "util.h"
 #include "chunk.h"
 
