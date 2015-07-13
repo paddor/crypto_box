@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 static char *input_file_name;
-static void round_trip(void)
+static int round_trip(void)
 {
   crypto_box_init();
 
@@ -39,15 +39,16 @@ static void round_trip(void)
   if (pt1 == NULL || ct == NULL || pt2 == NULL) exit(EXIT_FAILURE);
 
   /* generate random key */
-  key = key_malloc();
+  uint8_t *key;
+  if (key_malloc(&key) == -1) goto abort;
   randombytes_buf(key, KEY_BYTES);
 
   /* encrypt -> CT file */
-  lock_box(pt1, ct);
+  lock_box(pt1, ct, key);
 
   /* decrypt -> PT2 file */
   rewind(ct);
-  open_box(ct, pt2);
+  open_box(ct, pt2, key);
 
   /* hash PT1 and PT2 file contents */
   unsigned char hash_pt1[crypto_generichash_BYTES];
@@ -77,16 +78,23 @@ static void round_trip(void)
   /* compare PT1 and PT2 hashes */
   ck_assert_int_eq(0, sodium_memcmp(hash_pt1, hash_pt2,
         crypto_generichash_BYTES));
+
+  sodium_free(key);
+  return 0;
+
+abort:
+  sodium_free(key);
+  return -1;
 }
 
 START_TEST(test_binary_round_trip)
   arguments.ct_format = BIN;
-  round_trip();
+  ck_assert_int_eq(0, round_trip());
 END_TEST
 
 START_TEST(test_hex_round_trip)
   arguments.ct_format = HEX;
-  round_trip();
+  ck_assert_int_eq(0, round_trip());
 END_TEST
 
 

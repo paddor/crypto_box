@@ -162,26 +162,15 @@ get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
   DEBUG_ONLY(hexDump("not so secret key", key, KEY_BYTES));
 }
 
-static void
-key_free(void)
+int
+key_malloc(uint8_t ** const key)
 {
-  sodium_free(key);
-}
-
-uint8_t *
-key_malloc()
-{
-  uint8_t *key = sodium_malloc(KEY_BYTES);
-  if (key == NULL) {
+  *key = sodium_malloc(KEY_BYTES);
+  if (*key == NULL) {
     fprintf(stderr, "Unable to allocate memory for key.\n");
-    exit(EXIT_FAILURE);
+    return -1;
   }
 
-  /* register call to sodium_free() before exit
-   * NOTE: This is important because the unlocking also zeroes the memory out
-   * before actually unlocking and freeing it. */
-  atexit(key_free);
-
-  return key;
+  return 0;
 }
 // vim: et:ts=2:sw=2

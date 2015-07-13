@@ -1,3 +1,9 @@
+Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
+	* key.h (uint8_t *key): Eliminate global variable key. Make it local
+	in the respective main().
+	* key.h (key_malloc): Take a pointer to store the pointer in, just
+	like chunk_malloc(). Callers changed.
+
 Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box): Extract reading of a PT chunk to
 	read_pt_chunk().

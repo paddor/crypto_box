@@ -171,7 +171,7 @@ decrypt_next_chunk(
 }
 
 void
-open_box(FILE *input, FILE *output)
+open_box(FILE *input, FILE *output, uint8_t const * const key)
 {
   uint8_t nonce[NONCE_BYTES];
   struct chunk *chunk = NULL;

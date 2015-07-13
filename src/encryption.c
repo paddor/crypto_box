@@ -132,7 +132,7 @@ encrypt_next_chunk(
 }
 
 void
-lock_box(FILE *input, FILE *output)
+lock_box(FILE *input, FILE *output, uint8_t const * const key)
 {
   uint8_t nonce[NONCE_BYTES];
   struct chunk *chunk = NULL;
