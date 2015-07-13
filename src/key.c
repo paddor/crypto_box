@@ -19,8 +19,8 @@ get_key_from_file(const char *key_file, uint8_t *key)
       perror("Couldn't associate stream with file descriptor");
       exit(EXIT_FAILURE);
     }
-    randombytes_buf(key, KEY_BYTES); // generate random key
-    if (fwrite(key, KEY_BYTES, 1, f) == 0) { // write to file
+    randombytes_buf(key, crypto_stream_xsalsa20_KEYBYTES); // random key
+    if (fwrite(key, crypto_stream_xsalsa20_KEYBYTES, 1, f) == 0) {
       perror("Couldn't write key file");
       exit(EXIT_FAILURE);
     }
@@ -38,14 +38,14 @@ get_key_from_file(const char *key_file, uint8_t *key)
     }
 
     // check size
-    if (s.st_size < KEY_BYTES) {
+    if (s.st_size < crypto_stream_xsalsa20_KEYBYTES) {
       fprintf(stderr, "Key file is too small. It must contain at "
-          "least %d bytes.\n", KEY_BYTES);
+          "least %d bytes.\n", crypto_stream_xsalsa20_KEYBYTES);
       exit(EXIT_FAILURE);
     }
 
     // read key
-    if (fread(key, KEY_BYTES, 1, f) == 0) {
+    if (fread(key, crypto_stream_xsalsa20_KEYBYTES, 1, f) == 0) {
       perror("Couldn't read key file");
       exit(EXIT_FAILURE);
     }
@@ -59,10 +59,10 @@ get_key_from_str(const char *str, uint8_t *key)
   size_t bin_len, bytes_read;
   const char * hex_end; // pointer to last parsed hex character
 
-  if (-1 == sodium_hex2bin(key, KEY_BYTES, str,
+  if (-1 == sodium_hex2bin(key, crypto_stream_xsalsa20_KEYBYTES, str,
         strlen(str), ":", &bin_len, &hex_end)) {
     fprintf(stderr, "Given key is too long, only %u bytes are useable!\n",
-        KEY_BYTES);
+        crypto_stream_xsalsa20_KEYBYTES);
     exit(EXIT_FAILURE);
   }
 
@@ -75,12 +75,13 @@ get_key_from_str(const char *str, uint8_t *key)
   }
 
   /* warn about short keys */
-  if (bin_len < KEY_BYTES)
+  if (bin_len < crypto_stream_xsalsa20_KEYBYTES)
     fprintf(stderr, "WARNING: reuising key material to make up a key "
         "of sufficient length\n");
     bytes_read = bin_len;
-    while (bytes_read < KEY_BYTES) {
-      sodium_hex2bin(&key[bytes_read], KEY_BYTES - bytes_read,
+    while (bytes_read < crypto_stream_xsalsa20_KEYBYTES) {
+      sodium_hex2bin(&key[bytes_read],
+        crypto_stream_xsalsa20_KEYBYTES - bytes_read,
         str, strlen(str), ": ", &bin_len, NULL);
       bytes_read += bin_len;
     }
@@ -126,13 +127,14 @@ read_line(char *buf, size_t len)
  */
 #define HEX_KEY_MAXLEN (128)
 void
-get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
+get_key(const struct arguments * const arguments, uint8_t * const key)
 {
   switch (arguments->key_source) {
     case RANDOM:
-      randombytes_buf(key, KEY_BYTES);
-      char hex[KEY_BYTES * 2 + 1];
-      sodium_bin2hex(hex, KEY_BYTES * 2 + 1, key, KEY_BYTES);
+      randombytes_buf(key, crypto_stream_xsalsa20_KEYBYTES);
+      char hex[crypto_stream_xsalsa20_KEYBYTES * 2 + 1];
+      sodium_bin2hex(hex, crypto_stream_xsalsa20_KEYBYTES * 2 + 1, key,
+          crypto_stream_xsalsa20_KEYBYTES);
       fprintf(stderr, "%s\n", hex);
       break;
     case KEY_FILE:
@@ -164,7 +166,7 @@ get_key(const struct arguments * const arguments, uint8_t key[KEY_BYTES])
 int
 key_malloc(uint8_t ** const key)
 {
-  *key = sodium_malloc(KEY_BYTES);
+  *key = sodium_malloc(crypto_stream_xsalsa20_KEYBYTES);
   if (*key == NULL) {
     fprintf(stderr, "Unable to allocate memory for key.\n");
     return -1;

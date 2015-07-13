@@ -41,7 +41,7 @@ static int round_trip(void)
   /* generate random key */
   uint8_t *key;
   if (key_malloc(&key) == -1) goto abort;
-  randombytes_buf(key, KEY_BYTES);
+  randombytes_buf(key, crypto_stream_xsalsa20_KEYBYTES);
 
   /* encrypt -> CT file */
   lock_box(pt1, ct, key);
