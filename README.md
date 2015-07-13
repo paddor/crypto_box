@@ -1,4 +1,4 @@
-[![Build Status on Travis CI](https://travis-ci.org/paddor/crypto_box.png?branch=master)](https://travis-ci.org/paddor/crypto_box?branch=master)
+[![Build Status on Travis CI](https://travis-ci.org/paddor/crypto_box.svg?branch=master)](https://travis-ci.org/paddor/crypto_box?branch=master)
 [![Build Status on semaphore](https://semaphoreci.com/api/v1/projects/d5f56226-394c-453a-83c7-757b11f9279f/474468/shields_badge.svg)](https://semaphoreci.com/paddor/crypto_box)
 [![ISC License](https://img.shields.io/badge/license-ISC_License-blue.svg)](LICENSE)
 
