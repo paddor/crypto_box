@@ -6,6 +6,7 @@
 #include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 static char *input_file_name;
 static int round_trip(void)
@@ -76,7 +77,7 @@ static int round_trip(void)
   crypto_generichash_final(&state_pt2, hash_pt2, sizeof hash_pt2);
 
   /* compare PT1 and PT2 hashes */
-  ck_assert_int_eq(0, sodium_memcmp(hash_pt1, hash_pt2,
+  ck_assert_int_eq(0, memcmp(hash_pt1, hash_pt2,
         crypto_generichash_BYTES));
 
   sodium_free(key);
