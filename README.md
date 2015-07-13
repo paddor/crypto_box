@@ -7,6 +7,9 @@ Simple secret-key encryption without the PGP/GPG/OpenSSL/OMG jungle. Secure by
 default by leveraging [libsodium](https://github.com/jedisct1/libsodium)'s
 power.
 
+## Installation
+See [INSTALL.md](INSTALL.md).
+
 ## Usage
 
 Crypto Box gives you two (filter) utilities: `lock_box` and `open_box`. These
@@ -258,20 +261,11 @@ can be used to encrypt up to 64 KiB. So:
                = 3.347787592E35 YiB
 ```
 
-## TODO
+## News
+See [NEWS.md](NEWS.md).
 
-* `cb_` prefix for functions ("crypto box")
-* more tests
-  - tampered ciphertext
-    * appended chunk
-    * incomplete chunk
-    * completely missing chunk (head, middle, tail)
-    * replaced byte sequence
-    * truncated to < 17 bytes, 0 bytes
-    * no nonce
-    * wrong chunk type
-* (C11) threads
+## TODO
+See [TODO.md](TODO.md).
 
 ## License
-
-ISC. See LICENSE file.
+See [LICENSE](LICENSE).
