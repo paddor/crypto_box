@@ -45,7 +45,7 @@ construct_chunk_mac(
     uint8_t const * const nonce,
     uint8_t const * const key)
 {
-  static unsigned char previous_mac[MAC_BYTES];
+  static unsigned char previous_mac[crypto_onetimeauth_BYTES];
   crypto_onetimeauth_state auth_state;
 
   crypto_stream(chunk->subkey, crypto_onetimeauth_KEYBYTES, nonce, key);
@@ -54,12 +54,13 @@ construct_chunk_mac(
       CHUNK_CT_LEN(chunk->used));
   if (!chunk->is_first_chunk) {
     /* include previous MAC */
-    crypto_onetimeauth_update(&auth_state, previous_mac, MAC_BYTES);
+    crypto_onetimeauth_update(&auth_state, previous_mac,
+		    crypto_onetimeauth_BYTES);
   }
   crypto_onetimeauth_final(&auth_state, CHUNK_MAC(chunk->data));
 
   /* remember MAC */
-  memcpy(previous_mac, CHUNK_MAC(chunk->data), MAC_BYTES);
+  memcpy(previous_mac, CHUNK_MAC(chunk->data), crypto_onetimeauth_BYTES);
 }
 
 static int
@@ -99,7 +100,7 @@ encrypt_next_chunk(
   int8_t chunk_type; /* first, last or in between */
 
   /* recycle chunk data */
-  chunk->used = MAC_BYTES + 1; /* reserve room for MAC + chunk_type */
+  chunk->used = crypto_onetimeauth_BYTES + 1; /* reserve room for MAC + chunk_type */
 
   /* read complete chunk, if possible */
   if(read_pt_chunk(chunk, input) == -1) return -1;

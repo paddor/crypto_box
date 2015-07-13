@@ -13,6 +13,8 @@ Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 
 	* crypto_box.h (NONCE_BYTES): Macro removed. Users changed.
 
+	* crypto_box.h (MAC_BYTES): Macro removed. Users changed.
+
 Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box): Extract reading of a PT chunk to
 	read_pt_chunk().

@@ -69,7 +69,7 @@ verify_chunk(
     uint8_t const * const nonce,
     uint8_t const * const key)
 {
-  static unsigned char mac[MAC_BYTES];
+  static unsigned char mac[crypto_onetimeauth_BYTES];
   crypto_onetimeauth_state auth_state;
 
   /* derive subkey */
@@ -80,11 +80,11 @@ verify_chunk(
   crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used));
   if (!chunk->is_first_chunk) /* include previous MAC */
-    crypto_onetimeauth_update(&auth_state, mac, MAC_BYTES);
+    crypto_onetimeauth_update(&auth_state, mac, crypto_onetimeauth_BYTES);
   crypto_onetimeauth_final(&auth_state, mac);
 
   /* compare MACs */
-  return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MAC_BYTES);
+  return sodium_memcmp(mac, CHUNK_MAC(chunk->data), crypto_onetimeauth_BYTES);
 }
 
 static int

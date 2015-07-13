@@ -4,13 +4,13 @@
 
 /* +- 1 because of the chunk_type */
 #define CHUNK_MAC(x) (x)
-#define CHUNK_PT(x) (x + MAC_BYTES + 1)
-#define CHUNK_PT_LEN(x) (x - MAC_BYTES - 1)
-#define CHUNK_CT(x) (x + MAC_BYTES)
-#define CHUNK_CT_LEN(x) (x - MAC_BYTES)
-#define CHUNK_TYPE_INDEX MAC_BYTES
+#define CHUNK_PT(x) (x + crypto_onetimeauth_BYTES + 1)
+#define CHUNK_PT_LEN(x) (x - crypto_onetimeauth_BYTES - 1)
+#define CHUNK_CT(x) (x + crypto_onetimeauth_BYTES)
+#define CHUNK_CT_LEN(x) (x - crypto_onetimeauth_BYTES)
+#define CHUNK_TYPE_INDEX crypto_onetimeauth_BYTES
 #define CHUNK_CT_BYTES 65536UL /* 256 KiB */
-#define CHUNK_PT_BYTES (CHUNK_CT_BYTES - MAC_BYTES - 1) /* 256 KiB - 17 */
+#define CHUNK_PT_BYTES (CHUNK_CT_BYTES - crypto_onetimeauth_BYTES - 1)
 #define FIRST_CHUNK 1U
 #define LAST_CHUNK  2U
 

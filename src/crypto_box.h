@@ -13,8 +13,6 @@
 #include <sodium.h>
 #include <argp.h>
 
-#define MAC_BYTES crypto_onetimeauth_BYTES
-
 struct arguments {
   enum { STDIN, INPUT_FILE } input_source;
   enum { BIN, HEX } ct_format;
