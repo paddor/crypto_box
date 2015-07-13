@@ -23,7 +23,7 @@ main(int argc, char *argv[])
   get_key(&arguments, key);
 
   FILE *input = open_input(&arguments);
-  lock_box(input, stdout, key);
+  lock_box(input, stdout, key, arguments.ct_format == HEX);
   close_input(input);
 
   return EXIT_SUCCESS;

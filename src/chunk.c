@@ -3,8 +3,6 @@
 static int
 hex_ct_malloc(uint8_t ** const hex_buf)
 {
-  if (arguments.ct_format != HEX) return 0;
-
   *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
   if (*hex_buf != NULL) return 0;
 
@@ -26,7 +24,7 @@ auth_subkey_malloc(unsigned char ** const subkey)
 }
 
 int
-chunk_malloc(struct chunk ** const chunk)
+chunk_malloc(struct chunk ** const chunk, _Bool hex)
 {
   *chunk = malloc(sizeof(struct chunk));
 
@@ -54,7 +52,7 @@ chunk_malloc(struct chunk ** const chunk)
   if (auth_subkey_malloc(&(*chunk)->subkey) == -1) return -1;
 
   /* allocate memory for hex ciphertexts */
-  if (hex_ct_malloc(&(*chunk)->hex_buf) == -1) return -1;
+  if (hex && hex_ct_malloc(&(*chunk)->hex_buf) == -1) return -1;
 
   return 0;
 }

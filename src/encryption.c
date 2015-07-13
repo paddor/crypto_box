@@ -128,16 +128,16 @@ encrypt_next_chunk(
 }
 
 void
-lock_box(FILE *input, FILE *output, uint8_t const * const key)
+lock_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 {
   uint8_t nonce[crypto_stream_xsalsa20_NONCEBYTES];
   struct chunk *chunk = NULL;
 
   /* initialize chunk */
-  if (chunk_malloc(&chunk) == -1) goto abort;
+  if (chunk_malloc(&chunk, hex) == -1) goto abort;
 
   /* ciphertext to TTY warning */
-  if (isatty(fileno(output)) && arguments.ct_format == BIN)
+  if (!hex && isatty(fileno(output)))
     fprintf(stderr, "WARNING: Writing binary ciphertext to terminal.\n");
 
   /* new nonce */

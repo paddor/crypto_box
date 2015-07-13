@@ -23,6 +23,10 @@ Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.h crypto_box.c <argument parsing stuff>: Removed.
 	* arguments.h arguments.c <argument parsing stuff>: Added.
 
+	* chunk.h chunk.c encryption.h encryption.c decryption.h decryption.c
+	round_trip.c: Remove arguments stuff. It only belongs into
+	lock_box.[ch] and open_box.[ch]. Callers changed.
+
 Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box): Extract reading of a PT chunk to
 	read_pt_chunk().

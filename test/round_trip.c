@@ -8,9 +8,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 static char *input_file_name;
-static int round_trip(void)
+static int round_trip(_Bool hex_wanted)
 {
   crypto_box_init();
 
@@ -46,11 +47,11 @@ static int round_trip(void)
   randombytes_buf(key, crypto_stream_xsalsa20_KEYBYTES);
 
   /* encrypt -> CT file */
-  lock_box(pt1, ct, key);
+  lock_box(pt1, ct, key, hex_wanted);
 
   /* decrypt -> PT2 file */
   rewind(ct);
-  open_box(ct, pt2, key);
+  open_box(ct, pt2, key, hex_wanted);
 
   /* hash PT1 and PT2 file contents */
   unsigned char hash_pt1[crypto_generichash_BYTES];
@@ -90,13 +91,13 @@ abort:
 }
 
 START_TEST(test_binary_round_trip)
-  arguments.ct_format = BIN;
-  ck_assert_int_eq(0, round_trip());
+  _Bool hex_wanted = false; /* binary */
+  ck_assert_int_eq(0, round_trip(hex_wanted));
 END_TEST
 
 START_TEST(test_hex_round_trip)
-  arguments.ct_format = HEX;
-  ck_assert_int_eq(0, round_trip());
+  _Bool hex_wanted = true; /* hex */
+  ck_assert_int_eq(0, round_trip(hex_wanted));
 END_TEST
 
 

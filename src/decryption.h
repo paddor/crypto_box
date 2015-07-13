@@ -4,7 +4,8 @@
 #include "util.h"
 #include "chunk.h"
 
-extern void open_box(FILE *input, FILE *output, uint8_t const * const key);
+extern void open_box(FILE *input, FILE *output, uint8_t const * const key,
+		_Bool hex);
 
 // vim: et:ts=2:sw=2
 #endif

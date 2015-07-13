@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   get_key(&arguments, key);
 
   FILE *input = open_input(&arguments);
-  open_box(input, stdout, key);
+  open_box(input, stdout, key, arguments.ct_format == HEX);
   close_input(input);
 
   return EXIT_SUCCESS;

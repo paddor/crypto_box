@@ -1,7 +1,7 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 #include "crypto_box.h"
-#include "arguments.h"
+#include "stdbool.h"
 
 /* +- 1 because of the chunk_type */
 #define CHUNK_MAC(x) (x)
@@ -24,7 +24,7 @@ struct chunk {
   unsigned char *subkey;
 };
 
-extern int chunk_malloc(struct chunk ** const chunk);
+extern int chunk_malloc(struct chunk ** const chunk, _Bool hex);
 extern void chunk_free(struct chunk * const chunk);
 extern int8_t determine_pt_chunk_type(struct chunk const * const, FILE *input);
 extern int8_t determine_ct_chunk_type(struct chunk const * const, FILE *input);

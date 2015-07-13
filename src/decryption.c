@@ -162,13 +162,13 @@ decrypt_next_chunk(
 }
 
 void
-open_box(FILE *input, FILE *output, uint8_t const * const key)
+open_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 {
   uint8_t nonce[crypto_stream_xsalsa20_NONCEBYTES];
   struct chunk *chunk = NULL;
 
   /* initialize chunk */
-  if (chunk_malloc(&chunk) == -1) goto abort;
+  if (chunk_malloc(&chunk, hex) == -1) goto abort;
 
   /* read nonce */
   if (read_nonce(nonce, chunk->hex_buf, input) == -1) goto abort;
