@@ -13,7 +13,6 @@
 #include <sodium.h>
 #include <argp.h>
 
-#define NONCE_BYTES crypto_stream_xsalsa20_NONCEBYTES
 #define MAC_BYTES crypto_onetimeauth_BYTES
 
 struct arguments {

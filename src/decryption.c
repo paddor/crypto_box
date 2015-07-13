@@ -6,19 +6,20 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   size_t bin_len; /* length of binary data written during conversion  */
   int hex_result; /* result of hex->bin conversion */
   if (hex_buf == NULL) {
-    if (fread(nonce, NONCE_BYTES, 1, input) < 1) {
+    if (fread(nonce, crypto_stream_xsalsa20_NONCEBYTES, 1, input) < 1) {
       fprintf(stderr, "Couldn't read ciphertext.\n");
       return -1;
     }
   } else {
-    if (fread(hex_buf, NONCE_BYTES * 2, 1, input) < 1) {
+    if (fread(hex_buf, crypto_stream_xsalsa20_NONCEBYTES * 2, 1, input) < 1) {
       fprintf(stderr, "Couldn't read ciphertext.\n");
       return -1;
     }
 
-    hex_result = sodium_hex2bin(nonce, NONCE_BYTES, (const char*) hex_buf,
-      NONCE_BYTES * 2, NULL, &bin_len, NULL);
-    if (hex_result != 0 || bin_len < NONCE_BYTES) {
+    hex_result = sodium_hex2bin(nonce, crypto_stream_xsalsa20_NONCEBYTES,
+      (const char*) hex_buf, crypto_stream_xsalsa20_NONCEBYTES * 2, NULL,
+      &bin_len, NULL);
+    if (hex_result != 0 || bin_len < crypto_stream_xsalsa20_NONCEBYTES) {
       fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
       return -1;
     }
@@ -155,7 +156,7 @@ decrypt_next_chunk(
   if (write_pt_chunk(chunk, output) == -1) return -1;
 
   /* increment nonce */
-  sodium_increment(nonce, NONCE_BYTES);
+  sodium_increment(nonce, crypto_stream_xsalsa20_NONCEBYTES);
 
   return 0;
 }
@@ -163,7 +164,7 @@ decrypt_next_chunk(
 void
 open_box(FILE *input, FILE *output, uint8_t const * const key)
 {
-  uint8_t nonce[NONCE_BYTES];
+  uint8_t nonce[crypto_stream_xsalsa20_NONCEBYTES];
   struct chunk *chunk = NULL;
 
   /* initialize chunk */

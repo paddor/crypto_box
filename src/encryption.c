@@ -4,19 +4,21 @@ static int
 print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 {
   if (hex_buf == NULL) {
-    if (fwrite(nonce, NONCE_BYTES, 1, output) < 1) {
+    if (fwrite(nonce, crypto_stream_xsalsa20_NONCEBYTES, 1, output) < 1) {
       perror("Couldn't write ciphertext");
       return -1;
     }
   } else {
     char *hex_result; /* result of bin->hex conversion */
-    hex_result = sodium_bin2hex((char *) hex_buf, 2 * NONCE_BYTES + 1,
-        nonce, NONCE_BYTES);
+    hex_result = sodium_bin2hex((char *) hex_buf, 2 *
+      crypto_stream_xsalsa20_NONCEBYTES + 1, nonce,
+      crypto_stream_xsalsa20_NONCEBYTES);
     if (hex_result == NULL) {
       fprintf(stderr, "Couldn't convert nonce to hex.\n");
       return -1;
     }
-    if (fwrite(hex_buf, 2 * NONCE_BYTES, 1, output) < 1) {
+    if (fwrite(hex_buf, 2 * crypto_stream_xsalsa20_NONCEBYTES, 1, output) < 1)
+    {
       perror("Couldn't write ciphertext");
       return -1;
     }
@@ -119,7 +121,7 @@ encrypt_next_chunk(
   if (print_ct_chunk(chunk, output) == -1) return -1;
 
   /* increment nonce */
-  sodium_increment(nonce, NONCE_BYTES);
+  sodium_increment(nonce, crypto_stream_xsalsa20_NONCEBYTES);
 
   return 0;
 }
@@ -127,7 +129,7 @@ encrypt_next_chunk(
 void
 lock_box(FILE *input, FILE *output, uint8_t const * const key)
 {
-  uint8_t nonce[NONCE_BYTES];
+  uint8_t nonce[crypto_stream_xsalsa20_NONCEBYTES];
   struct chunk *chunk = NULL;
 
   /* initialize chunk */
