@@ -1,6 +1,6 @@
 #ifndef ARGUMENTS_H
 #define ARGUMENTS_H
-#include "crypto_box.h"
+#include "config.h"
 #include <argp.h>
 
 struct arguments {

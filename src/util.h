@@ -1,7 +1,8 @@
 #ifndef UTIL_H
 #define UTIL_H
-#include "crypto_box.h"
+#include "config.h"
 #include "arguments.h"
+#include <sodium.h>
 
 extern void crypto_box_init(void);
 extern FILE* open_input(struct arguments *arguments);

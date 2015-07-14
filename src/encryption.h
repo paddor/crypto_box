@@ -1,8 +1,13 @@
 #ifndef ENCRYPTION_H
 #define ENCRYPTION_H
-#include "crypto_box.h"
+#include "config.h"
 #include "util.h"
 #include "chunk.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h> /* isatty() */
+#include <sodium.h>
 
 extern void lock_box(FILE *input, FILE *output, uint8_t const * const key,
 		_Bool hex);

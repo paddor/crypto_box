@@ -1,8 +1,9 @@
-#include "crypto_box.h"
+#include "config.h"
 #include "arguments.h"
 #include "key.h"
 #include "encryption.h"
 #include "util.h"
+#include <sodium.h>
 
 static uint8_t *key;
 

@@ -1,14 +1,15 @@
-#include "crypto_box.h"
+#include "config.h"
 #include "key.h"
 #include "encryption.h"
 #include "decryption.h"
 #include "util.h"
 
-#include <check.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <check.h>
+#include <sodium.h>
 
 static char *input_file_name;
 static int round_trip(_Bool hex_wanted)

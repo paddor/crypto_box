@@ -1,8 +1,11 @@
 #ifndef DECRYPTION_H
 #define DECRYPTION_H
-#include "crypto_box.h"
+#include "config.h"
 #include "util.h"
 #include "chunk.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <sodium.h>
 
 extern void open_box(FILE *input, FILE *output, uint8_t const * const key,
 		_Bool hex);
