@@ -24,7 +24,7 @@ open_box="../open_box -k $KEY_FILE"
 # fill up a multi-chunk plaintext file
 big_file_size=0
 txt_file_size=`wc -c < $TXT_FILE`
-target_size=`expr 2 \* $CHUNK_SIZE`
+target_size=`expr $CHUNK_SIZE`
 until [ $big_file_size -gt $target_size ]
 do
 	cat $TXT_FILE >> $BIG_FILE
