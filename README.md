@@ -33,10 +33,10 @@ over secure connections like SSH (and nobody looking over your shoulders).
 $ echo foobar | lock_box > locked.box
 4a5c4119c24b0db47bb4b4d8383c716ea390f04553f8877d0c94099e1ac12eb6
 $ ls -l locked.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:20 locked.box
+-rw-r--r--+ 1 user  staff  48 Jun 18 12:20 locked.box
 ```
-The output file in this case is 24+16+7+16=63 bytes long, for nonce, chunk MAC,
-ciphertext, trailing MAC, respectively.
+The output file in this case is 24+16+1+7=48 bytes long, for nonce, chunk MAC,
+chunk type, and ciphertext, respectively. See Internals for more details.
 
 The long hex string is the randomly generated key. Store it somewhere safe and
 **keep it secret**.
@@ -56,8 +56,8 @@ $ ls -l secret.key
 ls: secret.key: No such file or directory
 $ echo foobar | lock_box -k secret.key > locked.box
 $ ls -l locked.box secret.key
--rw-r--r--+ 1 user  staff  47 Jun 18 19:31 locked.box
--r--------+ 1 user  staff  47 Jun 18 19:31 secret.key
+-rw-r--r--+ 1 user  staff  48 Jun 18 19:31 locked.box
+-r--------+ 1 user  staff  48 Jun 18 19:31 secret.key
 ```
 
 If the key file already exists, its first 32 bytes are used as the key.
@@ -66,9 +66,9 @@ anyone else but the owner.
 
 ```
 $ ls -l *secret.key
--rw-r--r--+ 1 user  staff  47 Jun 18 19:29 not_so_secret.key
+-rw-r--r--+ 1 user  staff  32 Jun 18 19:29 not_so_secret.key
 $ echo foobar | lock_box -k not_so_secret.key > locked.box
-Please specify a *secret* key file.
+lock_box: Please specify a *secret* key file.
 ```
 
 Keep in mind that, on a shared system, the administrator (`root`) can still
@@ -90,7 +90,7 @@ If you do this, **make sure your command won't get logged**! Enable the option
 # notice the additional space before the whole command, so it won't get logged
 $  echo foobar | lock_box abba0ff887ca6064622b30a47a2aa9980faa1f544b24a9991b14e948d7331728 > locked.box
 $ ls -l locked.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:22 locked.box
+-rw-r--r--+ 1 user  staff  48 Jun 18 12:22 locked.box
 ```
 
 Colons (`:`) in the key are ignored, so you can also specify the key like this: `ab:ba:0f:f8:87:ca:60:64:62:2b:30:a4:7a:2a:a9:98:0f:aa:1f:54:4b:24:a9:99:1b:14:e9:48:d7:33:17:28`.
@@ -102,9 +102,9 @@ which makes it easier to guess.
 
 ```
 $  echo foobar | lock_box 6ea390f04553 > insecurely_locked.box
-WARNING: reuising key material to make up a key of sufficient length
+lock_box: Warning: Reusing key material to make up a complete key.
 $ ls -l locked.box
--rw-r--r--+ 1 user  staff  47 Jun 18 12:24 insecurely_locked.box
+-rw-r--r--+ 1 user  staff  48 Jun 18 12:24 insecurely_locked.box
 ```
 
 #### Prompting for the key
@@ -145,13 +145,13 @@ program will exit with a message on STDERR. Example:
 ```
 $ echo foobar | lock_box -k secret.key > locked.box
 $ ls -l locked.box secret.key
--rw-r--r--+ 1 user  staff  47 Jun 18 12:27 locked.box
--r--------+ 1 user  staff  47 Jun 18 12:27 secret.key
+-rw-r--r--+ 1 user  staff  48 Jun 18 12:27 locked.box
+-r--------+ 1 user  staff  48 Jun 18 12:27 secret.key
 $ echo "baz" >> locked.box
 $ ls -l locked.box
--rw-r--r--+ 1 user  staff  51 Jun 18 12:27 locked.box
+-rw-r--r--+ 1 user  staff  52 Jun 18 12:27 locked.box
 $ open_box -k secret.key < locked.box
-Ciphertext couldn't be verified. It has been tampered with or you're using the wrong key.
+open_box: Ciphertext couldn't be verified. It has been tampered with or you're using the wrong key.
 ```
 
 ## Internals
