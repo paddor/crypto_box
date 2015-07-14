@@ -27,6 +27,8 @@ Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	round_trip.c: Remove arguments stuff. It only belongs into
 	lock_box.[ch] and open_box.[ch]. Callers changed.
 
+	* arguments.c (parse_options): Make use of argp_error().
+
 Sun Jul 12 2015  Patrik Wenger  <paddor@gmail.com>
 	* crypto_box.c (lock_box): Extract reading of a PT chunk to
 	read_pt_chunk().
