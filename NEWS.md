@@ -1,3 +1,10 @@
+News for Crypto Box 0.7.0
+=========================
+* All warnings and error messages are now prepended by the program name.
+* Some typos in warnings fixed.
+* Much cleaner code.
+* More tests.
+
 News for Crypto Box 0.6.1
 =========================
 * Fixed a problem with older versions of CMake fixed (like 2.8.12).
