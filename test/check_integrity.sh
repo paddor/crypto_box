@@ -11,13 +11,12 @@ KEY_SIZE=32
 TXT_FILE="$1"
 BIG_FILE=`mktemp -t integrity.pt.XXXXXX`
 BOX_FILE=`mktemp -t integrity.ct.XXXXXX`
-KEY_FILE=`mktemp -t integrity.key.XXXXXX`
+KEY_FILE=`mktemp -ut integrity.key.XXXXXX`
 
 NONCE_FILE=`mktemp -t integrity.nonce.XXXXXX`
 ALL_CHUNKS_FILE=`mktemp -t integrity.all_chunks.XXXXXX`
 CHUNK_FILES=`mktemp -ut integrity.chunk.XXXXXX` # template for split
 
-head -c $KEY_SIZE /dev/random > $KEY_FILE
 lock_box="../lock_box -k $KEY_FILE"
 open_box="../open_box -k $KEY_FILE"
 
