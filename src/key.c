@@ -4,7 +4,7 @@ static void
 get_key_from_file(const char *key_file, uint8_t *key)
 {
   FILE *f = fopen(key_file, "r");
-  if(f == NULL && errno != ENOENT) err(EX_NOINPUT, "Couldn't open key file");
+  if (f == NULL && errno != ENOENT) err(EX_NOINPUT, "Couldn't open key file");
 
   if (f == NULL && errno == ENOENT) {
     /* Create a new key file. */
@@ -132,8 +132,8 @@ get_key(const struct arguments * const arguments, uint8_t * const key)
       sodium_memzero(arguments->key, strlen(arguments->key));
       break;
     case ASK:
-      fprintf (stderr, "Enter key: ");
-      fflush (stderr);
+      fprintf(stderr, "Enter key: ");
+      fflush(stderr);
       char *hex_key = sodium_malloc(HEX_KEY_MAXLEN);
       if (hex_key == NULL)
         errx(EX_OSERR, "Memory for prompted key couldn't be allocated.");

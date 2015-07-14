@@ -103,7 +103,7 @@ encrypt_next_chunk(
   chunk->used = crypto_onetimeauth_BYTES + 1; /* reserve room for MAC + chunk_type */
 
   /* read complete chunk, if possible */
-  if(read_pt_chunk(chunk, input) == -1) return -1;
+  if (read_pt_chunk(chunk, input) == -1) return -1;
 
   chunk_type = determine_pt_chunk_type(chunk, input);
   if (chunk_type == -1) return -1;
