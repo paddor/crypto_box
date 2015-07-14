@@ -69,7 +69,7 @@ determine_chunk_type(
     /* check if we're right before EOF */
     if ((c = getc(input)) == EOF) {
       /* this is the last chunk */
-      chunk_type = LAST_CHUNK;
+      chunk_type = CHUNK_TYPE_LAST;
     } else {
       /* not the last chunk, put character back */
       if (ungetc(c, input) == EOF) {
@@ -78,11 +78,11 @@ determine_chunk_type(
       }
 
       /* might be the first */
-      if (chunk->is_first_chunk) chunk_type = FIRST_CHUNK;
+      if (chunk->is_first_chunk) chunk_type = CHUNK_TYPE_FIRST;
     }
   } else if (feof(input)) { /* already hit EOF */
      /* this is the last chunk */
-    chunk_type = LAST_CHUNK;
+    chunk_type = CHUNK_TYPE_LAST;
   } else if (chunk->is_first_chunk) {
     /* Since fread() guarantees that it reads the specified number of bytes
      * if possible, this code should never be reached. If fread() read less
@@ -90,7 +90,7 @@ determine_chunk_type(
      *
      * But what the hell. Better be safe.
      */
-    chunk_type = FIRST_CHUNK;
+    chunk_type = CHUNK_TYPE_FIRST;
   }
   return chunk_type;
 }

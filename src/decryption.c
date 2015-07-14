@@ -100,8 +100,8 @@ check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
    * have detected it
    */
   if ((chunk->data[CHUNK_TYPE_INDEX] == 0 ||
-        chunk->data[CHUNK_TYPE_INDEX] == FIRST_CHUNK)
-      && chunk_type == LAST_CHUNK) {
+        chunk->data[CHUNK_TYPE_INDEX] == CHUNK_TYPE_FIRST)
+      && chunk_type == CHUNK_TYPE_LAST) {
 
     warnx("Ciphertext's has been truncated.");
   }

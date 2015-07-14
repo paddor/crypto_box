@@ -18,8 +18,8 @@
 #define CHUNK_TYPE_INDEX crypto_onetimeauth_BYTES
 #define CHUNK_CT_BYTES 65536UL /* 64 KiB */
 #define CHUNK_PT_BYTES (CHUNK_CT_BYTES - crypto_onetimeauth_BYTES - 1)
-#define FIRST_CHUNK 1U
-#define LAST_CHUNK  2U
+#define CHUNK_TYPE_FIRST 1U
+#define CHUNK_TYPE_LAST  2U
 
 struct chunk {
   uint8_t *data; /* MAC + chunk_type + {PT,CT} */

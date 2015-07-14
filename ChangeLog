@@ -12,6 +12,9 @@ Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
 	* encryption.c decryption.c: Define macros NONCEBYTES and MACBYTES to
 	improve readability.
 
+	* chunk.h (FIRST_CHUNK, LAST_CHUNK): Rename macros to CHUNK_TYPE_FIRST
+	and CHUNK_TYPE_LAST for more consistency.
+
 Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	* key.h (uint8_t *key): Eliminate global variable key. Make it local
 	in the respective main().
