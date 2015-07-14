@@ -41,5 +41,6 @@ open_box
 # releases
 build/
 
-# Vim session
+# Vim/Neovim session
 /session.vim
+/session.nvim
