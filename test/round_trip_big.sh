@@ -2,7 +2,7 @@
 set -e
 TXT_FILE="$1"
 BIG_FILE=`mktemp -t round_trip.pt.XXXXXX`
-CHUNK_SIZE=65535
+CHUNK_SIZE=65536
 while [ `wc -c < $BIG_FILE` -le $CHUNK_SIZE ]
 do
 	cat $TXT_FILE >> $BIG_FILE
