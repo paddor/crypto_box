@@ -10,5 +10,5 @@ SODIUM_URL=https://github.com/jedisct1/libsodium/releases/download/${SODIUM_VERS
 cd `mktemp -d /tmp/install-libsodium-XXXXXX`
 wget $SODIUM_URL
 tar -xvzf libsodium-${SODIUM_VERSION}.tar.gz && cd libsodium-${SODIUM_VERSION}
-./configure && make && make check && sudo make install
+./configure && make && sudo make install
 sudo ldconfig
