@@ -64,7 +64,7 @@ get_key_from_str(const char *str, uint8_t *key)
 
   /* warn about short keys */
   if (bin_len < crypto_stream_xsalsa20_KEYBYTES)
-    warnx("Warning: Reuising key material to make up a complete key");
+    warnx("Warning: Reusing key material to make up a complete key.");
     bytes_read = bin_len;
     while (bytes_read < crypto_stream_xsalsa20_KEYBYTES) {
       sodium_hex2bin(&key[bytes_read],
