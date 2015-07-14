@@ -16,10 +16,6 @@ int main(int argc, char *argv[])
 {
   arguments.key_source = CMD;
   argp_parse(&argp_parser, argc, argv, 0, 0, &arguments);
-  if (arguments.key_source == RANDOM) {
-    fprintf(stderr, "Key can't be random while opening a box");
-    exit(EXIT_FAILURE);
-  }
 
   crypto_box_init();
   atexit(cleanup);
