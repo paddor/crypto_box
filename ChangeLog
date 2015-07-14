@@ -15,6 +15,13 @@ Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
 	* chunk.h (FIRST_CHUNK, LAST_CHUNK): Rename macros to CHUNK_TYPE_FIRST
 	and CHUNK_TYPE_LAST for more consistency.
 
+	* encryption.c decryption.c (cleanup): Defined.
+	* encryption.c decryption.c (struct chunk *chunk): Make it static in
+	file scope so easy cleanup is possible using cleanup(). This allows
+	nested calls to call exit()/err() (with meaningful codes) too, instead
+	of having to return error codes which will all be mapped to
+	EXIT_FAILURE (not really meaningful).
+
 Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	* key.h (uint8_t *key): Eliminate global variable key. Make it local
 	in the respective main().

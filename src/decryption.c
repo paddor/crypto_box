@@ -2,6 +2,13 @@
 #define NONCEBYTES crypto_stream_xsalsa20_NONCEBYTES
 #define MACBYTES crypto_onetimeauth_BYTES
 
+/* One variable in file scope so a simple call to cleanup() can be registered
+ * with atexit().
+ *
+ * This simplifies error handling by allowing nested calls to call exit()/err()
+ * too. */
+static struct chunk *chunk;
+
 static int
 read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
 {
@@ -162,14 +169,19 @@ decrypt_next_chunk(
   return 0;
 }
 
+static void cleanup(void)
+{
+  chunk_free(chunk);
+}
+
 void
 open_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 {
   uint8_t nonce[NONCEBYTES];
-  struct chunk *chunk = NULL;
 
   /* initialize chunk */
   chunk_malloc(&chunk, hex);
+  atexit(cleanup);
 
   /* read nonce */
   if (read_nonce(nonce, chunk->hex_buf, input) == -1) goto abort;
@@ -183,12 +195,9 @@ open_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
     if (decrypt_next_chunk(chunk, nonce, key, input, output) == -1) goto abort;
   }
 
-  /* cleanup */
-  chunk_free(chunk);
   return;
 
 abort: /* error */
-  chunk_free(chunk);
   exit(EXIT_FAILURE);
 }
 // vim: et:ts=2:sw=2
