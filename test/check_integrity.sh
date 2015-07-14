@@ -49,7 +49,7 @@ fi
 # appended chunk
 APPENDED_CHUNK_FILE=`mktemp -t integrity.appended_chunk.XXXXXX`
 cat $BOX_FILE >> $APPENDED_CHUNK_FILE
-head -c $CHUNK_SIZE /dev/random >> $APPENDED_CHUNK_FILE
+head -c $CHUNK_SIZE /dev/zero >> $APPENDED_CHUNK_FILE
 if $open_box < $APPENDED_CHUNK_FILE >/dev/null
 then
 	echo "Appended chunk undetected." >&2
@@ -60,7 +60,7 @@ fi
 INSERTED_CHUNK_FILE=`mktemp -t integrity.inserted_chunk.XXXXXX`
 cat $NONCE_FILE >> $INSERTED_CHUNK_FILE # nonce
 cat ${CHUNK_FILES}.a >> $INSERTED_CHUNK_FILE # first chunk
-head -c $CHUNK_SIZE /dev/random >> $INSERTED_CHUNK_FILE # inserted chunk
+head -c $CHUNK_SIZE /dev/zero >> $INSERTED_CHUNK_FILE # inserted chunk
 cat ${CHUNK_FILES}.b >> $INSERTED_CHUNK_FILE # last chunk
 if $open_box < $INSERTED_CHUNK_FILE >/dev/null
 then
