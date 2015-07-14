@@ -56,3 +56,15 @@ then
 	echo "Appended chunk undetected." >&2
 	exit 1
 fi
+
+# inserted chunk
+INSERTED_CHUNK_FILE=`mktemp -t integrity.inserted_chunk.XXXXXX`
+cat $NONCE_FILE >> $INSERTED_CHUNK_FILE # nonce
+cat ${CHUNK_FILES}.a >> $INSERTED_CHUNK_FILE # first chunk
+head -c $CHUNK_SIZE /dev/random >> $INSERTED_CHUNK_FILE # inserted chunk
+cat ${CHUNK_FILES}.b >> $INSERTED_CHUNK_FILE # last chunk
+if $open_box < $INSERTED_CHUNK_FILE >/dev/null
+then
+	echo "Inserted chunk undetected." >&2
+	exit 1
+fi
