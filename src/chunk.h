@@ -2,6 +2,7 @@
 #define CHUNK_H
 #include "config.h"
 #include <err.h>
+#include <sysexits.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -29,7 +30,7 @@ struct chunk {
   unsigned char *subkey;
 };
 
-extern int chunk_malloc(struct chunk ** const chunk, _Bool hex);
+extern void chunk_malloc(struct chunk ** const chunk, _Bool hex);
 extern void chunk_free(struct chunk * const chunk);
 extern int8_t determine_pt_chunk_type(struct chunk const * const, FILE *input);
 extern int8_t determine_ct_chunk_type(struct chunk const * const, FILE *input);

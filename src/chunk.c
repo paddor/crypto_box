@@ -1,36 +1,30 @@
 #include "chunk.h"
 
-static int
+static void
 hex_ct_malloc(uint8_t ** const hex_buf)
 {
   *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
-  if (*hex_buf != NULL) return 0;
+  if (*hex_buf != NULL) return;
 
-  warnx("Couldn't allocate memory for hex ciphertexts.");
-  return -1;
+  errx(EX_OSERR, "Couldn't allocate memory for hex ciphertexts.");
 }
 
 /* allocate memory for authentication subkey */
-static int
+static void
 auth_subkey_malloc(unsigned char ** const subkey)
 {
   *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
-  if (*subkey == NULL) {
-    warnx("Memory for authentication subkey couldn't be allocated.");
-    return -1;
-  }
-  return 0;
+  if (*subkey != NULL) return;
+
+  errx(EX_OSERR, "Memory for authentication subkey couldn't be allocated.");
 }
 
-int
+void
 chunk_malloc(struct chunk ** const chunk, _Bool hex)
 {
   *chunk = malloc(sizeof(struct chunk));
+  if (*chunk == NULL) errx(EX_OSERR, "Chunk couldn't be allocated");
 
-  if (*chunk == NULL) {
-    warnx("Chunk couldn't be allocated");
-    return -1;
-  }
   (*chunk)->size = 0;
   (*chunk)->used = 0;
   (*chunk)->is_first_chunk = true;
@@ -41,19 +35,14 @@ chunk_malloc(struct chunk ** const chunk, _Bool hex)
    * slightly bigger than CHUNK_PT_BYTES
    */
   (*chunk)->data = malloc(CHUNK_CT_BYTES);
-  if ((*chunk)->data == NULL) {
-    warnx("chunk data couldn't be allocated");
-    return -1;
-  }
+  if ((*chunk)->data == NULL) errx(EX_OSERR, "Chunk data couldn't be allocated");
   (*chunk)->size = CHUNK_CT_BYTES;
 
   /* memory for authentication subkeys */
-  if (auth_subkey_malloc(&(*chunk)->subkey) == -1) return -1;
+  auth_subkey_malloc(&(*chunk)->subkey);
 
   /* allocate memory for hex ciphertexts */
-  if (hex && hex_ct_malloc(&(*chunk)->hex_buf) == -1) return -1;
-
-  return 0;
+  if(hex) hex_ct_malloc(&(*chunk)->hex_buf);
 }
 
 void

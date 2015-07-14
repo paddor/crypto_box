@@ -168,7 +168,7 @@ open_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
   struct chunk *chunk = NULL;
 
   /* initialize chunk */
-  if (chunk_malloc(&chunk, hex) == -1) goto abort;
+  chunk_malloc(&chunk, hex);
 
   /* read nonce */
   if (read_nonce(nonce, chunk->hex_buf, input) == -1) goto abort;
