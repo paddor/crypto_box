@@ -40,8 +40,7 @@ ls -la ${CHUNK_FILES}.* # will create .a and .b
 # TESTS
 
 # missing nonce
-if $open_box < $ALL_CHUNKS_FILE >/dev/null
-then
+if $open_box < $ALL_CHUNKS_FILE >/dev/null; then
 	echo "Missing nonce undetected." >&2
 	exit 1
 fi
@@ -50,8 +49,7 @@ fi
 APPENDED_CHUNK_FILE=`mktemp -t integrity.appended_chunk.XXXXXX`
 cat $BOX_FILE >> $APPENDED_CHUNK_FILE
 head -c $CHUNK_SIZE /dev/zero >> $APPENDED_CHUNK_FILE
-if $open_box < $APPENDED_CHUNK_FILE >/dev/null
-then
+if $open_box < $APPENDED_CHUNK_FILE >/dev/null; then
 	echo "Appended chunk undetected." >&2
 	exit 1
 fi
@@ -62,8 +60,7 @@ cat $NONCE_FILE >> $INSERTED_CHUNK_FILE # nonce
 cat ${CHUNK_FILES}.a >> $INSERTED_CHUNK_FILE # first chunk
 head -c $CHUNK_SIZE /dev/zero >> $INSERTED_CHUNK_FILE # inserted chunk
 cat ${CHUNK_FILES}.b >> $INSERTED_CHUNK_FILE # last chunk
-if $open_box < $INSERTED_CHUNK_FILE >/dev/null
-then
+if $open_box < $INSERTED_CHUNK_FILE >/dev/null; then
 	echo "Inserted chunk undetected." >&2
 	exit 1
 fi
