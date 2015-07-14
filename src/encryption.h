@@ -4,6 +4,7 @@
 #include "util.h"
 #include "chunk.h"
 #include <err.h>
+#include <sysexits.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>

@@ -54,7 +54,7 @@ chunk_free(struct chunk * const chunk)
   free(chunk);
 }
 
-static int8_t
+static uint8_t
 determine_chunk_type(
     struct chunk const * const chunk,
     size_t chunk_bytes,
@@ -72,10 +72,8 @@ determine_chunk_type(
       chunk_type = CHUNK_TYPE_LAST;
     } else {
       /* not the last chunk, put character back */
-      if (ungetc(c, input) == EOF) {
-        warnx("Couldn't put character back.");
-        return -1;
-      }
+      if (ungetc(c, input) == EOF)
+        errx(EX_IOERR, "Couldn't put character back.");
 
       /* might be the first */
       if (chunk->is_first_chunk) chunk_type = CHUNK_TYPE_FIRST;
@@ -95,12 +93,14 @@ determine_chunk_type(
   return chunk_type;
 }
 
-int8_t determine_pt_chunk_type(struct chunk const * const chunk, FILE *input)
+uint8_t
+determine_pt_chunk_type(struct chunk const * const chunk, FILE *input)
 {
   return determine_chunk_type(chunk, CHUNK_PT_BYTES, input);
 }
 
-int8_t determine_ct_chunk_type(struct chunk const * const chunk, FILE *input)
+uint8_t
+determine_ct_chunk_type(struct chunk const * const chunk, FILE *input)
 {
   return determine_chunk_type(chunk, CHUNK_CT_BYTES, input);
 }

@@ -9,41 +9,34 @@
  * too. */
 static struct chunk *chunk;
 
-static int
+static void
 print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 {
   if (hex_buf == NULL) {
-    if (fwrite(nonce, NONCEBYTES, 1, output) < 1) {
-      warn("Couldn't write ciphertext");
-      return -1;
-    }
+    if (fwrite(nonce, NONCEBYTES, 1, output) < 1)
+      errx(EX_IOERR, "Couldn't write ciphertext");
+
   } else {
     char *hex_result; /* result of bin->hex conversion */
     hex_result = sodium_bin2hex((char *) hex_buf, 2 * NONCEBYTES + 1, nonce,
         NONCEBYTES);
-    if (hex_result == NULL) {
-      warnx("Couldn't convert nonce to hex.");
-      return -1;
-    }
-    if (fwrite(hex_buf, 2 * NONCEBYTES, 1, output) < 1) {
-      warn("Couldn't write ciphertext");
-      return -1;
-    }
+    if (hex_result == NULL)
+      errx(EX_SOFTWARE, "Couldn't convert nonce to hex.");
+
+    if (fwrite(hex_buf, 2 * NONCEBYTES, 1, output) < 1)
+      errx(EX_IOERR, "Couldn't write ciphertext");
   }
-  return 0;
 }
 
-static int
+static void
 read_pt_chunk(struct chunk * const chunk, FILE *input)
 {
   size_t nread = fread(&chunk->data[chunk->used], 1,
       CHUNK_PT_BYTES, input);
+  if (nread < CHUNK_PT_BYTES && ferror(input))
+    errx(EX_IOERR, "Couldn't read plaintext.");
+
   chunk->used += nread;
-  if (nread < CHUNK_PT_BYTES && ferror(input)) {
-    warnx("Couldn't read plaintext.");
-    return -1;
-  }
-  return 0;
 }
 
 static void
@@ -69,33 +62,28 @@ construct_chunk_mac(
   memcpy(previous_mac, CHUNK_MAC(chunk->data), MACBYTES);
 }
 
-static int
+static void
 print_ct_chunk(
   struct chunk const * const chunk,
   FILE *output)
 {
   if (chunk->hex_buf == NULL) {
-    if (fwrite(chunk->data, chunk->used, 1, output) < 1) {
-      warn("Couldn't write ciphertext");
-      return -1;
-    }
+    if (fwrite(chunk->data, chunk->used, 1, output) < 1)
+      errx(EX_IOERR, "Couldn't write ciphertext");
+
   } else {
     char *hex_result; /* result of bin->hex conversion */
     hex_result = sodium_bin2hex((char *) chunk->hex_buf, 2 * chunk->used + 1,
         chunk->data, chunk->used);
-    if (hex_result == NULL) {
-      warnx("Couldn't convert ciphertext to hex.");
-      return -1;
-    }
-    if (fwrite(chunk->hex_buf, chunk->used * 2, 1, output) < 1) {
-      warn("Couldn't write ciphertext");
-      return -1;
-    }
+    if (hex_result == NULL)
+      errx(EX_SOFTWARE, "Couldn't convert ciphertext to hex.");
+
+    if (fwrite(chunk->hex_buf, chunk->used * 2, 1, output) < 1)
+      errx(EX_IOERR, "Couldn't write ciphertext");
   }
-  return 0;
 }
 
-static int
+static void
 encrypt_next_chunk(
     struct chunk *chunk,
     uint8_t * const nonce,
@@ -109,10 +97,9 @@ encrypt_next_chunk(
   chunk->used = MACBYTES + 1; /* reserve room for MAC + chunk_type */
 
   /* read complete chunk, if possible */
-  if (read_pt_chunk(chunk, input) == -1) return -1;
+  read_pt_chunk(chunk, input);
 
   chunk_type = determine_pt_chunk_type(chunk, input);
-  if (chunk_type == -1) return -1;
 
   /* set chunk type */
   chunk->data[CHUNK_TYPE_INDEX] = chunk_type;
@@ -125,12 +112,10 @@ encrypt_next_chunk(
   construct_chunk_mac(chunk, nonce, key);
 
   /* print MAC + chunk_type + ciphertext */
-  if (print_ct_chunk(chunk, output) == -1) return -1;
+  print_ct_chunk(chunk, output);
 
   /* increment nonce */
   sodium_increment(nonce, NONCEBYTES);
-
-  return 0;
 }
 
 static void cleanup(void)
@@ -154,20 +139,14 @@ lock_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
   randombytes_buf(nonce, sizeof nonce);
 
   /* print nonce */
-  if (print_nonce(nonce, chunk->hex_buf, output) == -1) goto abort;
+  print_nonce(nonce, chunk->hex_buf, output);
 
   /* encrypt first chunk */
-  if (encrypt_next_chunk(chunk, nonce, key, input, output) == -1) goto abort;
+  encrypt_next_chunk(chunk, nonce, key, input, output);
 
   /* encrypt remaining chunks */
   chunk->is_first_chunk = false; /* not first chunk anymore */
-  while (!feof(input)) {
-    if (encrypt_next_chunk(chunk, nonce, key, input, output) == -1) goto abort;
-  }
-
-  return;
-
-abort: /* error */
-  exit(EXIT_FAILURE);
+  while (!feof(input))
+    encrypt_next_chunk(chunk, nonce, key, input, output);
 }
 // vim: et:ts=2:sw=2

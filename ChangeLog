@@ -22,6 +22,13 @@ Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
 	of having to return error codes which will all be mapped to
 	EXIT_FAILURE (not really meaningful).
 
+	* chunk.h (determine_pt_chunk_type, determine_ct_chunk_type): Change
+	return type to uint8_t. This is actually what a chunk type only can
+	be, getting rid of negative values for error codes.
+	* chunk.c encryption.c decryption.c (all static functions): Change
+	return type to void. Exit program with meaningful code right where an
+	error occurs. This simplifies everything. Callers changed.
+
 Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	* key.h (uint8_t *key): Eliminate global variable key. Make it local
 	in the respective main().

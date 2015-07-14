@@ -32,8 +32,8 @@ struct chunk {
 
 extern void chunk_malloc(struct chunk ** const chunk, _Bool hex);
 extern void chunk_free(struct chunk * const chunk);
-extern int8_t determine_pt_chunk_type(struct chunk const * const, FILE *input);
-extern int8_t determine_ct_chunk_type(struct chunk const * const, FILE *input);
+extern uint8_t determine_pt_chunk_type(struct chunk const * const, FILE *input);
+extern uint8_t determine_ct_chunk_type(struct chunk const * const, FILE *input);
 
 // vim: et:ts=2:sw=2
 #endif
