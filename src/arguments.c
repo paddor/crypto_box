@@ -55,13 +55,11 @@ parse_options(int key, char *arg, struct argp_state *state)
   case ARGP_KEY_SUCCESS: // finished parsing of args
     /* sanity check */
     if (arguments->key_source == ASK && arguments->input_source == STDIN) {
-      fprintf(stderr, "Can't use -a without -f.\n");
-      exit(EXIT_FAILURE);
+      argp_error(state, "Can't use -a without -f.\n");
     }
 
     if (arguments->key_source == CMD && arguments->key == NULL) {
-      fprintf(stderr, "Please specify a key.\n");
-      exit(EXIT_FAILURE);
+      argp_error(state, "Please specify a key.\n");
     }
   default: return ARGP_ERR_UNKNOWN;
   }
