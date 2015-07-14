@@ -22,14 +22,11 @@ lock_box="../lock_box -k $KEY_FILE"
 open_box="../open_box -k $KEY_FILE"
 
 # fill up a multi-chunk plaintext file
-big_file_size=0
-txt_file_size=`wc -c < $TXT_FILE`
-target_size=`expr $CHUNK_SIZE`
-until [ $big_file_size -gt $target_size ]
+until [ `wc -c < $BIG_FILE` -gt $CHUNK_SIZE ]
 do
 	cat $TXT_FILE >> $BIG_FILE
-	big_file_size=`expr $big_file_size + $txt_file_size`
 done
+# Now it's big enough to generate 2 chunks.
 
 # encrypt
 $lock_box < $BIG_FILE > $BOX_FILE
@@ -38,7 +35,7 @@ $lock_box < $BIG_FILE > $BOX_FILE
 head -c $NONCE_SIZE < $BOX_FILE > $NONCE_FILE
 tail -c +`expr $NONCE_SIZE + 1` < $BOX_FILE > $ALL_CHUNKS_FILE
 split -a 1 -b $CHUNK_SIZE $ALL_CHUNKS_FILE ${CHUNK_FILES}.
-ls -la ${CHUNK_FILES}.*
+ls -la ${CHUNK_FILES}.* # will create .a and .b
 
 ##
 # TESTS
