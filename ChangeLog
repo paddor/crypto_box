@@ -1,3 +1,8 @@
+Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
+	* chunk.c chunk.h decryption.c decryption.h encryption.c encryption.h
+	key.c key.h util.c util.h round_trip.c: Make use of err(), warn() and
+	friends from err.h. Also exit with meaningful codes from sysexits.h.
+
 Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	* key.h (uint8_t *key): Eliminate global variable key. Make it local
 	in the respective main().

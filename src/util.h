@@ -2,6 +2,8 @@
 #define UTIL_H
 #include "config.h"
 #include "arguments.h"
+#include <sysexits.h>
+#include <err.h>
 #include <sodium.h>
 
 extern void crypto_box_init(void);

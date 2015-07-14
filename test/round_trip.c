@@ -4,6 +4,8 @@
 #include "decryption.h"
 #include "util.h"
 
+#include <err.h>
+#include <sysexits.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,10 +30,9 @@ static int round_trip(_Bool hex_wanted)
   memcpy(fname_pt2, template, sizeof template);
   fd_ct = mkstemp(fname_ct);
   fd_pt2 = mkstemp(fname_pt2);
-  if (fd_ct == -1 || fd_pt2 == -1) {
-    perror("Couldn't create temporary file");
-    exit(EXIT_FAILURE);
-  }
+  if (fd_ct == -1 || fd_pt2 == -1)
+    err(EX_CANTCREAT, "Couldn't create temporary file");
+
   fprintf(stderr, "ciphertext file: %s\n", fname_ct);
   fprintf(stderr, "plaintext (2) file: %s\n", fname_pt2);
 
@@ -129,8 +130,7 @@ int main(int argc, char *argv[])
     if (argc == 2) {
       input_file_name = argv[1];
     } else {
-      fprintf(stderr, "Usage: %s <input_file.txt>\n", argv[0]);
-      return EXIT_FAILURE;
+      errx(EX_USAGE, "Usage: %s <input_file.txt>", argv[0]);
     }
 
     s = crypto_box_suite();

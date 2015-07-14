@@ -5,7 +5,7 @@ print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 {
   if (hex_buf == NULL) {
     if (fwrite(nonce, crypto_stream_xsalsa20_NONCEBYTES, 1, output) < 1) {
-      perror("Couldn't write ciphertext");
+      warn("Couldn't write ciphertext");
       return -1;
     }
   } else {
@@ -14,12 +14,12 @@ print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
       crypto_stream_xsalsa20_NONCEBYTES + 1, nonce,
       crypto_stream_xsalsa20_NONCEBYTES);
     if (hex_result == NULL) {
-      fprintf(stderr, "Couldn't convert nonce to hex.\n");
+      warnx("Couldn't convert nonce to hex.");
       return -1;
     }
     if (fwrite(hex_buf, 2 * crypto_stream_xsalsa20_NONCEBYTES, 1, output) < 1)
     {
-      perror("Couldn't write ciphertext");
+      warn("Couldn't write ciphertext");
       return -1;
     }
   }
@@ -33,7 +33,7 @@ read_pt_chunk(struct chunk * const chunk, FILE *input)
       CHUNK_PT_BYTES, input);
   chunk->used += nread;
   if (nread < CHUNK_PT_BYTES && ferror(input)) {
-    fprintf(stderr, "Couldn't read plaintext.\n");
+    warnx("Couldn't read plaintext.");
     return -1;
   }
   return 0;
@@ -70,7 +70,7 @@ print_ct_chunk(
 {
   if (chunk->hex_buf == NULL) {
     if (fwrite(chunk->data, chunk->used, 1, output) < 1) {
-      perror("Couldn't write ciphertext");
+      warn("Couldn't write ciphertext");
       return -1;
     }
   } else {
@@ -78,11 +78,11 @@ print_ct_chunk(
     hex_result = sodium_bin2hex((char *) chunk->hex_buf, 2 * chunk->used + 1,
         chunk->data, chunk->used);
     if (hex_result == NULL) {
-      fprintf(stderr, "Couldn't convert ciphertext to hex.\n");
+      warnx("Couldn't convert ciphertext to hex.");
       return -1;
     }
     if (fwrite(chunk->hex_buf, chunk->used * 2, 1, output) < 1) {
-      perror("Couldn't write ciphertext");
+      warn("Couldn't write ciphertext");
       return -1;
     }
   }
@@ -138,7 +138,7 @@ lock_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 
   /* ciphertext to TTY warning */
   if (!hex && isatty(fileno(output)))
-    fprintf(stderr, "WARNING: Writing binary ciphertext to terminal.\n");
+    warnx("Warning: Writing binary ciphertext to terminal.");
 
   /* new nonce */
   randombytes_buf(nonce, sizeof nonce);

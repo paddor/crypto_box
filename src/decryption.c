@@ -7,12 +7,12 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   int hex_result; /* result of hex->bin conversion */
   if (hex_buf == NULL) {
     if (fread(nonce, crypto_stream_xsalsa20_NONCEBYTES, 1, input) < 1) {
-      fprintf(stderr, "Couldn't read ciphertext.\n");
+      warn("Couldn't read ciphertext.");
       return -1;
     }
   } else {
     if (fread(hex_buf, crypto_stream_xsalsa20_NONCEBYTES * 2, 1, input) < 1) {
-      fprintf(stderr, "Couldn't read ciphertext.\n");
+      warn("Couldn't read ciphertext.");
       return -1;
     }
 
@@ -20,7 +20,7 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
       (const char*) hex_buf, crypto_stream_xsalsa20_NONCEBYTES * 2, NULL,
       &bin_len, NULL);
     if (hex_result != 0 || bin_len < crypto_stream_xsalsa20_NONCEBYTES) {
-      fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+      warn("Couldn't convert to binary ciphertext.");
       return -1;
     }
   }
@@ -35,7 +35,7 @@ read_ct_chunk(struct chunk * const chunk, FILE *input)
   } else {
     size_t nread = fread(chunk->hex_buf, 2, CHUNK_CT_BYTES, input);
     if (nread < CHUNK_CT_BYTES && ferror(input)) {
-      fprintf(stderr, "Couldn't read ciphertext.\n");
+      warnx("Couldn't read ciphertext.");
       return -1;
     }
 
@@ -43,20 +43,20 @@ read_ct_chunk(struct chunk * const chunk, FILE *input)
     hex_result = sodium_hex2bin(chunk->data, chunk->size,
         (const char*) chunk->hex_buf, nread * 2, NULL, &chunk->used, NULL);
     if (hex_result != 0 || chunk->used < nread) {
-      fprintf(stderr, "Couldn't convert to binary ciphertext.\n");
+      warnx("Couldn't convert to binary ciphertext.");
       return -1;
     }
   }
 
   /* truncated header */
   if (chunk->used < 17) { /* MAC + chunk_type = 17 */
-    fprintf(stderr, "Ciphertext's header has been truncated.\n");
+    warnx("Ciphertext's header has been truncated.");
     return -1;
   }
 
   /* read error */
   if (chunk->used < (CHUNK_CT_BYTES) && ferror(input)) {
-    fprintf(stderr, "Couldn't read ciphertext.\n");
+    warnx("Couldn't read ciphertext.");
     return -1;
   }
 
@@ -102,7 +102,7 @@ check_chunk_type(struct chunk const * const chunk, const uint8_t chunk_type)
         chunk->data[CHUNK_TYPE_INDEX] == FIRST_CHUNK)
       && chunk_type == LAST_CHUNK) {
 
-    fprintf(stderr, "Ciphertext's has been truncated.\n");
+    warnx("Ciphertext's has been truncated.");
   }
 
   return -1;
@@ -114,7 +114,7 @@ write_pt_chunk(struct chunk const * const chunk, FILE *output)
   if (fwrite(CHUNK_PT(chunk->data), CHUNK_PT_LEN(chunk->used), 1, output) < 1)
   {
     if (CHUNK_PT_LEN(chunk->used) == 0) return 0; /* special case: empty PT */
-    perror("Couldn't write plaintext");
+    warn("Couldn't write plaintext");
     return -1;
   }
   return 0;
@@ -138,8 +138,8 @@ decrypt_next_chunk(
 
   /* verify MAC */
   if (verify_chunk(chunk, nonce, key) == -1) {
-    fprintf(stderr, "Ciphertext couldn't be verified. It has been "
-      "tampered with or you're using the wrong key.\n");
+    warnx("Ciphertext couldn't be verified. It has been "
+      "tampered with or you're using the wrong key.");
     return -1;
   }
 

@@ -1,10 +1,7 @@
 #include "util.h"
 
 void crypto_box_init(void) {
-  if (sodium_init() == -1) {
-    fprintf(stderr, "unable to initialize libsodium\n");
-    exit(EXIT_FAILURE);
-  }
+  if (sodium_init() == -1) errx(EX_SOFTWARE, "Unable to initialize libsodium");
 }
 
 FILE*
@@ -12,10 +9,7 @@ open_input(struct arguments *arguments)
 {
   if (arguments->input_source == INPUT_FILE) {
     FILE *input = fopen(arguments->input_file, "r");
-    if (input == NULL) {
-      perror("Couldn't open input file");
-      exit(EXIT_FAILURE);
-    }
+    if (input == NULL) err(EX_NOINPUT, "Couldn't open input file");
     return input;
   } else {
     return stdin;

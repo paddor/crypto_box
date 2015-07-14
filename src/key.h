@@ -2,7 +2,9 @@
 #define KEY_H
 #include "config.h"
 #include "arguments.h"
-#include "fcntl.h"
+#include <err.h>
+#include <sysexits.h>
+#include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sodium.h>

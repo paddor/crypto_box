@@ -6,7 +6,7 @@ hex_ct_malloc(uint8_t ** const hex_buf)
   *hex_buf = sodium_malloc(CHUNK_CT_BYTES * 2 + 1);
   if (*hex_buf != NULL) return 0;
 
-  fprintf(stderr, "Couldn't allocate memory for hex ciphertexts.\n");
+  warnx("Couldn't allocate memory for hex ciphertexts.");
   return -1;
 }
 
@@ -16,8 +16,7 @@ auth_subkey_malloc(unsigned char ** const subkey)
 {
   *subkey = sodium_malloc(crypto_onetimeauth_KEYBYTES);
   if (*subkey == NULL) {
-    fprintf(stderr, "Memory for authentication subkey couldn't be "
-        "allocated.\n");
+    warnx("Memory for authentication subkey couldn't be allocated.");
     return -1;
   }
   return 0;
@@ -29,7 +28,7 @@ chunk_malloc(struct chunk ** const chunk, _Bool hex)
   *chunk = malloc(sizeof(struct chunk));
 
   if (*chunk == NULL) {
-    fprintf(stderr, "chunk couldn't be allocated\n");
+    warnx("Chunk couldn't be allocated");
     return -1;
   }
   (*chunk)->size = 0;
@@ -43,7 +42,7 @@ chunk_malloc(struct chunk ** const chunk, _Bool hex)
    */
   (*chunk)->data = malloc(CHUNK_CT_BYTES);
   if ((*chunk)->data == NULL) {
-    fprintf(stderr, "chunk data couldn't be allocated\n");
+    warnx("chunk data couldn't be allocated");
     return -1;
   }
   (*chunk)->size = CHUNK_CT_BYTES;
@@ -85,7 +84,7 @@ determine_chunk_type(
     } else {
       /* not the last chunk, put character back */
       if (ungetc(c, input) == EOF) {
-        fprintf(stderr, "Couldn't put character back.\n");
+        warnx("Couldn't put character back.");
         return -1;
       }
 
