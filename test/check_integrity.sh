@@ -6,6 +6,7 @@ set -e
 
 NONCE_SIZE=16
 CHUNK_SIZE=65536
+CHUNK_HEADER_SIZE=17
 KEY_SIZE=32
 
 TXT_FILE="$1"
@@ -42,6 +43,31 @@ ls -la ${CHUNK_FILES}.* # will create .a and .b
 # missing nonce
 if $open_box < $ALL_CHUNKS_FILE >/dev/null; then
 	echo "Missing nonce undetected." >&2
+	exit 1
+fi
+
+# missing chunk
+MISSING_CHUNK_FILE=`mktemp -t integrity.missing_chunk.XXXXXX`
+cat $NONCE_FILE >> $MISSING_CHUNK_FILE # nonce
+cat ${CHUNK_FILES}.a >> $MISSING_CHUNK_FILE # first chunk
+if $open_box < $MISSING_CHUNK_FILE >/dev/null; then
+	echo "Missing chunk undetected." >&2
+	exit 1
+fi
+
+# nonce only (all chunks missing)
+if $open_box < $NONCE_FILE >/dev/null; then
+	echo "All chunks missing undetected." >&2
+	exit 1
+fi
+
+# nonce and header only (missing CT, but MAC + chunk_type still there)
+NONCE_AND_HEADER_ONLY_FILE=`mktemp -t integrity.nonce_and_header_only.XXXXXX`
+cat $NONCE_FILE >> $NONCE_AND_HEADER_ONLY_FILE # nonce
+# header of first chunk
+head -c $CHUNK_HEADER_SIZE $ALL_CHUNKS_FILE >> $NONCE_AND_HEADER_ONLY_FILE
+if $open_box < $NONCE_AND_HEADER_ONLY_FILE >/dev/null; then
+	echo "Nonce and header only undetected." >&2
 	exit 1
 fi
 
