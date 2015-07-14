@@ -9,6 +9,9 @@ Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
 	* chunk.h chunk.c (chunk_malloc): Change return type to void. Exit with
 	meaningful code if allocation failed. Callers changed.
 
+	* encryption.c decryption.c: Define macros NONCEBYTES and MACBYTES to
+	improve readability.
+
 Sun Jul 13 2015  Patrik Wenger  <paddor@gmail.com>
 	* key.h (uint8_t *key): Eliminate global variable key. Make it local
 	in the respective main().

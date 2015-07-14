@@ -1,4 +1,6 @@
 #include "decryption.h"
+#define NONCEBYTES crypto_stream_xsalsa20_NONCEBYTES
+#define MACBYTES crypto_onetimeauth_BYTES
 
 static int
 read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
@@ -6,20 +8,19 @@ read_nonce(uint8_t * const nonce, uint8_t *hex_buf, FILE *input)
   size_t bin_len; /* length of binary data written during conversion  */
   int hex_result; /* result of hex->bin conversion */
   if (hex_buf == NULL) {
-    if (fread(nonce, crypto_stream_xsalsa20_NONCEBYTES, 1, input) < 1) {
+    if (fread(nonce, NONCEBYTES, 1, input) < 1) {
       warn("Couldn't read ciphertext.");
       return -1;
     }
   } else {
-    if (fread(hex_buf, crypto_stream_xsalsa20_NONCEBYTES * 2, 1, input) < 1) {
+    if (fread(hex_buf, NONCEBYTES * 2, 1, input) < 1) {
       warn("Couldn't read ciphertext.");
       return -1;
     }
 
-    hex_result = sodium_hex2bin(nonce, crypto_stream_xsalsa20_NONCEBYTES,
-      (const char*) hex_buf, crypto_stream_xsalsa20_NONCEBYTES * 2, NULL,
-      &bin_len, NULL);
-    if (hex_result != 0 || bin_len < crypto_stream_xsalsa20_NONCEBYTES) {
+    hex_result = sodium_hex2bin(nonce, NONCEBYTES, (const char*) hex_buf,
+        NONCEBYTES * 2, NULL, &bin_len, NULL);
+    if (hex_result != 0 || bin_len < NONCEBYTES) {
       warn("Couldn't convert to binary ciphertext.");
       return -1;
     }
@@ -69,7 +70,7 @@ verify_chunk(
     uint8_t const * const nonce,
     uint8_t const * const key)
 {
-  static unsigned char mac[crypto_onetimeauth_BYTES];
+  static unsigned char mac[MACBYTES];
   crypto_onetimeauth_state auth_state;
 
   /* derive subkey */
@@ -80,11 +81,11 @@ verify_chunk(
   crypto_onetimeauth_update(&auth_state, CHUNK_CT(chunk->data),
       CHUNK_CT_LEN(chunk->used));
   if (!chunk->is_first_chunk) /* include previous MAC */
-    crypto_onetimeauth_update(&auth_state, mac, crypto_onetimeauth_BYTES);
+    crypto_onetimeauth_update(&auth_state, mac, MACBYTES);
   crypto_onetimeauth_final(&auth_state, mac);
 
   /* compare MACs */
-  return sodium_memcmp(mac, CHUNK_MAC(chunk->data), crypto_onetimeauth_BYTES);
+  return sodium_memcmp(mac, CHUNK_MAC(chunk->data), MACBYTES);
 }
 
 static int
@@ -156,7 +157,7 @@ decrypt_next_chunk(
   if (write_pt_chunk(chunk, output) == -1) return -1;
 
   /* increment nonce */
-  sodium_increment(nonce, crypto_stream_xsalsa20_NONCEBYTES);
+  sodium_increment(nonce, NONCEBYTES);
 
   return 0;
 }
@@ -164,7 +165,7 @@ decrypt_next_chunk(
 void
 open_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 {
-  uint8_t nonce[crypto_stream_xsalsa20_NONCEBYTES];
+  uint8_t nonce[NONCEBYTES];
   struct chunk *chunk = NULL;
 
   /* initialize chunk */

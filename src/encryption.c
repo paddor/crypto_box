@@ -1,24 +1,24 @@
 #include "encryption.h"
+#define NONCEBYTES crypto_stream_xsalsa20_NONCEBYTES
+#define MACBYTES crypto_onetimeauth_BYTES
 
 static int
 print_nonce(uint8_t const * const nonce, uint8_t *hex_buf, FILE *output)
 {
   if (hex_buf == NULL) {
-    if (fwrite(nonce, crypto_stream_xsalsa20_NONCEBYTES, 1, output) < 1) {
+    if (fwrite(nonce, NONCEBYTES, 1, output) < 1) {
       warn("Couldn't write ciphertext");
       return -1;
     }
   } else {
     char *hex_result; /* result of bin->hex conversion */
-    hex_result = sodium_bin2hex((char *) hex_buf, 2 *
-      crypto_stream_xsalsa20_NONCEBYTES + 1, nonce,
-      crypto_stream_xsalsa20_NONCEBYTES);
+    hex_result = sodium_bin2hex((char *) hex_buf, 2 * NONCEBYTES + 1, nonce,
+        NONCEBYTES);
     if (hex_result == NULL) {
       warnx("Couldn't convert nonce to hex.");
       return -1;
     }
-    if (fwrite(hex_buf, 2 * crypto_stream_xsalsa20_NONCEBYTES, 1, output) < 1)
-    {
+    if (fwrite(hex_buf, 2 * NONCEBYTES, 1, output) < 1) {
       warn("Couldn't write ciphertext");
       return -1;
     }
@@ -45,7 +45,7 @@ construct_chunk_mac(
     uint8_t const * const nonce,
     uint8_t const * const key)
 {
-  static unsigned char previous_mac[crypto_onetimeauth_BYTES];
+  static unsigned char previous_mac[MACBYTES];
   crypto_onetimeauth_state auth_state;
 
   crypto_stream(chunk->subkey, crypto_onetimeauth_KEYBYTES, nonce, key);
@@ -54,13 +54,12 @@ construct_chunk_mac(
       CHUNK_CT_LEN(chunk->used));
   if (!chunk->is_first_chunk) {
     /* include previous MAC */
-    crypto_onetimeauth_update(&auth_state, previous_mac,
-		    crypto_onetimeauth_BYTES);
+    crypto_onetimeauth_update(&auth_state, previous_mac, MACBYTES);
   }
   crypto_onetimeauth_final(&auth_state, CHUNK_MAC(chunk->data));
 
   /* remember MAC */
-  memcpy(previous_mac, CHUNK_MAC(chunk->data), crypto_onetimeauth_BYTES);
+  memcpy(previous_mac, CHUNK_MAC(chunk->data), MACBYTES);
 }
 
 static int
@@ -100,7 +99,7 @@ encrypt_next_chunk(
   int8_t chunk_type; /* first, last or in between */
 
   /* recycle chunk data */
-  chunk->used = crypto_onetimeauth_BYTES + 1; /* reserve room for MAC + chunk_type */
+  chunk->used = MACBYTES + 1; /* reserve room for MAC + chunk_type */
 
   /* read complete chunk, if possible */
   if (read_pt_chunk(chunk, input) == -1) return -1;
@@ -122,7 +121,7 @@ encrypt_next_chunk(
   if (print_ct_chunk(chunk, output) == -1) return -1;
 
   /* increment nonce */
-  sodium_increment(nonce, crypto_stream_xsalsa20_NONCEBYTES);
+  sodium_increment(nonce, NONCEBYTES);
 
   return 0;
 }
@@ -130,7 +129,7 @@ encrypt_next_chunk(
 void
 lock_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 {
-  uint8_t nonce[crypto_stream_xsalsa20_NONCEBYTES];
+  uint8_t nonce[NONCEBYTES];
   struct chunk *chunk = NULL;
 
   /* initialize chunk */
