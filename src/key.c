@@ -148,15 +148,11 @@ get_key(const struct arguments * const arguments, uint8_t * const key)
   }
 }
 
-int
+void
 key_malloc(uint8_t ** const key)
 {
   *key = sodium_malloc(crypto_stream_xsalsa20_KEYBYTES);
-  if (*key == NULL) {
-    warnx("Unable to allocate memory for key.");
-    return -1;
-  }
-
-  return 0;
+  if (*key != NULL) return;
+  errx(EX_OSERR, "Unable to allocate memory for key.");
 }
 // vim: et:ts=2:sw=2

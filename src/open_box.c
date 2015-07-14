@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
 
   crypto_box_init();
   atexit(cleanup);
-  if (key_malloc(&key) == -1) goto abort;
+  key_malloc(&key);
   get_key(&arguments, key);
 
   FILE *input = open_input(&arguments);

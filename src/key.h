@@ -9,7 +9,7 @@
 #include <sys/stat.h>
 #include <sodium.h>
 
-int key_malloc(uint8_t ** const key);
+void key_malloc(uint8_t ** const key);
 void get_key(const struct arguments * const arguments, uint8_t * const key);
 
 // vim: et:ts=2:sw=2

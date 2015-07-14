@@ -45,7 +45,7 @@ static int round_trip(_Bool hex_wanted)
 
   /* generate random key */
   uint8_t *key;
-  if (key_malloc(&key) == -1) goto abort;
+  key_malloc(&key);
   randombytes_buf(key, crypto_stream_xsalsa20_KEYBYTES);
 
   /* encrypt -> CT file */
