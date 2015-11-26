@@ -238,7 +238,7 @@ plaintext's length can be calculated from the ciphertext's length.
 
 ## Limitations
 Due to the filter nature and lack of a header that specifies the length of the
-data, there are real limitations in the length of a file/data stream you can
+data, there are no real limitations in the length of a file/data stream you can
 encrypt (at once). Of course, reasonable reuse of a key is advised.
 
 To be precise: You could safely encrypt encrypt up to 3.347787592E35 YiB at
