@@ -5,7 +5,7 @@ set -e
 # and I don't wanna use wily (unstable) because CMake 3.3 is not needed (CMake
 # 2.8.12 is enough).
 
-SODIUM_VERSION=1.0.3
+SODIUM_VERSION=1.0.7
 SODIUM_URL=https://github.com/jedisct1/libsodium/releases/download/${SODIUM_VERSION}/libsodium-${SODIUM_VERSION}.tar.gz
 cd `mktemp -d /tmp/install-libsodium-XXXXXX`
 wget $SODIUM_URL
