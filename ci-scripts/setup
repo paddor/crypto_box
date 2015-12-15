@@ -1,6 +1,6 @@
 #!/bin/sh -x
 set -e
-REPO_SOURCE="deb http://us.archive.ubuntu.com/ubuntu/ utopic main universe"
+REPO_SOURCE="deb http://us.archive.ubuntu.com/ubuntu/ wily main universe"
 sudo add-apt-repository "$REPO_SOURCE"
 sudo apt-get update -qq
 sudo apt-get install check cmake -y
