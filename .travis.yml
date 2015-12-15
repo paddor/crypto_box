@@ -1,12 +1,3 @@
 language: c
-before_install:
-  - sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ utopic main universe"
-  - sudo apt-get update -qq
-install:
-  - sudo apt-get install cmake check
-  - ci-scripts/install-libsodium
-before_script:
-  - mkdir -p build/test && cd build/test
-  - cmake ../..
-  - make VERBOSE=1
-script: make test
+install: ci-scripts/setup
+script: ci-scripts/run
