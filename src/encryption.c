@@ -124,7 +124,7 @@ static void cleanup(void)
 }
 
 void
-lock_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
+lock_box(FILE *input, FILE *output, uint8_t const * const key, bool hex)
 {
   uint8_t nonce[NONCEBYTES];
 

@@ -152,7 +152,7 @@ static void cleanup(void)
 }
 
 void
-open_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
+open_box(FILE *input, FILE *output, uint8_t const * const key, bool hex)
 {
   uint8_t nonce[NONCEBYTES];
 

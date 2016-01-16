@@ -12,7 +12,7 @@
 #include <sodium.h>
 
 extern void lock_box(FILE *input, FILE *output, uint8_t const * const key,
-		_Bool hex);
+		bool hex);
 
 // vim: et:ts=2:sw=2
 #endif

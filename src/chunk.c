@@ -20,7 +20,7 @@ auth_subkey_malloc(unsigned char ** const subkey)
 }
 
 void
-chunk_malloc(struct chunk ** const chunk, _Bool hex)
+chunk_malloc(struct chunk ** const chunk, bool hex)
 {
   *chunk = malloc(sizeof(struct chunk));
   if (*chunk == NULL) errx(EX_OSERR, "Chunk couldn't be allocated");

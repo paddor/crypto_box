@@ -25,12 +25,12 @@ struct chunk {
   uint8_t *data; /* MAC + chunk_type + {PT,CT} */
   size_t used;
   size_t size;
-  _Bool is_first_chunk;
+  bool is_first_chunk;
   uint8_t *hex_buf;
   unsigned char *subkey;
 };
 
-extern void chunk_malloc(struct chunk ** const chunk, _Bool hex);
+extern void chunk_malloc(struct chunk ** const chunk, bool hex);
 extern void chunk_free(struct chunk * const chunk);
 extern uint8_t determine_pt_chunk_type(struct chunk const * const, FILE *input);
 extern uint8_t determine_ct_chunk_type(struct chunk const * const, FILE *input);
