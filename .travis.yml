@@ -1,3 +1,13 @@
 language: c
+sudo: false
+cache: ccache
+addons:
+  apt:
+    packages:
+      - cmake
+      - check
+before_install:
+  - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)
+  - export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)
 install: ci-scripts/setup
 script: ci-scripts/run
