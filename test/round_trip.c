@@ -86,10 +86,6 @@ static int round_trip(_Bool hex_wanted)
 
   sodium_free(key);
   return 0;
-
-abort:
-  sodium_free(key);
-  return -1;
 }
 
 START_TEST(test_binary_round_trip)

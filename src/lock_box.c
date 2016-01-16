@@ -27,8 +27,5 @@ int main(int argc, char *argv[])
   close_input(input);
 
   return EXIT_SUCCESS;
-
-abort:
-  return EXIT_FAILURE;
 }
 // vim: et:ts=2:sw=2

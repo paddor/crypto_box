@@ -1,3 +1,6 @@
+Sat Jan 16 2016  Patrik Wenger  <paddor@gmail.com>
+	* lock_box.c open_box.c (main): Remove dead code ("abort:" label).
+
 Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
 	* chunk.c chunk.h decryption.c decryption.h encryption.c encryption.h
 	key.c key.h util.c util.h round_trip.c: Make use of err(), warn() and
