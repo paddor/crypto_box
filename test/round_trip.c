@@ -24,8 +24,12 @@ static int round_trip(_Bool hex_wanted)
 
   /* generate names and open temporary files */
   char *fname_pt2 = malloc(sizeof template);
+  if (fname_pt2 == NULL)
+    errx(EX_OSERR, "Couldn't allocate fname_pt2");
   char *fname_ct = malloc(sizeof template);
-  if (fname_ct == NULL || fname_pt2 == NULL) exit(EXIT_FAILURE);
+  if (fname_ct == NULL)
+    errx(EX_OSERR, "Couldn't allocate fname_ct");
+
   memcpy(fname_ct, template, sizeof template);
   memcpy(fname_pt2, template, sizeof template);
   fd_ct = mkstemp(fname_ct);
@@ -38,10 +42,11 @@ static int round_trip(_Bool hex_wanted)
 
   /* open/associate file descriptors with file streams (FILE*) */
   pt1 = fopen(input_file_name, "r");
+  if (pt1 == NULL) err(EX_NOINPUT, "Couldn't read input file");
   ct = fdopen(fd_ct, "r+");
+  if (ct == NULL) err(EX_IOERR, "Couldn't reopen ciphertext file for r+");
   pt2 = fdopen(fd_pt2, "r+");
-
-  if (pt1 == NULL || ct == NULL || pt2 == NULL) exit(EXIT_FAILURE);
+  if (pt2 == NULL) err(EX_IOERR, "Couldn't reopen second plaintext file for r+");
 
   /* generate random key */
   uint8_t *key;
@@ -50,10 +55,12 @@ static int round_trip(_Bool hex_wanted)
 
   /* encrypt -> CT file */
   lock_box(pt1, ct, key, hex_wanted);
+  fprintf(stderr, "encrypted data to: %s\n", fname_ct);
 
   /* decrypt -> PT2 file */
   rewind(ct);
   open_box(ct, pt2, key, hex_wanted);
+  fprintf(stderr, "decrypted data to: %s\n", fname_pt2);
 
   /* hash PT1 and PT2 file contents */
   unsigned char hash_pt1[crypto_generichash_BYTES];
@@ -64,17 +71,20 @@ static int round_trip(_Bool hex_wanted)
   crypto_generichash_init(&state_pt2, NULL, 0, sizeof hash_pt2);
   size_t nread;
   unsigned char *buf = malloc(CHUNK_CT_BYTES); /* size doesn't really matter */
-  if (buf == NULL) exit(EXIT_FAILURE);
+  if (buf == NULL)
+    errx(EX_OSERR, "Couldn't allocate buffer");
   rewind(pt1);
   while(!feof(pt1)) {
     nread = fread(buf, 1, CHUNK_CT_BYTES, pt1);
-    if (nread < CHUNK_CT_BYTES && ferror(pt1)) exit(EXIT_FAILURE);
+    if (nread < CHUNK_CT_BYTES && ferror(pt1))
+      err(EX_IOERR, "Couldn't read from first plaintext file");
     crypto_generichash_update(&state_pt1, buf, nread);
   }
   rewind(pt2);
   while(!feof(pt2)) {
     nread = fread(buf, 1, CHUNK_CT_BYTES, pt2);
-    if (nread < CHUNK_CT_BYTES && ferror(pt2)) exit(EXIT_FAILURE);
+    if (nread < CHUNK_CT_BYTES && ferror(pt2))
+      err(EX_IOERR, "Couldn't read from second plaintext file");
     crypto_generichash_update(&state_pt2, buf, nread);
   }
   crypto_generichash_final(&state_pt1, hash_pt1, sizeof hash_pt1);
