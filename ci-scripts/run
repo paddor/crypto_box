@@ -4,10 +4,12 @@ mkdir -p build/test
 cd build/test
 cmake ../..
 make VERBOSE=1
-if ! make test
+if make test
 then
 	echo "'make test' exited with: $?"
-	cat test/c_round_trip.out || true
-	cat test/c_round_trip.err || true
+	exit 0
+else
+	echo "'make test' exited with: $?"
+	cat Testing//Temporary/LastTest.log
 	exit 1
 fi
