@@ -12,4 +12,7 @@ before_install:
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)
   - export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)
 install: ci-scripts/setup
-script: ci-scripts/run
+script:
+  - ci-scripts/run
+  - cat test/c_round_trip.out
+  - cat test/c_round_trip.err
