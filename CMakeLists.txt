@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project("Crypto Box" C)
 
 # C standard
-add_definitions(-std=gnu99)
+add_definitions(-std=gnu99 -Wall -Wextra)
 
 # variables for packaging
 set(CPACK_PACKAGE_NAME "crypto_box")
