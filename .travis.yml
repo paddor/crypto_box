@@ -3,6 +3,8 @@ sudo: false
 cache: ccache
 addons:
   apt:
+    sources:
+      - kubuntu-backports # to get CMake >= 2.8.12
     packages:
       - cmake
       - check
