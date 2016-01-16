@@ -14,7 +14,7 @@
 #include <sodium.h>
 
 static char *input_file_name;
-static int round_trip(_Bool hex_wanted)
+static int round_trip(bool hex_wanted)
 {
   crypto_box_init();
 
@@ -99,12 +99,12 @@ static int round_trip(_Bool hex_wanted)
 }
 
 START_TEST(test_binary_round_trip)
-  _Bool hex_wanted = false; /* binary */
+  bool hex_wanted = false; /* binary */
   ck_assert_int_eq(0, round_trip(hex_wanted));
 END_TEST
 
 START_TEST(test_hex_round_trip)
-  _Bool hex_wanted = true; /* hex */
+  bool hex_wanted = true; /* hex */
   ck_assert_int_eq(0, round_trip(hex_wanted));
 END_TEST
 
