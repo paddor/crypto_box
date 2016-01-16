@@ -46,12 +46,17 @@ chunk_malloc(struct chunk ** const chunk, bool hex)
 }
 
 void
-chunk_free(struct chunk * const chunk)
+chunk_free(struct chunk ** const chunk_p)
 {
-  free(chunk->data);
-  sodium_free(chunk->hex_buf);
-  sodium_free(chunk->subkey);
-  free(chunk);
+  assert(chunk_p);
+  if (*chunk_p) {
+    struct chunk * chunk = *chunk_p;
+    free(chunk->data);
+    sodium_free(chunk->hex_buf);
+    sodium_free(chunk->subkey);
+    free(chunk);
+    *chunk_p = NULL;
+  }
 }
 
 static uint8_t

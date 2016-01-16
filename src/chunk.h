@@ -1,6 +1,7 @@
 #ifndef CHUNK_H
 #define CHUNK_H
 #include "config.h"
+#include <assert.h>
 #include <err.h>
 #include <sysexits.h>
 #include <stdbool.h>
@@ -31,7 +32,7 @@ struct chunk {
 };
 
 extern void chunk_malloc(struct chunk ** const chunk, bool hex);
-extern void chunk_free(struct chunk * const chunk);
+extern void chunk_free(struct chunk ** const chunk_p);
 extern uint8_t determine_pt_chunk_type(struct chunk const * const, FILE *input);
 extern uint8_t determine_ct_chunk_type(struct chunk const * const, FILE *input);
 

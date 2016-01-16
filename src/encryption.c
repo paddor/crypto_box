@@ -120,7 +120,7 @@ encrypt_next_chunk(
 
 static void cleanup(void)
 {
-  chunk_free(chunk);
+  chunk_free(&chunk);
 }
 
 void

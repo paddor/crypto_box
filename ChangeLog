@@ -1,5 +1,7 @@
 Sat Jan 16 2016  Patrik Wenger  <paddor@gmail.com>
 	* lock_box.c open_box.c (main): Remove dead code ("abort:" label).
+	* chunk.c chunk.h (chunk_free): Pass pointer to pointer so we can set
+	provided pointer to NULL after freeing. Callers changed.
 
 Sun Jul 14 2015  Patrik Wenger  <paddor@gmail.com>
 	* chunk.c chunk.h decryption.c decryption.h encryption.c encryption.h
