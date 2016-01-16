@@ -21,11 +21,11 @@ static char args_doc[] =
   "--key-file <key_file>\n"
   "--ask --file <input_file>";
 static struct argp_option options[] = {
-    { "key-file", 'k', "FILE", 0, "get key from file"},
-    { "ask", 'a', 0, 0, "Ask for the key (requires -f)"},
-    { "file", 'f', "FILE", 0, "get data from file instead of STDIN"},
-    { "hex", 'H', 0, 0, "read/write ciphertext as ASCII hex characters"},
-    { 0 }
+    { "key-file", 'k', "FILE", 0, "get key from file", 0 },
+    { "ask", 'a', 0, 0, "Ask for the key (requires -f)", 0 },
+    { "file", 'f', "FILE", 0, "get data from file instead of STDIN", 0 },
+    { "hex", 'H', 0, 0, "read/write ciphertext as ASCII hex characters", 0 },
+    { NULL, 0, 0, 0, NULL, 0 }
 };
 
 /* initialize with default values */

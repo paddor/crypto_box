@@ -130,6 +130,7 @@ lock_box(FILE *input, FILE *output, uint8_t const * const key, _Bool hex)
 
   /* initialize chunk */
   chunk_malloc(&chunk, hex);
+  atexit(cleanup);
 
   /* ciphertext to TTY warning */
   if (!hex && isatty(fileno(output)))

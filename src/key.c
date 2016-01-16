@@ -59,7 +59,7 @@ get_key_from_str(const char *str, uint8_t *key)
   /* check if invalid characters (like "abfg") or invalid format given (like
    * "abc", which has an uneven number of 4-bit nibbles)
    */
-  if ((hex_end - str) < strlen(str))
+  if (hex_end < str + strlen(str))
     errx(EX_USAGE, "Please check your key for typos.");
 
   /* warn about short keys */
