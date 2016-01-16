@@ -1,14 +1,18 @@
 #!/bin/sh -x
 set -e
 
-# This is needed because Ubuntu precise (12.04 LTS) doesn't know libsodium yet
-# and I don't wanna use wily (unstable) because CMake 3.3 is not needed (CMake
-# 2.8.12 is enough).
+# This is needed because Ubuntu precise (12.04 LTS, the current build dist on
+# Travis CI's container-based platform for C projects) doesn't know libsodium
+# yet and I don't wanna use wily (unstable) because CMake 3.3 is not needed
+# (CMake 2.8.12 is enough).
 
-SODIUM_VERSION=1.0.7
+# always get latest release
+SODIUM_VERSION=$(basename `wget -O /dev/null --max-redirect=1 https://github.com/jedisct1/libsodium/releases/latest 2>&1 | grep '\[following\]'| cut -d" " -f2`)
 SODIUM_URL=https://github.com/jedisct1/libsodium/releases/download/${SODIUM_VERSION}/libsodium-${SODIUM_VERSION}.tar.gz
-cd `mktemp -d /tmp/install-libsodium-XXXXXX`
+
 wget $SODIUM_URL
-tar -xvzf libsodium-${SODIUM_VERSION}.tar.gz && cd libsodium-${SODIUM_VERSION}
-./configure && make && sudo make install
-sudo ldconfig
+tar -xvzf libsodium-${SODIUM_VERSION}.tar.gz
+cd "libsodium-${SODIUM_VERSION}"
+./configure --prefix=$HOME
+make
+make install
