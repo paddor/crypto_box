@@ -1,6 +1,8 @@
 language: c
 sudo: false
-cache: ccache
+cache:
+  directories:
+    - $HOME/.ccache
 addons:
   apt:
     sources:
@@ -9,6 +11,7 @@ addons:
       - cmake
       - check
 before_install:
+  - PATH="/usr/lib/ccache:$PATH" # enable ccache
   - export LD_LIBRARY_PATH=$HOME/lib # custom libs (for execution)
   - export PKG_CONFIG_PATH=$HOME/lib/pkgconfig # custom libs (for linking)
 install: ci-scripts/setup
