@@ -186,8 +186,8 @@ Also, each chunk MAC will not only be computed over its ciphertext, but also
 over the previous chunk's MAC to avoid missing/reordered/replayed chunks going
 undetected. To know which chunks are the first and the last (to avoid
 truncation going undetected), each chunk gets an additional byte to identify
-its type. If there's only one chunk, it's marked as the last (so tail
-truncation of all but the fist chunks can be detected).
+its type. If there's only one chunk, it's marked as the last. This way, tail
+truncation of all but the first chunk can be detected.
 
 That means that `lock_box` will output 24 additional bytes for the nonce plus
 16+1=17 additional bytes for each chunk. Versions before 0.4.0 would output a
