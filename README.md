@@ -198,7 +198,7 @@ The chunk size is 64 KiB (or less for the last chunk, depending on input
 size).  This makes the speed and size overheads negligible and still allows a
 tiny memory foot print.
 
-Schematically, output from `lock_box` will look like this:
+Schematically, the output of `lock_box` will look like this:
 ```
 +-----------------------+----------------------------------------------------+
 |    nonce (24 bytes)   |                  one or more chunks                |
@@ -215,7 +215,7 @@ Whereas each chunk will look like this:
 ## Caveats
 
 ### Truncated ciphertext input produces incomplete plaintext output
-it's possible that `open_box` will output data before it
+It's possible that `open_box` will output data before it
 eventually finds out that the ciphertext has been truncated. However, it will
 **never ever** output any unauthenticated data. And, of course, when it
 eventually finds out the ciphertext has been truncated, it exits immediately
@@ -241,7 +241,7 @@ Due to the filter nature and lack of a header that specifies the length of the
 data, there are no real limitations in the length of a file/data stream you can
 encrypt (at once). Of course, reasonable reuse of a key is advised.
 
-To be precise: You could safely encrypt encrypt up to 3.347787592E35 YiB at
+To be precise: You could safely encrypt up to 3.347787592E35 YiB at
 once with one key. That's a whole lot more than all of the WWW. And more than
 ZFS can store.
 
