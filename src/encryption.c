@@ -85,7 +85,7 @@ print_ct_chunk(
 
 static void
 encrypt_next_chunk(
-    struct chunk *chunk,
+    struct chunk * const chunk,
     uint8_t * const nonce,
     uint8_t const * const key,
     FILE *input,
